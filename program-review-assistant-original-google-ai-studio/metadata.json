@@ -1,0 +1,5 @@
+{
+  "name": "Program Review Assistant (public)",
+  "description": "An AI-powered application to assist college faculty in writing program reviews by generating insights and text based on aggregate program data.",
+  "requestFramePermissions": []
+}
