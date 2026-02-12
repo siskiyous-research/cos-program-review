@@ -1,0 +1,315 @@
+{
+  "version": "2024",
+  "lastUpdated": "2026-02-05",
+  "source": "ACCJC - Accrediting Commission for Community and Junior Colleges",
+  "standards": [
+    {
+      "id": "I",
+      "title": "Mission, Academic Quality and Institutional Effectiveness",
+      "description": "The institution demonstrates strong commitment to a clearly stated mission that guides institutional planning and operations. It has measurable student learning outcomes and evaluates its effectiveness in achieving them.",
+      "substandards": [
+        {
+          "id": "I.A",
+          "title": "Mission",
+          "description": "The institution has a clearly defined, widely published mission that guides its operations."
+        },
+        {
+          "id": "I.B",
+          "title": "Assuring Academic Quality and Institutional Effectiveness",
+          "description": "The institution assures the quality of its educational offerings through its evaluation of how well student learning is being achieved."
+        },
+        {
+          "id": "I.C",
+          "title": "Institutional Planning and Effectiveness",
+          "description": "The institution conducts planning and institutional effectiveness evaluation of relevant, accessible, and reliable information."
+        }
+      ],
+      "reviewSections": [
+        "program_description",
+        "external_factors",
+        "outcomes_assessment",
+        "effectiveness_indicators",
+        "other_research",
+        "analysis",
+        "planning_agenda"
+      ],
+      "keyQuestions": [
+        "Does the program review address the institution's mission?",
+        "Are learning outcomes clearly defined and assessed?",
+        "Are the effectiveness indicators tracked and analyzed?",
+        "How does the program contribute to institutional goals?"
+      ]
+    },
+    {
+      "id": "II",
+      "title": "Student Learning and Support Services",
+      "description": "The institution provides learning opportunities and student support services appropriate to its mission. Institutions ensure that students are prepared to succeed in a complex society and economy.",
+      "substandards": [
+        {
+          "id": "II.A",
+          "title": "Instructional Programs",
+          "description": "The institution offers instructional programs, including general education, in formats and locations that accommodate student diversity and needs."
+        },
+        {
+          "id": "II.B",
+          "title": "Library and Learning Support Services",
+          "description": "The institution provides library and learning support services to support student needs and learning."
+        },
+        {
+          "id": "II.C",
+          "title": "Student Support Services",
+          "description": "The institution provides appropriate, comprehensive, and accessible student support services."
+        }
+      ],
+      "reviewSections": [
+        "slo_assessment",
+        "support_obstacles",
+        "closing_the_loop_annual"
+      ],
+      "keyQuestions": [
+        "Are student learning outcomes being assessed?",
+        "What support services are available to students?",
+        "How are assessment results used to improve programs?",
+        "Are there adequate resources for student success?"
+      ]
+    },
+    {
+      "id": "III",
+      "title": "Resources",
+      "description": "The institution effectively uses all of its resources to achieve its mission and to ensure the quality, stability, and integrity of its educational programs and services.",
+      "substandards": [
+        {
+          "id": "III.A",
+          "title": "Human Resources",
+          "description": "The institution employs a sufficient number of qualified personnel to carry out its mission."
+        },
+        {
+          "id": "III.B",
+          "title": "Physical Resources and Facilities",
+          "description": "The institution has appropriate physical resources and facilities to support its mission and ensure the safety and well-being of its students."
+        },
+        {
+          "id": "III.C",
+          "title": "Technology Resources and Support",
+          "description": "The institution ensures adequate technology resources and support for teaching, learning, and institutional operations."
+        },
+        {
+          "id": "III.D",
+          "title": "Financial Resources",
+          "description": "The institution allocates and manages its financial resources to support student learning programs and services and to improve institutional effectiveness."
+        }
+      ],
+      "reviewSections": [
+        "budgetary_needs",
+        "closing_the_loop_annual",
+        "effectiveness_indicators",
+        "improvement_actions"
+      ],
+      "keyQuestions": [
+        "Does the program have sufficient staff and resources?",
+        "Are facilities adequate for the program's needs?",
+        "Are technology resources sufficient?",
+        "Is the budget allocation aligned with program goals?",
+        "What RAR (Resource Allocation Request) needs exist?"
+      ]
+    },
+    {
+      "id": "IV",
+      "title": "Leadership and Governance",
+      "description": "The institution demonstrates effective overall planning, leadership, and governance structures that promote student learning and accomplishment of mission through collaborative processes that involve the broad college community.",
+      "substandards": [
+        {
+          "id": "IV.A",
+          "title": "Decision-Making Roles and Processes",
+          "description": "The institution has a clear system of governance with defined roles and responsibilities that supports effective decision-making and planning."
+        },
+        {
+          "id": "IV.B",
+          "title": "Chief Executive Officer",
+          "description": "The institution's chief executive officer provides effective leadership in planning, governance, and institutional improvement."
+        },
+        {
+          "id": "IV.C",
+          "title": "Governing Board",
+          "description": "The governing board acts in the best interests of the institution in setting policies and ensuring effective governance."
+        }
+      ],
+      "reviewSections": [
+        "program_info",
+        "improvement_actions",
+        "planning_agenda",
+        "external_factors"
+      ],
+      "keyQuestions": [
+        "Are program decisions aligned with institutional governance?",
+        "Does the program participate in collaborative planning?",
+        "Are program goals aligned with institutional goals?",
+        "How does leadership support program improvement?"
+      ]
+    }
+  ],
+  "accreditationCycle": {
+    "annual": {
+      "frequency": "yearly",
+      "sections": [
+        "program_info",
+        "improvement_actions",
+        "slo_assessment",
+        "support_obstacles",
+        "budgetary_needs",
+        "closing_the_loop_annual"
+      ]
+    },
+    "comprehensive": {
+      "frequency": "every 6 years",
+      "instructional": [
+        "program_description",
+        "external_factors",
+        "outcomes_assessment",
+        "effectiveness_indicators",
+        "other_research",
+        "analysis",
+        "planning_agenda"
+      ],
+      "nonInstructional": [
+        "ni_description",
+        "external_factors",
+        "outcomes_assessment",
+        "ni_effectiveness",
+        "other_research",
+        "ni_evaluation",
+        "ni_planning"
+      ]
+    }
+  },
+  "complianceChecklist": {
+    "standard_I": {
+      "title": "Mission & Institutional Effectiveness",
+      "items": [
+        "Clear mission statement aligned with program description",
+        "Measurable student learning outcomes defined",
+        "Assessment methodology documented",
+        "Evidence of closing the loop (using assessment data for improvement)",
+        "Program contributes to institutional goals",
+        "Data-informed planning documented"
+      ]
+    },
+    "standard_II": {
+      "title": "Student Learning & Support",
+      "items": [
+        "Student learning outcomes are specific and measurable",
+        "Assessment plan is comprehensive and ongoing",
+        "Student support services identified and evaluated",
+        "Evidence of student success in program completion",
+        "Equity data disaggregated by demographic groups",
+        "Gap analysis and improvement plans documented"
+      ]
+    },
+    "standard_III": {
+      "title": "Resources",
+      "items": [
+        "Adequate staffing levels documented",
+        "Faculty qualifications meet program needs",
+        "Budget allocated to support program goals",
+        "Facilities meet program requirements",
+        "Technology resources are appropriate and current",
+        "Professional development opportunities available",
+        "Resource allocation aligned with program priorities"
+      ]
+    },
+    "standard_IV": {
+      "title": "Leadership & Governance",
+      "items": [
+        "Program participates in institutional governance",
+        "Leadership vision supports program mission",
+        "Collaborative planning processes documented",
+        "Institutional policies support program operations",
+        "Program aligns with college strategic plan",
+        "Decision-making authority clearly defined",
+        "Communication mechanisms with leadership established"
+      ]
+    }
+  },
+  "evaluationCriteria": [
+    {
+      "criterion": "Alignment with Mission",
+      "standard": "I",
+      "description": "Does the program demonstrate how it supports the college mission and student success?"
+    },
+    {
+      "criterion": "Student Learning Outcomes",
+      "standard": "II",
+      "description": "Are SLOs clearly defined, measurable, and evidence-based?"
+    },
+    {
+      "criterion": "Assessment and Improvement",
+      "standard": "II",
+      "description": "Is there documented evidence of assessment and continuous improvement?"
+    },
+    {
+      "criterion": "Equity and Access",
+      "standard": "II",
+      "description": "Does the program demonstrate commitment to equity in student outcomes?"
+    },
+    {
+      "criterion": "Resource Sufficiency",
+      "standard": "III",
+      "description": "Are staffing, facilities, and budget adequate for program goals?"
+    },
+    {
+      "criterion": "Institutional Integration",
+      "standard": "IV",
+      "description": "Is the program integrated with institutional planning and governance?"
+    },
+    {
+      "criterion": "External Relevance",
+      "standard": "I, IV",
+      "description": "How do external factors (market, regulations, competition) impact the program?"
+    },
+    {
+      "criterion": "Strategic Planning",
+      "standard": "I, IV",
+      "description": "Does the program have a clear planning agenda aligned with college goals?"
+    }
+  ],
+  "commonIssues": [
+    {
+      "issue": "Insufficient SLO Assessment",
+      "standards": ["I.B", "II.A"],
+      "feedback": "Programs must demonstrate systematic assessment of student learning outcomes with documented evidence of student mastery."
+    },
+    {
+      "issue": "Weak Connection to Institutional Mission",
+      "standards": ["I.A", "I.C"],
+      "feedback": "Clarify how the program contributes to the college mission and institutional strategic priorities."
+    },
+    {
+      "issue": "Inadequate Resource Allocation",
+      "standards": ["III.A", "III.D"],
+      "feedback": "Document need for staffing, facilities, or technology through data. Submit RARs (Resource Allocation Requests) to justify additional resources."
+    },
+    {
+      "issue": "Limited Closing the Loop Evidence",
+      "standards": ["I.B", "II.A"],
+      "feedback": "Show how assessment results led to programmatic changes and improvements in student outcomes."
+    },
+    {
+      "issue": "Equity Gaps Not Addressed",
+      "standards": ["II.C", "I.C"],
+      "feedback": "Disaggregate data by student demographics. Identify and address disparities in student achievement and support."
+    },
+    {
+      "issue": "Outdated or Unclear Objectives",
+      "standards": ["I.A", "I.C"],
+      "feedback": "Review program goals and objectives. Ensure they are current, measurable, and aligned with institutional strategic plan."
+    }
+  ],
+  "resources": {
+    "accjcWebsite": "https://accjc.org",
+    "handbookUrl": "https://accjc.org/wp-content/uploads/ACCJC-Handbook.pdf",
+    "standardsUrl": "https://accjc.org/wp-content/uploads/ACCJC-2024-Accreditation-Standards.pdf",
+    "contactEmail": "accjc@accjc.org",
+    "phone": "(415) 506-0234",
+    "address": "428 J Street, Suite 400, Sacramento, CA 95814"
+  }
+}
