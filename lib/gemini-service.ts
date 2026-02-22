@@ -8,12 +8,15 @@ import { GoogleGenAI, Type } from '@google/genai';
 import { ProgramData, ChatMessage, HistoricalReview } from './types';
 import { buildAccjcContext } from './accjc-standards';
 
-// Initialize Gemini with API key from environment
-if (!process.env.GEMINI_API_KEY) {
-  throw new Error('GEMINI_API_KEY environment variable is not set. Check your .env.local file.');
+// Lazily initialize Gemini so builds don't fail when env vars aren't present.
+// (Vercel provides GEMINI_API_KEY at runtime via Environment Variables.)
+function getAi() {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error('GEMINI_API_KEY environment variable is not set.');
+  }
+  return new GoogleGenAI({ apiKey });
 }
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 /**
  * Schema for program data structured output from Gemini
@@ -66,7 +69,7 @@ export async function generateProgramData(programName: string): Promise<ProgramD
   and a brief summary of 2-3 program strengths and 2-3 weaknesses. 
   Present this as a JSON object that strictly adheres to the provided schema.`;
 
-  const response = await ai.models.generateContent({
+  const response = await getAi().models.generateContent({
     model: 'gemini-2.5-flash',
     contents: prompt,
     config: {
@@ -75,7 +78,10 @@ export async function generateProgramData(programName: string): Promise<ProgramD
     },
   });
 
-  const jsonText = response.text.trim();
+  const jsonText = (response.text ?? '').trim();
+  if (!jsonText) {
+    throw new Error('Gemini returned an empty response for program data.');
+  }
   try {
     return JSON.parse(jsonText) as ProgramData;
   } catch (e) {
@@ -158,12 +164,12 @@ Generate a well-written, professional response that expands on the user's notes 
 
   const prompt = createTailoredPrompt();
 
-  const response = await ai.models.generateContent({
+  const response = await getAi().models.generateContent({
     model: 'gemini-2.5-flash',
     contents: prompt,
   });
 
-  return response.text;
+  return response.text ?? '';
 }
 
 /**
@@ -206,7 +212,7 @@ ${knowledgeBaseData ? `\nAdditional Program Context:\n${knowledgeBaseData}` : ''
 
 Provide helpful, specific guidance based on the program data and the user's questions. Be supportive and constructive.`;
 
-  const response = await ai.models.generateContent({
+  const response = await getAi().models.generateContent({
     model: 'gemini-2.5-flash',
     contents: [
       {
@@ -217,7 +223,7 @@ Provide helpful, specific guidance based on the program data and the user's ques
     ],
   });
 
-  return response.text;
+  return response.text ?? '';
 }
 
 /**
@@ -255,10 +261,10 @@ ${knowledgeBaseData ? `\nAdditional Context:\n${knowledgeBaseData}` : ''}
 
 Generate a professional, constructive executive summary.`;
 
-  const response = await ai.models.generateContent({
+  const response = await getAi().models.generateContent({
     model: 'gemini-2.5-flash',
     contents: prompt,
   });
 
-  return response.text;
+  return response.text ?? '';
 }
