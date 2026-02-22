@@ -1,86 +1,57 @@
 /**
- * Gemini API Service
- * Backend service for calling Google Gemini AI API
+ * OpenRouter API Service
+ * Backend service for calling Xiaomi MiMo-V2-Flash via OpenRouter
  * IMPORTANT: This is backend-only code. API key is kept secure.
  */
 
-import { GoogleGenAI, Type } from '@google/genai';
+import OpenAI from 'openai';
 import { ProgramData, ChatMessage, HistoricalReview } from './types';
 import { buildAccjcContext } from './accjc-standards';
 
-// Lazily initialize Gemini so builds don't fail when env vars aren't present.
-// (Vercel provides GEMINI_API_KEY at runtime via Environment Variables.)
-function getAi() {
-  const apiKey = process.env.GEMINI_API_KEY;
+const MODEL = 'xiaomi/mimo-v2-flash';
+
+// Lazily initialize OpenRouter client so builds don't fail when env vars aren't present.
+function getClient() {
+  const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
-    throw new Error('GEMINI_API_KEY environment variable is not set.');
+    throw new Error('OPENROUTER_API_KEY environment variable is not set.');
   }
-  return new GoogleGenAI({ apiKey });
+  return new OpenAI({
+    baseURL: 'https://openrouter.ai/api/v1',
+    apiKey,
+  });
 }
 
 /**
- * Schema for program data structured output from Gemini
- */
-const programDataSchema = {
-  type: Type.OBJECT,
-  properties: {
-    programName: { type: Type.STRING },
-    summary: {
-      type: Type.OBJECT,
-      properties: {
-        strengths: { type: Type.ARRAY, items: { type: Type.STRING } },
-        weaknesses: { type: Type.ARRAY, items: { type: Type.STRING } },
-      },
-    },
-    enrollment: {
-      type: Type.ARRAY,
-      items: {
-        type: Type.OBJECT,
-        properties: {
-          year: { type: Type.INTEGER },
-          count: { type: Type.INTEGER },
-        },
-      },
-    },
-    completionRate: { type: Type.NUMBER },
-    jobPlacementRate: { type: Type.NUMBER },
-    demographics: {
-      type: Type.OBJECT,
-      properties: {
-        caucasian: { type: Type.NUMBER },
-        hispanic: { type: Type.NUMBER },
-        asian: { type: Type.NUMBER },
-        africanAmerican: { type: Type.NUMBER },
-        other: { type: Type.NUMBER },
-      },
-    },
-  },
-};
-
-/**
- * Generate realistic program data using Gemini
+ * Generate realistic program data using AI
  * @param programName - Name of the program
  * @returns ProgramData with enrollment, demographics, and assessment metrics
  */
 export async function generateProgramData(programName: string): Promise<ProgramData> {
-  const prompt = `Generate realistic, aggregate-level program review data for a community college '${programName}' program. 
-  Include metrics like: enrollment numbers for the last 3 years (e.g., 2021, 2022, 2023), completion rates (as a number between 0 and 1), 
-  job placement rates for CTE programs (as a number between 0 and 1), student demographics as percentages (summing to 100), 
-  and a brief summary of 2-3 program strengths and 2-3 weaknesses. 
-  Present this as a JSON object that strictly adheres to the provided schema.`;
+  const prompt = `Generate realistic, aggregate-level program review data for a community college '${programName}' program.
+  Include metrics like: enrollment numbers for the last 3 years (e.g., 2021, 2022, 2023), completion rates (as a number between 0 and 1),
+  job placement rates for CTE programs (as a number between 0 and 1), student demographics as percentages (summing to 100),
+  and a brief summary of 2-3 program strengths and 2-3 weaknesses.
 
-  const response = await getAi().models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: prompt,
-    config: {
-      responseMimeType: 'application/json',
-      responseSchema: programDataSchema,
-    },
+  Return ONLY a valid JSON object with this exact structure:
+  {
+    "programName": "string",
+    "summary": { "strengths": ["string"], "weaknesses": ["string"] },
+    "enrollment": [{ "year": number, "count": number }],
+    "completionRate": number,
+    "jobPlacementRate": number,
+    "demographics": { "caucasian": number, "hispanic": number, "asian": number, "africanAmerican": number, "other": number }
+  }`;
+
+  const response = await getClient().chat.completions.create({
+    model: MODEL,
+    messages: [{ role: 'user', content: prompt }],
+    response_format: { type: 'json_object' },
   });
 
-  const jsonText = (response.text ?? '').trim();
+  const jsonText = (response.choices[0]?.message?.content ?? '').trim();
   if (!jsonText) {
-    throw new Error('Gemini returned an empty response for program data.');
+    throw new Error('AI returned an empty response for program data.');
   }
   try {
     return JSON.parse(jsonText) as ProgramData;
@@ -93,13 +64,6 @@ export async function generateProgramData(programName: string): Promise<ProgramD
 /**
  * Get AI assistance for a specific review section
  * ACCJC Integration: Includes relevant standards in the prompt
- * @param sectionId - ID of the section
- * @param sectionTitle - Title of the section
- * @param sectionDescription - Description of what goes in the section
- * @param programData - Program data to reference
- * @param userNotes - User's initial notes
- * @param knowledgeBaseData - Additional context/knowledge base
- * @returns AI-generated assistance text
  */
 export async function getSectionAssistance(
   sectionId: string,
@@ -109,10 +73,8 @@ export async function getSectionAssistance(
   userNotes: string,
   knowledgeBaseData?: string
 ): Promise<string> {
-  // Build ACCJC context for this section
   const accjcContext = buildAccjcContext(sectionId);
 
-  // Create tailored prompts based on section type
   const createTailoredPrompt = () => {
     const baseIntro = `You are an expert academic program review assistant for a community college. Your task is to act as a writing partner to a faculty member.
 They have provided notes for the '${sectionTitle}' section of their program review.
@@ -162,23 +124,16 @@ ${accjcContext}
 Generate a well-written, professional response that expands on the user's notes without introducing new topics.`;
   };
 
-  const prompt = createTailoredPrompt();
-
-  const response = await getAi().models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: prompt,
+  const response = await getClient().chat.completions.create({
+    model: MODEL,
+    messages: [{ role: 'user', content: createTailoredPrompt() }],
   });
 
-  return response.text ?? '';
+  return response.choices[0]?.message?.content ?? '';
 }
 
 /**
  * Get chat response for user queries about their program
- * @param userMessage - User's chat message
- * @param programData - Program data context
- * @param chatHistory - Previous chat messages for context
- * @param knowledgeBaseData - Additional knowledge base context
- * @returns AI response to the user's query
  */
 export async function getChatResponse(
   userMessage: string,
@@ -186,18 +141,6 @@ export async function getChatResponse(
   chatHistory: ChatMessage[],
   knowledgeBaseData?: string
 ): Promise<string> {
-  // Build chat history for context
-  const conversationHistory = chatHistory.map(msg => ({
-    role: msg.role,
-    parts: [{ text: msg.content }],
-  }));
-
-  // Add current message
-  conversationHistory.push({
-    role: 'user',
-    parts: [{ text: userMessage }],
-  });
-
   const systemPrompt = `You are a knowledgeable program review assistant for a community college. You have access to program data and are helping faculty members with their program reviews.
 
 Program Context:
@@ -212,26 +155,26 @@ ${knowledgeBaseData ? `\nAdditional Program Context:\n${knowledgeBaseData}` : ''
 
 Provide helpful, specific guidance based on the program data and the user's questions. Be supportive and constructive.`;
 
-  const response = await getAi().models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: [
-      {
-        role: 'user',
-        parts: [{ text: systemPrompt }],
-      },
-      ...conversationHistory,
-    ],
+  // Map chat history: our 'model' role → OpenAI 'assistant' role
+  const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
+    { role: 'system', content: systemPrompt },
+    ...chatHistory.map((msg): OpenAI.Chat.ChatCompletionMessageParam => ({
+      role: msg.role === 'model' ? 'assistant' : 'user',
+      content: msg.content,
+    })),
+    { role: 'user', content: userMessage },
+  ];
+
+  const response = await getClient().chat.completions.create({
+    model: MODEL,
+    messages,
   });
 
-  return response.text ?? '';
+  return response.choices[0]?.message?.content ?? '';
 }
 
 /**
  * Generate an executive summary of the program review
- * @param fullReviewText - Complete review text
- * @param historicalData - Previous review data for trend analysis
- * @param knowledgeBaseData - Additional context
- * @returns Executive summary text
  */
 export async function getExecutiveSummary(
   fullReviewText: string,
@@ -239,7 +182,7 @@ export async function getExecutiveSummary(
   knowledgeBaseData?: string
 ): Promise<string> {
   const historicalContext = historicalData
-    .slice(0, 2) // Get last 2 reviews
+    .slice(0, 2)
     .map(review => `${review.year} (${review.type}): ${review.title}`)
     .join('\n');
 
@@ -261,10 +204,10 @@ ${knowledgeBaseData ? `\nAdditional Context:\n${knowledgeBaseData}` : ''}
 
 Generate a professional, constructive executive summary.`;
 
-  const response = await getAi().models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: prompt,
+  const response = await getClient().chat.completions.create({
+    model: MODEL,
+    messages: [{ role: 'user', content: prompt }],
   });
 
-  return response.text ?? '';
+  return response.choices[0]?.message?.content ?? '';
 }
