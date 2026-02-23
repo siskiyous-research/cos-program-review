@@ -5,7 +5,7 @@ import { Sidebar } from './components/Sidebar';
 import { ProgramReviewForm } from './components/ProgramReviewForm';
 import { SummaryModal } from './components/SummaryModal';
 import { DirectorySidebar } from './components/DirectorySidebar';
-import { ChatMessage, ProgramData, HistoricalData, HistoricalReview, Citation } from '@/lib/types';
+import { ChatMessage, ProgramData, HistoricalData, HistoricalReview, Citation, KBFile } from '@/lib/types';
 import {
   ANNUAL_PROGRAM_REVIEW_TEMPLATE,
   COMPREHENSIVE_PROGRAM_REVIEW_TEMPLATE,
@@ -17,9 +17,6 @@ import { AccjcFeedback } from './components/AccjcFeedback';
 type ReviewType = 'annual' | 'comprehensive_instructional' | 'comprehensive_non_instructional';
 
 const defaultProgram = PROGRAM_LIST.instructional[0] || 'Nursing';
-
-// Historical data is loaded from the reviews manifest (public/reviews/manifest.json)
-// via the DirectorySidebar component on mount.
 
 export default function Home() {
   const [reviewType, setReviewType] = useState<ReviewType>('annual');
@@ -38,10 +35,15 @@ export default function Home() {
   const [isGeneratingSummary, setIsGeneratingSummary] = useState<boolean>(false);
   const [isArchiveOpen, setIsArchiveOpen] = useState<boolean>(true);
   const [historicalData, setHistoricalData] = useState<HistoricalData>({});
-  const [knowledgeBaseData, setKnowledgeBaseData] = useState<Record<string, string>>({});
+  const [knowledgeBaseNotes, setKnowledgeBaseNotes] = useState<Record<string, string>>({});
   const [sectionCitations, setSectionCitations] = useState<Record<string, Citation[]>>({});
   const [sectionGuidance, setSectionGuidance] = useState<Record<string, string>>({});
   const [isGeneratingGuidance, setIsGeneratingGuidance] = useState<string | null>(null);
+
+  // KB file upload state
+  const [kbFiles, setKbFiles] = useState<Record<string, KBFile[]>>({});
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<string>('');
 
   const currentTemplate =
     reviewType === 'annual'
@@ -49,6 +51,20 @@ export default function Home() {
       : reviewType === 'comprehensive_instructional'
         ? COMPREHENSIVE_PROGRAM_REVIEW_TEMPLATE
         : NON_INSTRUCTIONAL_COMPREHENSIVE_TEMPLATE;
+
+  /**
+   * Build combined KB data (uploaded file texts + manual notes) for AI prompts
+   */
+  const getKnowledgeBaseData = useCallback((program: string): string => {
+    const files = kbFiles[program] || [];
+    const notes = knowledgeBaseNotes[program] || '';
+    const parts: string[] = [];
+    for (const file of files) {
+      parts.push(`--- ${file.name} ---\n${file.textContent}`);
+    }
+    if (notes.trim()) parts.push(`--- Notes ---\n${notes}`);
+    return parts.join('\n\n');
+  }, [kbFiles, knowledgeBaseNotes]);
 
   /**
    * Initialize program data by calling the API
@@ -114,8 +130,6 @@ export default function Home() {
 
   /**
    * Call AI Assist API for section assistance
-   * Supports empty notes (draft from scratch) and notes expansion
-   * Returns citations from RAG data
    */
   const handleAiAssist = async (sectionId: string) => {
     if (!programData) return;
@@ -127,7 +141,6 @@ export default function Home() {
     try {
       const section = currentTemplate.find((s) => s.id === sectionId);
       if (section) {
-        // Determine program category for RAG retrieval
         const programCategory = getProgramCategory(programName);
         const response = await fetch('/api/section-assistance', {
           method: 'POST',
@@ -138,7 +151,7 @@ export default function Home() {
             sectionDescription: section.description,
             programData,
             userNotes,
-            knowledgeBaseData: knowledgeBaseData[programName],
+            knowledgeBaseData: getKnowledgeBaseData(programName),
             programCategory,
           }),
         });
@@ -220,7 +233,8 @@ export default function Home() {
           message: prompt,
           chatHistory: updatedHistory.slice(-6),
           programData,
-          knowledgeBaseData: knowledgeBaseData[programName],
+          knowledgeBaseData: getKnowledgeBaseData(programName),
+          programCategory: getProgramCategory(programName),
         }),
       });
 
@@ -239,6 +253,102 @@ export default function Home() {
     } finally {
       setIsChatting(false);
     }
+  };
+
+  // KB Upload handlers
+  const handleKBUpload = async (files: File[]) => {
+    setIsUploading(true);
+    setUploadProgress(`Processing ${files.length} file(s)...`);
+    try {
+      const formData = new FormData();
+      formData.append('program', programName);
+      for (const file of files) {
+        formData.append('files', file);
+      }
+
+      const response = await fetch('/api/kb-upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (!result.ok) throw new Error(result.error);
+
+      const newFiles: KBFile[] = result.files.map((f: KBFile) => ({
+        id: f.id,
+        name: f.name,
+        type: f.type,
+        size: f.size,
+        textContent: f.textContent,
+        processingTime: f.processingTime,
+      }));
+
+      setKbFiles((prev) => ({
+        ...prev,
+        [programName]: [...(prev[programName] || []), ...newFiles],
+      }));
+    } catch (e) {
+      console.error('KB upload failed:', e);
+      setError('Failed to upload file(s). Please try again.');
+    } finally {
+      setIsUploading(false);
+      setUploadProgress('');
+    }
+  };
+
+  const handleKBUrlFetch = async (url: string) => {
+    setIsUploading(true);
+    setUploadProgress('Fetching URL...');
+    try {
+      const response = await fetch('/api/kb-upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, program: programName }),
+      });
+
+      const result = await response.json();
+      if (!result.ok) throw new Error(result.error);
+
+      const newFiles: KBFile[] = result.files.map((f: KBFile) => ({
+        id: f.id,
+        name: f.name,
+        type: f.type,
+        size: f.size,
+        textContent: f.textContent,
+        processingTime: f.processingTime,
+      }));
+
+      setKbFiles((prev) => ({
+        ...prev,
+        [programName]: [...(prev[programName] || []), ...newFiles],
+      }));
+    } catch (e) {
+      console.error('KB URL fetch failed:', e);
+      setError('Failed to fetch URL. Please try again.');
+    } finally {
+      setIsUploading(false);
+      setUploadProgress('');
+    }
+  };
+
+  const handleKBFileRemove = async (fileId: string) => {
+    setKbFiles((prev) => ({
+      ...prev,
+      [programName]: (prev[programName] || []).filter((f) => f.id !== fileId),
+    }));
+    // Also delete from server
+    try {
+      await fetch(`/api/admin/uploads/${fileId}`, { method: 'DELETE' });
+    } catch {
+      // Silent fail — file is already removed from client state
+    }
+  };
+
+  const handleKnowledgeBaseNotesUpdate = (data: string) => {
+    setKnowledgeBaseNotes((prev) => ({
+      ...prev,
+      [programName]: data,
+    }));
   };
 
   const handleReviewTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -297,7 +407,9 @@ export default function Home() {
         body: JSON.stringify({
           fullReviewText: fullText,
           historicalData: programHistory,
-          knowledgeBaseData: knowledgeBaseData[programName],
+          knowledgeBaseData: getKnowledgeBaseData(programName),
+          programName,
+          programCategory: getProgramCategory(programName),
         }),
       });
 
@@ -324,13 +436,6 @@ export default function Home() {
         [program]: newProgramHistory,
       };
     });
-  };
-
-  const handleKnowledgeBaseUpdate = (data: string) => {
-    setKnowledgeBaseData((prev) => ({
-      ...prev,
-      [programName]: data,
-    }));
   };
 
   return (
@@ -498,8 +603,14 @@ export default function Home() {
             isLoadingData={isLoadingData}
             isChatting={isChatting}
             onChatSubmit={handleChatSubmit}
-            knowledgeBaseData={knowledgeBaseData[programName] || ''}
-            onKnowledgeBaseUpdate={handleKnowledgeBaseUpdate}
+            knowledgeBaseNotes={knowledgeBaseNotes[programName] || ''}
+            onKnowledgeBaseUpdate={handleKnowledgeBaseNotesUpdate}
+            kbFiles={kbFiles[programName] || []}
+            onKBUpload={handleKBUpload}
+            onKBUrlFetch={handleKBUrlFetch}
+            onKBFileRemove={handleKBFileRemove}
+            isUploading={isUploading}
+            uploadProgress={uploadProgress}
           />
         </aside>
       </div>

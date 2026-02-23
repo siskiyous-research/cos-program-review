@@ -102,32 +102,46 @@ interface RetrievalOptions {
 
 /**
  * Score an index entry based on relevance to the query
+ * Reviews from other programs are excluded (score 0) to avoid irrelevant citations.
  */
 function scoreEntry(entry: SearchIndexEntry, opts: RetrievalOptions): number {
   let score = 0;
 
-  // 1. Program match (highest priority)
-  if (opts.programName && entry.metadata.program) {
-    if (entry.metadata.program === opts.programName) {
-      score += 100;
+  // For reviews: ONLY include if they match the current program (or have no program set)
+  if (entry.source === 'review') {
+    if (opts.programName && entry.metadata.program) {
+      if (entry.metadata.program === opts.programName) {
+        score += 100;
+      } else {
+        // Different program's review → exclude entirely
+        return 0;
+      }
+    } else if (opts.programCategory && entry.metadata.programCategory) {
+      if (entry.metadata.programCategory === opts.programCategory) {
+        score += 30;
+      } else {
+        return 0;
+      }
     }
+    // Recency bonus for reviews
+    if (entry.metadata.year) {
+      const currentYear = new Date().getFullYear();
+      const age = currentYear - entry.metadata.year;
+      if (age <= 2) score += 15;
+      else if (age <= 4) score += 8;
+    }
+    score += 10;
+    return score;
   }
 
-  // 2. Program category match
-  if (opts.programCategory && entry.metadata.programCategory) {
-    if (entry.metadata.programCategory === opts.programCategory) {
-      score += 30;
-    }
-  }
-
-  // 3. Section-based policy chapter match
+  // For policies: section-based chapter match
   if (opts.sectionId) {
     const relevantChapters = SECTION_CHAPTER_MAP[opts.sectionId] || [];
     if (entry.metadata.chapter && relevantChapters.includes(entry.metadata.chapter)) {
       score += 40;
     }
 
-    // 4. ACCJC standard match
+    // ACCJC standard match
     const mappedStandards = getMappedStandards(opts.sectionId);
     for (const std of mappedStandards) {
       const stdTag = `accjc-${std.toLowerCase().replace('.', '')}`;
@@ -137,18 +151,9 @@ function scoreEntry(entry: SearchIndexEntry, opts: RetrievalOptions): number {
     }
   }
 
-  // 5. Source type scoring (reviews > policies > accreditation for program context)
-  if (entry.source === 'review') score += 10;
+  // Source type scoring for non-review sources
   if (entry.source === 'policy') score += 5;
   if (entry.source === 'accreditation') score += 3;
-
-  // 6. Recency bonus for reviews
-  if (entry.metadata.year) {
-    const currentYear = new Date().getFullYear();
-    const age = currentYear - entry.metadata.year;
-    if (age <= 2) score += 15;
-    else if (age <= 4) score += 8;
-  }
 
   return score;
 }
@@ -233,6 +238,21 @@ export function formatRAGContext(context: RAGContext): string {
   return `\n# Institutional Context (RAG Data)\nThe following is real institutional data from College of the Siskiyous. Use this to ground your response in actual COS context.\n\n${sections.join('\n\n---\n\n')}\n`;
 }
 
+// Cached reviews manifest for URL building
+let cachedReviewManifest: Record<string, { program: string; category: string; files: { title: string; filename: string }[] }> | null = null;
+
+function getReviewManifest() {
+  if (cachedReviewManifest) return cachedReviewManifest;
+  const manifestPath = path.join(process.cwd(), 'public', 'reviews', 'manifest.json');
+  if (!fs.existsSync(manifestPath)) return null;
+  try {
+    cachedReviewManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+    return cachedReviewManifest;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Build a source URL for a data chunk
  */
@@ -247,9 +267,30 @@ function buildSourceUrl(chunk: DataChunk): string | undefined {
       }
       return undefined;
     }
-    case 'review':
-      // Historical review PDFs in public/reviews/
-      return `/reviews/${chunk.sourceId}.pdf`;
+    case 'review': {
+      // Look up actual file path from manifest using sourceId
+      const manifest = getReviewManifest();
+      if (manifest) {
+        // The sourceId is a slug like "adhs-program-review-2018"
+        // Search manifest entries for a matching filename
+        for (const [key, entry] of Object.entries(manifest)) {
+          const programSlug = key.split('/').pop() || '';
+          for (const file of entry.files) {
+            // Slugify the filename for comparison
+            const fileSlug = file.filename
+              .replace(/\.pdf$/i, '')
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/^-|-$/g, '');
+            if (fileSlug === chunk.sourceId || chunk.sourceId.includes(fileSlug) || fileSlug.includes(chunk.sourceId)) {
+              return `/reviews/${entry.category}/${programSlug}/${encodeURIComponent(file.filename)}`;
+            }
+          }
+        }
+      }
+      // Fallback: no manifest match
+      return undefined;
+    }
     case 'accreditation':
       // Accreditation docs on the college site
       return `https://www.siskiyous.edu/accreditation/`;

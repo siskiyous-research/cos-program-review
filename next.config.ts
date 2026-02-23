@@ -5,6 +5,11 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     '/api/**': ['./data/**/*.json'],
   },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '20mb',
+    },
+  },
 }
 
 export default nextConfig

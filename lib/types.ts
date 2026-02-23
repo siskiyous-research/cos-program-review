@@ -129,3 +129,15 @@ export interface AccjcIntegration {
   checklist: ComplianceChecklistItem[];
   feedback: string;
 }
+
+/**
+ * Knowledge Base file upload
+ */
+export interface KBFile {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  textContent: string;
+  processingTime?: number;
+}

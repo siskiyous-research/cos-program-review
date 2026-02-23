@@ -262,7 +262,14 @@ Program Context:
 ${knowledgeBaseData ? `\nAdditional Program Context:\n${knowledgeBaseData}` : ''}
 ${ragText}
 
-Provide helpful, specific guidance based on the program data and institutional context. Reference specific COS board policies, historical reviews, or accreditation standards when relevant. Be supportive and constructive.`;
+Response rules:
+- Be CONCISE: 2-4 short paragraphs max unless the user asks for detail.
+- Use markdown: **bold** for key terms and numbers.
+- Use bullet points for lists (1 line each, max 5 items).
+- Use emojis sparingly (📊 data, ✅ positive, ⚠️ concern, 💡 suggestion).
+- Do NOT include "Recommendations", "Next Steps", or "Important Context" sections unless asked.
+- If you don't have exact data, say so briefly — don't speculate at length.
+- ONLY cite sources that are directly relevant to the program "${programData.programName}". Do NOT cite sources from other programs.`;
 
   // Map chat history: our 'model' role → OpenAI 'assistant' role
   const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
