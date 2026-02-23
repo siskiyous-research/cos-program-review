@@ -1,6 +1,6 @@
 /**
  * POST /api/section-assistance
- * Generates AI assistance for a specific review section with ACCJC integration
+ * Generates AI assistance for a specific review section with ACCJC + RAG integration
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -9,7 +9,7 @@ import { ProgramData } from '@/lib/types';
 
 export async function POST(req: NextRequest) {
   try {
-    const { sectionId, sectionTitle, sectionDescription, programData, userNotes, knowledgeBaseData } = await req.json();
+    const { sectionId, sectionTitle, sectionDescription, programData, userNotes, knowledgeBaseData, programCategory } = await req.json();
 
     // Validate required fields
     if (!sectionId || !sectionTitle || !programData || !userNotes) {
@@ -19,8 +19,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Call Gemini service with ACCJC context automatically included
-    const assistance = await getSectionAssistance(sectionId, sectionTitle, sectionDescription || '', programData as ProgramData, userNotes, knowledgeBaseData);
+    // Call AI service with ACCJC + RAG context
+    const assistance = await getSectionAssistance(
+      sectionId,
+      sectionTitle,
+      sectionDescription || '',
+      programData as ProgramData,
+      userNotes,
+      knowledgeBaseData,
+      programCategory
+    );
 
     return NextResponse.json({ ok: true, assistance });
   } catch (error) {

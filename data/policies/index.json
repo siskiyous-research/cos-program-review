@@ -1,0 +1,2743 @@
+{
+  "source": "siskiyous.edu/bpap",
+  "scrapedAt": "2026-02-22T20:24:27.243Z",
+  "totalPolicies": 342,
+  "policies": [
+    {
+      "title": "BP 1100",
+      "policyNumber": "1100",
+      "policyType": "BP",
+      "chapter": "I",
+      "chapterTitle": "I - The District",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BXB32N04C872"
+    },
+    {
+      "title": "BP 1200",
+      "policyNumber": "1200",
+      "policyType": "BP",
+      "chapter": "I",
+      "chapterTitle": "I - The District",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C2HLXB5881E2"
+    },
+    {
+      "title": "AP 1200",
+      "policyNumber": "1200",
+      "policyType": "AP",
+      "chapter": "I",
+      "chapterTitle": "I - The District",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BXB36Q055FFE"
+    },
+    {
+      "title": "BP 2010",
+      "policyNumber": "2010",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7QMP25C203D"
+    },
+    {
+      "title": "BP 2015",
+      "policyNumber": "2015",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=DMGS4B70D360"
+    },
+    {
+      "title": "AP 2015",
+      "policyNumber": "2015",
+      "policyType": "AP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BYWPBY638E59"
+    },
+    {
+      "title": "BP 2100",
+      "policyNumber": "2100",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BXU29N011F09"
+    },
+    {
+      "title": "BP 2105",
+      "policyNumber": "2105",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BXUUVK7DE953"
+    },
+    {
+      "title": "AP 2105",
+      "policyNumber": "2105",
+      "policyType": "AP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BYWPSD65A6E5"
+    },
+    {
+      "title": "BP 2110",
+      "policyNumber": "2110",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BXUV6J7F39A2"
+    },
+    {
+      "title": "AP 2110",
+      "policyNumber": "2110",
+      "policyType": "AP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7VVR781F562"
+    },
+    {
+      "title": "BP 2200",
+      "policyNumber": "2200",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7QNGH5FDE9E"
+    },
+    {
+      "title": "BP 2210",
+      "policyNumber": "2210",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BXUVVX827F9D"
+    },
+    {
+      "title": "BP 2220",
+      "policyNumber": "2220",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BXUW4M83A26C"
+    },
+    {
+      "title": "BP 2305",
+      "policyNumber": "2305",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D8HUX87E2720"
+    },
+    {
+      "title": "BP 2310",
+      "policyNumber": "2310",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C87SZ774E331"
+    },
+    {
+      "title": "BP 2315",
+      "policyNumber": "2315",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": " https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7QPFX6479DB"
+    },
+    {
+      "title": "BP 2320",
+      "policyNumber": "2320",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BXV2QH033DC7"
+    },
+    {
+      "title": "AP 2320",
+      "policyNumber": "2320",
+      "policyType": "AP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BYWQLP69DBF2"
+    },
+    {
+      "title": "AP 2325",
+      "policyNumber": "2325",
+      "policyType": "AP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=DMGSAJ71BEFD"
+    },
+    {
+      "title": "BP 2330",
+      "policyNumber": "2330",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CSKP4U619B92"
+    },
+    {
+      "title": "BP 2340",
+      "policyNumber": "2340",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7QPLX65295C"
+    },
+    {
+      "title": "AP 2340",
+      "policyNumber": "2340",
+      "policyType": "AP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=DCRW2M8356AB"
+    },
+    {
+      "title": "BP 2345",
+      "policyNumber": "2345",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C53UVY7DF882"
+    },
+    {
+      "title": "AP 2345",
+      "policyNumber": "2345",
+      "policyType": "AP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C5URWJ6FFDA5"
+    },
+    {
+      "title": "BP 2350",
+      "policyNumber": "2350",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BXVW5N83C842"
+    },
+    {
+      "title": "BP 2355",
+      "policyNumber": "2355",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7UTNG782EF7"
+    },
+    {
+      "title": "BP 2360",
+      "policyNumber": "2360",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BXWNR45FC398"
+    },
+    {
+      "title": "AP 2360",
+      "policyNumber": "2360",
+      "policyType": "AP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BYWQZU6B5501"
+    },
+    {
+      "title": "BP 2365",
+      "policyNumber": "2365",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CSKP4Y61A4EF"
+    },
+    {
+      "title": "AP 2365",
+      "policyNumber": "2365",
+      "policyType": "AP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BYWR3A6B7D42"
+    },
+    {
+      "title": "BP 2410",
+      "policyNumber": "2410",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CHLUJE7C46EE"
+    },
+    {
+      "title": "AP 2410",
+      "policyNumber": "2410",
+      "policyType": "AP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7VVRJ820265"
+    },
+    {
+      "title": "BP 2430",
+      "policyNumber": "2430",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7UTNR783924"
+    },
+    {
+      "title": "BP 2431",
+      "policyNumber": "2431",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7UTNW783EE8"
+    },
+    {
+      "title": "AP 2431",
+      "policyNumber": "2431",
+      "policyType": "AP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BYX33Z04FAC6"
+    },
+    {
+      "title": "BP 2432",
+      "policyNumber": "2432",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7UTQS784803"
+    },
+    {
+      "title": "BP 2435",
+      "policyNumber": "2435",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C5URSK6F4D01"
+    },
+    {
+      "title": "AP 2435",
+      "policyNumber": "2435",
+      "policyType": "AP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C5URWJ6FFDA5"
+    },
+    {
+      "title": "BP 2510",
+      "policyNumber": "2510",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7UTQT785203"
+    },
+    {
+      "title": "AP 2510",
+      "policyNumber": "2510",
+      "policyType": "AP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7VVY982FD9E"
+    },
+    {
+      "title": "BP 2610",
+      "policyNumber": "2610",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BYLUFD7BD3DC"
+    },
+    {
+      "title": "AP 2610",
+      "policyNumber": "2610",
+      "policyType": "AP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BYXUXH7AC3BF"
+    },
+    {
+      "title": "BP 2710",
+      "policyNumber": "2710",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BYLUHM7C28EA"
+    },
+    {
+      "title": "AP 2710",
+      "policyNumber": "2710",
+      "policyType": "AP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7VVYH830708"
+    },
+    {
+      "title": "BP 2712",
+      "policyNumber": "2712",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BYLV8K7F856E"
+    },
+    {
+      "title": "AP 2712",
+      "policyNumber": "2712",
+      "policyType": "AP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CUATAS767873"
+    },
+    {
+      "title": "BP 2715",
+      "policyNumber": "2715",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7UTQU785854"
+    },
+    {
+      "title": "BP 2716",
+      "policyNumber": "2716",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BYLVRP8207B9"
+    },
+    {
+      "title": "BP 2717",
+      "policyNumber": "2717",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BYLVTV82594E"
+    },
+    {
+      "title": "BP 2720",
+      "policyNumber": "2720",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BYLVWL82BF97"
+    },
+    {
+      "title": "BP 2725",
+      "policyNumber": "2725",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BYLVY882FCC6"
+    },
+    {
+      "title": "AP 2725",
+      "policyNumber": "2725",
+      "policyType": "AP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BZ2N2Z5CC879"
+    },
+    {
+      "title": "BP 2730",
+      "policyNumber": "2730",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BYLVZE8327F6"
+    },
+    {
+      "title": "AP 2730",
+      "policyNumber": "2730",
+      "policyType": "AP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BZ2N785D4220"
+    },
+    {
+      "title": "BP 2735",
+      "policyNumber": "2735",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CWZTNW783F6F"
+    },
+    {
+      "title": "AP 2735",
+      "policyNumber": "2735",
+      "policyType": "AP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CYMV5U75FD1B"
+    },
+    {
+      "title": "BP 2740",
+      "policyNumber": "2740",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BYLW5K83C559"
+    },
+    {
+      "title": "AP 2740",
+      "policyNumber": "2740",
+      "policyType": "AP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BZ2NAG5DAF22"
+    },
+    {
+      "title": "BP 2745",
+      "policyNumber": "2745",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C5URTA6F833D"
+    },
+    {
+      "title": "BP 2750",
+      "policyNumber": "2750",
+      "policyType": "BP",
+      "chapter": "II",
+      "chapterTitle": "II - Board of Trustees",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BYM24J005E67"
+    },
+    {
+      "title": "BP 3050",
+      "policyNumber": "3050",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C68TB26BC82F"
+    },
+    {
+      "title": "AP 3050",
+      "policyNumber": "3050",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7VVYU83143A"
+    },
+    {
+      "title": "BP 3100",
+      "policyNumber": "3100",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C68TEN6C51C9"
+    },
+    {
+      "title": "AP 3100",
+      "policyNumber": "3100",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C6FSYX7505A0"
+    },
+    {
+      "title": "BP 3200",
+      "policyNumber": "3200",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CQBRFD6DC524"
+    },
+    {
+      "title": "AP 3200",
+      "policyNumber": "3200",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7VW3N837D15"
+    },
+    {
+      "title": "BP 3225",
+      "policyNumber": "3225",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7UTQW7873CB"
+    },
+    {
+      "title": "AP 3225",
+      "policyNumber": "3225",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7VW3T838381"
+    },
+    {
+      "title": "BP 3250",
+      "policyNumber": "3250",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7UTQZ78798D"
+    },
+    {
+      "title": "BP 3251",
+      "policyNumber": "3251",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C68U66710136"
+    },
+    {
+      "title": "AP 3251",
+      "policyNumber": "3251",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C6FTHG77734D"
+    },
+    {
+      "title": "BP 3280",
+      "policyNumber": "3280",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CQBRQA6F129B"
+    },
+    {
+      "title": "AP 3280",
+      "policyNumber": "3280",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CQBRPC6EF030"
+    },
+    {
+      "title": "BP 3300",
+      "policyNumber": "3300",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CTWTV47926F7"
+    },
+    {
+      "title": "AP 3300",
+      "policyNumber": "3300",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CH7U647A78E8"
+    },
+    {
+      "title": "BP 3310",
+      "policyNumber": "3310",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C68UUW76E25E"
+    },
+    {
+      "title": "AP 3310",
+      "policyNumber": "3310",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C6FU577A4C02"
+    },
+    {
+      "title": "BP 3410",
+      "policyNumber": "3410",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C29MNC5C03EF"
+    },
+    {
+      "title": "AP 3410",
+      "policyNumber": "3410",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CUATB576852A"
+    },
+    {
+      "title": "AP 3415",
+      "policyNumber": "3415",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=DFZTWV796A9B"
+    },
+    {
+      "title": "BP 3420",
+      "policyNumber": "3420",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CTWTYX79B733"
+    },
+    {
+      "title": "AP 3420",
+      "policyNumber": "3420",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C5JUH573C151"
+    },
+    {
+      "title": "BP 3430",
+      "policyNumber": "3430",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BTJRN46EBB8F"
+    },
+    {
+      "title": "AP 3430",
+      "policyNumber": "3430",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D6ZQ846803A5"
+    },
+    {
+      "title": "BP 3433",
+      "policyNumber": "3433",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BTJS9C719263"
+    },
+    {
+      "title": "AP 3433",
+      "policyNumber": "3433",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=DAR7X31BB0E8"
+    },
+    {
+      "title": "AP 3434",
+      "policyNumber": "3434",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CLEUJV7C58B2"
+    },
+    {
+      "title": "BP 3435",
+      "policyNumber": "3435",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C29PRV65E924"
+    },
+    {
+      "title": "AP 3435",
+      "policyNumber": "3435",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=DMGSFY728B9F"
+    },
+    {
+      "title": "BP 3440",
+      "policyNumber": "3440",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C69L8954B0E5"
+    },
+    {
+      "title": "AP 3440",
+      "policyNumber": "3440",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C7BRN56EBF16"
+    },
+    {
+      "title": "BP 3500",
+      "policyNumber": "3500",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C69LQ956C447"
+    },
+    {
+      "title": "AP 3500",
+      "policyNumber": "3500",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C7BRWL6FFFA6"
+    },
+    {
+      "title": "BP 3501",
+      "policyNumber": "3501",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7UTR37882B1"
+    },
+    {
+      "title": "AP 3501",
+      "policyNumber": "3501",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=DFZNTS5F50EB"
+    },
+    {
+      "title": "AP 3502",
+      "policyNumber": "3502",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=DDJQGJ6940AB"
+    },
+    {
+      "title": "BP 3505",
+      "policyNumber": "3505",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C6AS2P6F034A"
+    },
+    {
+      "title": "AP 3505",
+      "policyNumber": "3505",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C7BSFR72800B"
+    },
+    {
+      "title": "AP 3506",
+      "policyNumber": "3506",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CERPTS6634F7"
+    },
+    {
+      "title": "BP 3510",
+      "policyNumber": "3510",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CQBSPM738E81"
+    },
+    {
+      "title": "AP 3510",
+      "policyNumber": "3510",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CH7UBS7B4CF8"
+    },
+    {
+      "title": "BP 3515",
+      "policyNumber": "3515",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C6AS4L701C92"
+    },
+    {
+      "title": "AP 3515",
+      "policyNumber": "3515",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C7BSQ373BB2D"
+    },
+    {
+      "title": "BP 3516",
+      "policyNumber": "3516",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C6DQSK6AB5C7"
+    },
+    {
+      "title": "AP 3516",
+      "policyNumber": "3516",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C7BSU2744FA0"
+    },
+    {
+      "title": "BP 3518",
+      "policyNumber": "3518",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C6DQV36B15B2"
+    },
+    {
+      "title": "AP 3518",
+      "policyNumber": "3518",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C7BSVZ7498DE"
+    },
+    {
+      "title": "BP 3520",
+      "policyNumber": "3520",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C6DRCZ6D6C6E"
+    },
+    {
+      "title": "AP 3520",
+      "policyNumber": "3520",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C7BSY274E52F"
+    },
+    {
+      "title": "BP 3530",
+      "policyNumber": "3530",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C6DRGN6DEE32"
+    },
+    {
+      "title": "AP 3530",
+      "policyNumber": "3530",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C7BT5B75AC25"
+    },
+    {
+      "title": "BP 3540",
+      "policyNumber": "3540",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BTJSBW71F2F4"
+    },
+    {
+      "title": "AP 3540",
+      "policyNumber": "3540",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BTJV2E7E9F1A"
+    },
+    {
+      "title": "BP 3550",
+      "policyNumber": "3550",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CTWTYX79B733"
+    },
+    {
+      "title": "AP 3550",
+      "policyNumber": "3550",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CUBNL9606B88"
+    },
+    {
+      "title": "BP 3560",
+      "policyNumber": "3560",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C6DRRG6F3CCF"
+    },
+    {
+      "title": "AP 3560",
+      "policyNumber": "3560",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C7BTSE78C2E5"
+    },
+    {
+      "title": "BP 3570",
+      "policyNumber": "3570",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=DBWPT4661C8F"
+    },
+    {
+      "title": "AP 3570",
+      "policyNumber": "3570",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=DBWMZ25D9AE3"
+    },
+    {
+      "title": "BP 3715",
+      "policyNumber": "3715",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C6DSHX71BB90"
+    },
+    {
+      "title": "AP 3715",
+      "policyNumber": "3715",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C7CQCT681274"
+    },
+    {
+      "title": "BP 3720",
+      "policyNumber": "3720",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C6DSJG71EB84"
+    },
+    {
+      "title": "AP 3720",
+      "policyNumber": "3720",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CECNRJ61283C"
+    },
+    {
+      "title": "AP 3725",
+      "policyNumber": "3725",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C8FVFV808426"
+    },
+    {
+      "title": "BP 3750",
+      "policyNumber": "3750",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C6DSN672AAFB"
+    },
+    {
+      "title": "AP 3750",
+      "policyNumber": "3750",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C7CQL3694951"
+    },
+    {
+      "title": "BP 3810",
+      "policyNumber": "3810",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C6DSNZ72DAB9"
+    },
+    {
+      "title": "AP 3810",
+      "policyNumber": "3810",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CECP2362101F"
+    },
+    {
+      "title": "BP 3820",
+      "policyNumber": "3820",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C6DSP9730D59"
+    },
+    {
+      "title": "AP 3820",
+      "policyNumber": "3820",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C7CR2P6A9498"
+    },
+    {
+      "title": "BP 3900",
+      "policyNumber": "3900",
+      "policyType": "BP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C6DSPK734339"
+    },
+    {
+      "title": "AP 3900",
+      "policyNumber": "3900",
+      "policyType": "AP",
+      "chapter": "III",
+      "chapterTitle": "III - General Institution",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C6WMF55A251A"
+    },
+    {
+      "title": "BP 4010",
+      "policyNumber": "4010",
+      "policyType": "BP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CM6UU47C75A4"
+    },
+    {
+      "title": "AP 4010",
+      "policyNumber": "4010",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C8FM7957B89F"
+    },
+    {
+      "title": "BP 4020",
+      "policyNumber": "4020",
+      "policyType": "BP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CW2MP2598158"
+    },
+    {
+      "title": "AP 4020",
+      "policyNumber": "4020",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C5JV547B2A45"
+    },
+    {
+      "title": "AP 4021",
+      "policyNumber": "4021",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CM6V9B7FA125"
+    },
+    {
+      "title": "AP 4022",
+      "policyNumber": "4022",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C5TNVE616861"
+    },
+    {
+      "title": "AP 4025",
+      "policyNumber": "4025",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C5TTPE784700"
+    },
+    {
+      "title": "AP 4026",
+      "policyNumber": "4026",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CM6VFR809353"
+    },
+    {
+      "title": "BP 4030",
+      "policyNumber": "4030",
+      "policyType": "BP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CM6UTT7C5C80"
+    },
+    {
+      "title": "BP 4040",
+      "policyNumber": "4040",
+      "policyType": "BP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7UTR4788F95"
+    },
+    {
+      "title": "AP 4040",
+      "policyNumber": "4040",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7W26W00B7A6"
+    },
+    {
+      "title": "BP 4050",
+      "policyNumber": "4050",
+      "policyType": "BP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CM9TX578A6B4"
+    },
+    {
+      "title": "BP 4060",
+      "policyNumber": "4060",
+      "policyType": "BP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CM9UHV7BA5C8"
+    },
+    {
+      "title": "AP 4060",
+      "policyNumber": "4060",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CM9UKH7C6625"
+    },
+    {
+      "title": "BP 4070",
+      "policyNumber": "4070",
+      "policyType": "BP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CM9UQB7CD566"
+    },
+    {
+      "title": "AP 4070",
+      "policyNumber": "4070",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CM9UX77E2561"
+    },
+    {
+      "title": "AP 4100",
+      "policyNumber": "4100",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BTZUPJ7D065A"
+    },
+    {
+      "title": "AP 4101",
+      "policyNumber": "4101",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CMAPJT64E56E"
+    },
+    {
+      "title": "AP 4102",
+      "policyNumber": "4102",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C5TQ8T66E9DA"
+    },
+    {
+      "title": "AP 4103",
+      "policyNumber": "4103",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CMAPN5654CD1"
+    },
+    {
+      "title": "AP 4104",
+      "policyNumber": "4104",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CMAPNF65578B"
+    },
+    {
+      "title": "AP 4105",
+      "policyNumber": "4105",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C8FQA2655FEB"
+    },
+    {
+      "title": "BP 4106",
+      "policyNumber": "4106",
+      "policyType": "BP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C5JMZY5D9534"
+    },
+    {
+      "title": "AP 4106",
+      "policyNumber": "4106",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CMAPSF65DDC6"
+    },
+    {
+      "title": "BP 4220",
+      "policyNumber": "4220",
+      "policyType": "BP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CM6UTY7C66C3"
+    },
+    {
+      "title": "AP 4220",
+      "policyNumber": "4220",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CMAQV86AFF53"
+    },
+    {
+      "title": "BP 4225",
+      "policyNumber": "4225",
+      "policyType": "BP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BUMNWE5BA6D0"
+    },
+    {
+      "title": "AP 4225",
+      "policyNumber": "4225",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BUMPJN64DEE8"
+    },
+    {
+      "title": "BP 4226",
+      "policyNumber": "4226",
+      "policyType": "BP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CMAVKL8122A3"
+    },
+    {
+      "title": "AP 4226",
+      "policyNumber": "4226",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CMAVX2825BB2"
+    },
+    {
+      "title": "AP 4228",
+      "policyNumber": "4228",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CPXKX753EED2"
+    },
+    {
+      "title": "AP 4229",
+      "policyNumber": "4229",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CPXL4J548583"
+    },
+    {
+      "title": "BP 4230",
+      "policyNumber": "4230",
+      "policyType": "BP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C87TKR77C940"
+    },
+    {
+      "title": "AP 4230",
+      "policyNumber": "4230",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C8FQAF65852B"
+    },
+    {
+      "title": "AP 4231",
+      "policyNumber": "4231",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CPXL8M55580F"
+    },
+    {
+      "title": "AP 4232",
+      "policyNumber": "4232",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CPXLAX55AE52"
+    },
+    {
+      "title": "BP 4235",
+      "policyNumber": "4235",
+      "policyType": "BP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BWDUDA7B864E"
+    },
+    {
+      "title": "AP 4235",
+      "policyNumber": "4235",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CRHV8H7492C2"
+    },
+    {
+      "title": "AP 4236",
+      "policyNumber": "4236",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C8FQPS670AAD"
+    },
+    {
+      "title": "AP 4237",
+      "policyNumber": "4237",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CPXN8K5E082C"
+    },
+    {
+      "title": "AP 4240",
+      "policyNumber": "4240",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CQ7U3R7A2080"
+    },
+    {
+      "title": "AP 4250",
+      "policyNumber": "4250",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C5US4J708E95"
+    },
+    {
+      "title": "AP 4255",
+      "policyNumber": "4255",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BWQVEB805C8C"
+    },
+    {
+      "title": "AP 4260",
+      "policyNumber": "4260",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BWTUMR7CC417"
+    },
+    {
+      "title": "AP 4300",
+      "policyNumber": "4300",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CYN24A005543"
+    },
+    {
+      "title": "AP 4400",
+      "policyNumber": "4400",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CQ7USK7D785C"
+    },
+    {
+      "title": "AP 4500",
+      "policyNumber": "4500",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CQ7UUP7DC8AF"
+    },
+    {
+      "title": "AP 4610",
+      "policyNumber": "4610",
+      "policyType": "AP",
+      "chapter": "IV",
+      "chapterTitle": "IV - Academic Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CQ7UWP7E131F"
+    },
+    {
+      "title": "BP 5010",
+      "policyNumber": "5010",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7UTR97896E3"
+    },
+    {
+      "title": "AP 5010",
+      "policyNumber": "5010",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7W27900C3EE"
+    },
+    {
+      "title": "AP 5011",
+      "policyNumber": "5011",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CJNSVJ7487EB"
+    },
+    {
+      "title": "AP 5012",
+      "policyNumber": "5012",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CV5TWJ78CA82"
+    },
+    {
+      "title": "AP 5013",
+      "policyNumber": "5013",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C8FN7N5A8C91"
+    },
+    {
+      "title": "BP 5015",
+      "policyNumber": "5015",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C88NLC5F8AD3"
+    },
+    {
+      "title": "AP 5015",
+      "policyNumber": "5015",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C2PVZ4828AB8"
+    },
+    {
+      "title": "AP 5017",
+      "policyNumber": "5017",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CWANVM618AD6"
+    },
+    {
+      "title": "BP 5020",
+      "policyNumber": "5020",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CTWU3U7A24C8"
+    },
+    {
+      "title": "AP 5020",
+      "policyNumber": "5020",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=DB2TNK77E8A0"
+    },
+    {
+      "title": "BP 5030",
+      "policyNumber": "5030",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7VTQ7782E94"
+    },
+    {
+      "title": "AP 5030",
+      "policyNumber": "5030",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=DB2TZR79D430"
+    },
+    {
+      "title": "AP 5031",
+      "policyNumber": "5031",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CV6ND65F6209"
+    },
+    {
+      "title": "BP 5035",
+      "policyNumber": "5035",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C2PVXH81264F"
+    },
+    {
+      "title": "AP 5035",
+      "policyNumber": "5035",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C5UPLK651FE6"
+    },
+    {
+      "title": "BP 5040",
+      "policyNumber": "5040",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CJGUBA7B3C05"
+    },
+    {
+      "title": "AP 5040",
+      "policyNumber": "5040",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7W29G00D746"
+    },
+    {
+      "title": "AP 5045",
+      "policyNumber": "5045",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CV6NN760B472"
+    },
+    {
+      "title": "BP 5050",
+      "policyNumber": "5050",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7UTRH78A0BC"
+    },
+    {
+      "title": "AP 5050",
+      "policyNumber": "5050",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7W27X00DCFF"
+    },
+    {
+      "title": "BP 5052",
+      "policyNumber": "5052",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CWAPD263E9BA"
+    },
+    {
+      "title": "AP 5052",
+      "policyNumber": "5052",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CV6PDG63A33A"
+    },
+    {
+      "title": "BP 5055",
+      "policyNumber": "5055",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CU5PTE6627F9"
+    },
+    {
+      "title": "AP 5055",
+      "policyNumber": "5055",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CYN27M00D29D"
+    },
+    {
+      "title": "AP 5070",
+      "policyNumber": "5070",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CV6PHA64A581"
+    },
+    {
+      "title": "AP 5071",
+      "policyNumber": "5071",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CV6PLL6506CF"
+    },
+    {
+      "title": "AP 5075",
+      "policyNumber": "5075",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CU5RBC6D2DE7"
+    },
+    {
+      "title": "AP 5076",
+      "policyNumber": "5076",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CU5RMF6EA835"
+    },
+    {
+      "title": "BP 5110",
+      "policyNumber": "5110",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7UTRM78A5C9"
+    },
+    {
+      "title": "AP 5110",
+      "policyNumber": "5110",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7W28700E7F2"
+    },
+    {
+      "title": "AP 5111",
+      "policyNumber": "5111",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CU5RST6F0717"
+    },
+    {
+      "title": "AP 5112",
+      "policyNumber": "5112",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CV6PSL65F08A"
+    },
+    {
+      "title": "BP 5120",
+      "policyNumber": "5120",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CULUPY7D1705"
+    },
+    {
+      "title": "AP 5120",
+      "policyNumber": "5120",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CV6PWW66AAF1"
+    },
+    {
+      "title": "BP 5130",
+      "policyNumber": "5130",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7VUAS7B2949"
+    },
+    {
+      "title": "AP 5130",
+      "policyNumber": "5130",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D8LLT2580A1A"
+    },
+    {
+      "title": "BP 5140",
+      "policyNumber": "5140",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CULVMW8179FF"
+    },
+    {
+      "title": "AP 5140",
+      "policyNumber": "5140",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CV6Q43673A1F"
+    },
+    {
+      "title": "AP 5141",
+      "policyNumber": "5141",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CV6Q5X679EDE"
+    },
+    {
+      "title": "BP 5150",
+      "policyNumber": "5150",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CULVWJ82BD5F"
+    },
+    {
+      "title": "AP 5150",
+      "policyNumber": "5150",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CV6UKD7C6B21"
+    },
+    {
+      "title": "BP 5200",
+      "policyNumber": "5200",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CULW4Q83A4EE"
+    },
+    {
+      "title": "AP 5200",
+      "policyNumber": "5200",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CV6UQH7D27A8"
+    },
+    {
+      "title": "AP 5203",
+      "policyNumber": "5203",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CV6UUX7DCBB2"
+    },
+    {
+      "title": "BP 5205",
+      "policyNumber": "5205",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CUM2VC0400EF"
+    },
+    {
+      "title": "AP 5205",
+      "policyNumber": "5205",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CV6UVV7DF466"
+    },
+    {
+      "title": "BP 5210",
+      "policyNumber": "5210",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CULULH7C94A5"
+    },
+    {
+      "title": "AP 5210",
+      "policyNumber": "5210",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CV6UYK7E583D"
+    },
+    {
+      "title": "BP 5220",
+      "policyNumber": "5220",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CUM2WV043A11"
+    },
+    {
+      "title": "AP 5220",
+      "policyNumber": "5220",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CV6V2K7EA45B"
+    },
+    {
+      "title": "BP 5300",
+      "policyNumber": "5300",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CUM2YJ047891"
+    },
+    {
+      "title": "AP 5300",
+      "policyNumber": "5300",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CUATLC77DF71"
+    },
+    {
+      "title": "BP 5400",
+      "policyNumber": "5400",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CUM2ZT04A7EB"
+    },
+    {
+      "title": "AP 5400",
+      "policyNumber": "5400",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CWAMWU5D40FD"
+    },
+    {
+      "title": "BP 5410",
+      "policyNumber": "5410",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CU5TQW788A07"
+    },
+    {
+      "title": "AP 5410",
+      "policyNumber": "5410",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CV6V9H7F18B9"
+    },
+    {
+      "title": "BP 5420",
+      "policyNumber": "5420",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CUM34J050E91"
+    },
+    {
+      "title": "AP 5420",
+      "policyNumber": "5420",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CJPQ9P65589E"
+    },
+    {
+      "title": "BP 5500",
+      "policyNumber": "5500",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D6ZPN7656020"
+    },
+    {
+      "title": "AP 5500",
+      "policyNumber": "5500",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D9EQM569EC6A"
+    },
+    {
+      "title": "BP 5510",
+      "policyNumber": "5510",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CUM35T053E38"
+    },
+    {
+      "title": "AP 5510",
+      "policyNumber": "5510",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CV6VHA80BEE2"
+    },
+    {
+      "title": "AP 5520",
+      "policyNumber": "5520",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C5UPQM65BFF1"
+    },
+    {
+      "title": "AP 5530",
+      "policyNumber": "5530",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7W28K00F5F5"
+    },
+    {
+      "title": "AP 5551",
+      "policyNumber": "5551",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CV6W2K8354C7"
+    },
+    {
+      "title": "AP 5570",
+      "policyNumber": "5570",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CV6W4F839AEE"
+    },
+    {
+      "title": "AP 5610",
+      "policyNumber": "5610",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CV7N2Q5DD9CE"
+    },
+    {
+      "title": "BP 5700",
+      "policyNumber": "5700",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C88NPV602047"
+    },
+    {
+      "title": "AP 5700",
+      "policyNumber": "5700",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C8FMHB588314"
+    },
+    {
+      "title": "BP 5800",
+      "policyNumber": "5800",
+      "policyType": "BP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CUM3BJ061542"
+    },
+    {
+      "title": "AP 5800",
+      "policyNumber": "5800",
+      "policyType": "AP",
+      "chapter": "V",
+      "chapterTitle": "V - Student Services",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CV7NJ760184B"
+    },
+    {
+      "title": "BP 6100",
+      "policyNumber": "6100",
+      "policyType": "BP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D8ZK2X4FD0CF"
+    },
+    {
+      "title": "AP 6100",
+      "policyNumber": "6100",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D8ZK7Q507953"
+    },
+    {
+      "title": "BP 6150",
+      "policyNumber": "6150",
+      "policyType": "BP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D8ZK2Z4FD499"
+    },
+    {
+      "title": "AP 6150",
+      "policyNumber": "6150",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D8ZK7Q507953"
+    },
+    {
+      "title": "BP 6200",
+      "policyNumber": "6200",
+      "policyType": "BP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=DA3MUY5D023B"
+    },
+    {
+      "title": "AP 6200",
+      "policyNumber": "6200",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D8ZK7T508154"
+    },
+    {
+      "title": "BP 6250",
+      "policyNumber": "6250",
+      "policyType": "BP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D8ZK374FDB5D"
+    },
+    {
+      "title": "AP 6250",
+      "policyNumber": "6250",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D8ZK7U5084AA"
+    },
+    {
+      "title": "BP 6300",
+      "policyNumber": "6300",
+      "policyType": "BP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D8ZK3D4FE060"
+    },
+    {
+      "title": "AP 6300",
+      "policyNumber": "6300",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D8ZK7V5087D0"
+    },
+    {
+      "title": "AP 6305",
+      "policyNumber": "6305",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CRXV547F02FB"
+    },
+    {
+      "title": "BP 6307",
+      "policyNumber": "6307",
+      "policyType": "BP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9ASTZ73F9D7"
+    },
+    {
+      "title": "AP 6307",
+      "policyNumber": "6307",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9ASJM722767"
+    },
+    {
+      "title": "AP 6310",
+      "policyNumber": "6310",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BWQUXN7E37BB"
+    },
+    {
+      "title": "AP 6315",
+      "policyNumber": "6315",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BWQUZX7E8C95"
+    },
+    {
+      "title": "BP 6320",
+      "policyNumber": "6320",
+      "policyType": "BP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BTUTSK78C90C"
+    },
+    {
+      "title": "AP 6320",
+      "policyNumber": "6320",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BTUTWB795549"
+    },
+    {
+      "title": "AP 6322",
+      "policyNumber": "6322",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9AVQG7B5F1A"
+    },
+    {
+      "title": "AP 6325",
+      "policyNumber": "6325",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CABUQF7D293C"
+    },
+    {
+      "title": "BP 6330",
+      "policyNumber": "6330",
+      "policyType": "BP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BU3TQB787407"
+    },
+    {
+      "title": "AP 6330",
+      "policyNumber": "6330",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BU3TUQ790A6A"
+    },
+    {
+      "title": "BP 6340",
+      "policyNumber": "6340",
+      "policyType": "BP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7UTSB78BF01"
+    },
+    {
+      "title": "AP 6340",
+      "policyNumber": "6340",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7W295010A1E"
+    },
+    {
+      "title": "AP 6345",
+      "policyNumber": "6345",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D8ZKAH50EE15"
+    },
+    {
+      "title": "AP 6350",
+      "policyNumber": "6350",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BUJUVF7DE43B"
+    },
+    {
+      "title": "AP 6365",
+      "policyNumber": "6365",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9AVLY7F9F75"
+    },
+    {
+      "title": "AP 6370",
+      "policyNumber": "6370",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BTUU677A7BF5"
+    },
+    {
+      "title": "BP 6400",
+      "policyNumber": "6400",
+      "policyType": "BP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7VUT67D8EB4"
+    },
+    {
+      "title": "AP 6400",
+      "policyNumber": "6400",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CUATNG782E86"
+    },
+    {
+      "title": "BP 6450",
+      "policyNumber": "6450",
+      "policyType": "BP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9AVU8824ED7"
+    },
+    {
+      "title": "AP 6450",
+      "policyNumber": "6450",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9AVYE830432"
+    },
+    {
+      "title": "BP 6500",
+      "policyNumber": "6500",
+      "policyType": "BP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BUMNX55BDF93"
+    },
+    {
+      "title": "BP 6520",
+      "policyNumber": "6520",
+      "policyType": "BP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7UTSG78C4E6"
+    },
+    {
+      "title": "AP 6540",
+      "policyNumber": "6540",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C5UQLK69D7D8"
+    },
+    {
+      "title": "BP 6550",
+      "policyNumber": "6550",
+      "policyType": "BP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BTUUMZ7CCD36"
+    },
+    {
+      "title": "AP 6550",
+      "policyNumber": "6550",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BTUVPS81C07B"
+    },
+    {
+      "title": "BP 6600",
+      "policyNumber": "6600",
+      "policyType": "BP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BTUVTZ825E06"
+    },
+    {
+      "title": "AP 6600",
+      "policyNumber": "6600",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BTUVXS82EC42"
+    },
+    {
+      "title": "BP 6620",
+      "policyNumber": "6620",
+      "policyType": "BP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C88NSR60B04F"
+    },
+    {
+      "title": "AP 6620",
+      "policyNumber": "6620",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C88P3X6279C7"
+    },
+    {
+      "title": "BP 6700",
+      "policyNumber": "6700",
+      "policyType": "BP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BUMMZW5D50F2"
+    },
+    {
+      "title": "AP 6700",
+      "policyNumber": "6700",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CYN29G011747"
+    },
+    {
+      "title": "BP 6740",
+      "policyNumber": "6740",
+      "policyType": "BP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BTUW3X838805"
+    },
+    {
+      "title": "AP 6740",
+      "policyNumber": "6740",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BTV22J0012F3"
+    },
+    {
+      "title": "BP 6750",
+      "policyNumber": "6750",
+      "policyType": "BP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9BU5V776173"
+    },
+    {
+      "title": "AP 6750",
+      "policyNumber": "6750",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9BU7E77D93A"
+    },
+    {
+      "title": "BP 6800",
+      "policyNumber": "6800",
+      "policyType": "BP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9BUBY794D96"
+    },
+    {
+      "title": "AP 6800",
+      "policyNumber": "6800",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9BUCK79B6B9"
+    },
+    {
+      "title": "AP 6850",
+      "policyNumber": "6850",
+      "policyType": "AP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BWQV4L7EF064"
+    },
+    {
+      "title": "BP 6900",
+      "policyNumber": "6900",
+      "policyType": "BP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9BUSE7CC8C7"
+    },
+    {
+      "title": "BP 6910",
+      "policyNumber": "6910",
+      "policyType": "BP",
+      "chapter": "VI",
+      "chapterTitle": "VI - Business and Fiscal Affairs",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=BUMN4K5DE7A2"
+    },
+    {
+      "title": "BP 7110",
+      "policyNumber": "7110",
+      "policyType": "BP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C28ULV7CA382"
+    },
+    {
+      "title": "AP 7110",
+      "policyNumber": "7110",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D8SRE56D968F"
+    },
+    {
+      "title": "AP 7125",
+      "policyNumber": "7125",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C8VPCX640907"
+    },
+    {
+      "title": "AP 7126",
+      "policyNumber": "7126",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9HRHS6C856E"
+    },
+    {
+      "title": "BP 7140",
+      "policyNumber": "7140",
+      "policyType": "BP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C8VP2S628987"
+    },
+    {
+      "title": "AP 7145",
+      "policyNumber": "7145",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9SRWW6DEB01"
+    },
+    {
+      "title": "AP 7150",
+      "policyNumber": "7150",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CH7UCV7B77A2"
+    },
+    {
+      "title": "BP 7210",
+      "policyNumber": "7210",
+      "policyType": "BP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9GU2A6AD745"
+    },
+    {
+      "title": "AP 7211",
+      "policyNumber": "7211",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=D7W2A9013542"
+    },
+    {
+      "title": "AP 7212",
+      "policyNumber": "7212",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9HUS477B969"
+    },
+    {
+      "title": "AP 7215",
+      "policyNumber": "7215",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9HUUL789D57"
+    },
+    {
+      "title": "AP 7216",
+      "policyNumber": "7216",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9HV5N7ACDD6"
+    },
+    {
+      "title": "AP 7217",
+      "policyNumber": "7217",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9HVCB7CD9C4"
+    },
+    {
+      "title": "BP 7218",
+      "policyNumber": "7218",
+      "policyType": "BP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9H39L83C168"
+    },
+    {
+      "title": "BP 7230",
+      "policyNumber": "7230",
+      "policyType": "BP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9GU6K6B8906"
+    },
+    {
+      "title": "AP 7232",
+      "policyNumber": "7232",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9HVEL7E4D9E"
+    },
+    {
+      "title": "AP 7233",
+      "policyNumber": "7233",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C28VLE8141DC"
+    },
+    {
+      "title": "AP 7234",
+      "policyNumber": "7234",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9HVPA81ADC5"
+    },
+    {
+      "title": "BP 7250",
+      "policyNumber": "7250",
+      "policyType": "BP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C2PVXU81A7EC"
+    },
+    {
+      "title": "AP 7280",
+      "policyNumber": "7280",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CMQS9J70B0AE"
+    },
+    {
+      "title": "BP 7310",
+      "policyNumber": "7310",
+      "policyType": "BP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9GVMB71B4C1"
+    },
+    {
+      "title": "AP 7310",
+      "policyNumber": "7310",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9HVTR8254B2"
+    },
+    {
+      "title": "BP 7330",
+      "policyNumber": "7330",
+      "policyType": "BP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CERPTK662D70"
+    },
+    {
+      "title": "BP 7335",
+      "policyNumber": "7335",
+      "policyType": "BP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9H2B47915FA"
+    },
+    {
+      "title": "AP 7336",
+      "policyNumber": "7336",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9HW3W836E10"
+    },
+    {
+      "title": "AP 7337",
+      "policyNumber": "7337",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9HW5483B391"
+    },
+    {
+      "title": "AP 7341",
+      "policyNumber": "7341",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CDQTR97844D9"
+    },
+    {
+      "title": "AP 7342",
+      "policyNumber": "7342",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9J29P011FA0"
+    },
+    {
+      "title": "AP 7344",
+      "policyNumber": "7344",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CDQUBJ7B444F"
+    },
+    {
+      "title": "AP 7366",
+      "policyNumber": "7366",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9JSUX6B8227"
+    },
+    {
+      "title": "BP 7370",
+      "policyNumber": "7370",
+      "policyType": "BP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9H2SM7EBACD"
+    },
+    {
+      "title": "AP 7371",
+      "policyNumber": "7371",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9JTCQ6CF7E9"
+    },
+    {
+      "title": "BP 7400",
+      "policyNumber": "7400",
+      "policyType": "BP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CX4SHH6F2636"
+    },
+    {
+      "title": "AP 7400",
+      "policyNumber": "7400",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CYN2BL0167A8"
+    },
+    {
+      "title": "BP 7405",
+      "policyNumber": "7405",
+      "policyType": "BP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CW9T7C75F7E8"
+    },
+    {
+      "title": "AP 7500",
+      "policyNumber": "7500",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CH7UEH7BB317"
+    },
+    {
+      "title": "BP 7510",
+      "policyNumber": "7510",
+      "policyType": "BP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9H32P81ADE0"
+    },
+    {
+      "title": "BP 7700",
+      "policyNumber": "7700",
+      "policyType": "BP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=C9H37J8313E0"
+    },
+    {
+      "title": "AP 7700",
+      "policyNumber": "7700",
+      "policyType": "AP",
+      "chapter": "VII",
+      "chapterTitle": "VII - Human Resources",
+      "url": "https://go.boarddocs.com/ca/sjccd/Board.nsf/goto?open&id=CH7UGH7BF7F7"
+    }
+  ]
+}

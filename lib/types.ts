@@ -40,6 +40,53 @@ export interface HistoricalData {
 }
 
 /**
+ * RAG (Retrieval-Augmented Generation) types
+ */
+
+export interface DataChunk {
+  id: string;
+  source: 'policy' | 'review' | 'accreditation' | 'meeting';
+  sourceId: string;
+  title: string;
+  text: string;
+  metadata: {
+    chapter?: string;
+    policyNumber?: string;
+    policyType?: 'BP' | 'AP';
+    program?: string;
+    programCategory?: string;
+    year?: number;
+    reviewType?: 'Annual' | 'Comprehensive';
+    sectionId?: string;
+    standardId?: string;
+  };
+  tags: string[];
+  tokenCount: number;
+}
+
+export interface SearchIndexEntry {
+  chunkId: string;
+  source: DataChunk['source'];
+  title: string;
+  tags: string[];
+  metadata: DataChunk['metadata'];
+  filePath: string;
+}
+
+export interface SearchIndex {
+  version: string;
+  generatedAt: string;
+  totalChunks: number;
+  entries: SearchIndexEntry[];
+}
+
+export interface RAGContext {
+  chunks: DataChunk[];
+  totalTokens: number;
+  sources: string[];
+}
+
+/**
  * ACCJC-related types for compliance tracking
  */
 

@@ -7,6 +7,7 @@
 import OpenAI from 'openai';
 import { ProgramData, ChatMessage, HistoricalReview } from './types';
 import { buildAccjcContext } from './accjc-standards';
+import { retrieveContext, formatRAGContext } from './rag-service';
 
 const MODEL = 'xiaomi/mimo-v2-flash';
 
@@ -71,9 +72,18 @@ export async function getSectionAssistance(
   sectionDescription: string,
   programData: ProgramData,
   userNotes: string,
-  knowledgeBaseData?: string
+  knowledgeBaseData?: string,
+  programCategory?: string
 ): Promise<string> {
   const accjcContext = buildAccjcContext(sectionId);
+
+  // Retrieve RAG context for this section
+  const ragContext = retrieveContext({
+    programName: programData.programName,
+    programCategory,
+    sectionId,
+  });
+  const ragText = formatRAGContext(ragContext);
 
   const createTailoredPrompt = () => {
     const baseIntro = `You are an expert academic program review assistant for a community college. Your task is to act as a writing partner to a faculty member.
@@ -119,9 +129,11 @@ Program Data Summary:
 
 ${knowledgeBaseData ? `\nAdditional Context from Knowledge Base:\n${knowledgeBaseData}` : ''}
 
+${ragText}
+
 ${accjcContext}
 
-Generate a well-written, professional response that expands on the user's notes without introducing new topics.`;
+Generate a well-written, professional response that expands on the user's notes without introducing new topics. Reference specific COS policies, historical data, or accreditation findings when relevant.`;
   };
 
   const response = await getClient().chat.completions.create({
@@ -139,9 +151,17 @@ export async function getChatResponse(
   userMessage: string,
   programData: ProgramData,
   chatHistory: ChatMessage[],
-  knowledgeBaseData?: string
+  knowledgeBaseData?: string,
+  programCategory?: string
 ): Promise<string> {
-  const systemPrompt = `You are a knowledgeable program review assistant for a community college. You have access to program data and are helping faculty members with their program reviews.
+  // Retrieve RAG context for chat
+  const ragContext = retrieveContext({
+    programName: programData.programName,
+    programCategory,
+  });
+  const ragText = formatRAGContext(ragContext);
+
+  const systemPrompt = `You are a knowledgeable program review assistant for College of the Siskiyous. You have access to program data, institutional policies, and historical context to help faculty members with their program reviews.
 
 Program Context:
 - Program: ${programData.programName}
@@ -152,8 +172,9 @@ Program Context:
 - Key Weaknesses: ${programData.summary.weaknesses.join(', ')}
 
 ${knowledgeBaseData ? `\nAdditional Program Context:\n${knowledgeBaseData}` : ''}
+${ragText}
 
-Provide helpful, specific guidance based on the program data and the user's questions. Be supportive and constructive.`;
+Provide helpful, specific guidance based on the program data and institutional context. Reference specific COS board policies, historical reviews, or accreditation standards when relevant. Be supportive and constructive.`;
 
   // Map chat history: our 'model' role → OpenAI 'assistant' role
   const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
@@ -179,14 +200,23 @@ Provide helpful, specific guidance based on the program data and the user's ques
 export async function getExecutiveSummary(
   fullReviewText: string,
   historicalData: HistoricalReview[],
-  knowledgeBaseData?: string
+  knowledgeBaseData?: string,
+  programName?: string,
+  programCategory?: string
 ): Promise<string> {
+  // Retrieve RAG context for summary
+  const ragContext = retrieveContext({
+    programName,
+    programCategory,
+  });
+  const ragText = formatRAGContext(ragContext);
+
   const historicalContext = historicalData
     .slice(0, 2)
     .map(review => `${review.year} (${review.type}): ${review.title}`)
     .join('\n');
 
-  const prompt = `You are an expert in community college program reviews and accreditation standards. Create a concise executive summary (300-400 words) of the following program review.
+  const prompt = `You are an expert in community college program reviews and accreditation standards for College of the Siskiyous. Create a concise executive summary (300-400 words) of the following program review.
 
 The summary should:
 1. Highlight key program strengths and achievements
@@ -194,6 +224,7 @@ The summary should:
 3. Summarize the four-year action plan and strategic priorities
 4. Note any resource needs or allocation requests
 5. Connect findings to ACCJC accreditation standards where relevant
+6. Reference applicable COS board policies and institutional context
 
 Current Program Review:
 ${fullReviewText}
@@ -201,8 +232,9 @@ ${fullReviewText}
 ${historicalContext ? `\nHistorical Context (Previous Reviews):\n${historicalContext}` : ''}
 
 ${knowledgeBaseData ? `\nAdditional Context:\n${knowledgeBaseData}` : ''}
+${ragText}
 
-Generate a professional, constructive executive summary.`;
+Generate a professional, constructive executive summary that references specific institutional context when available.`;
 
   const response = await getClient().chat.completions.create({
     model: MODEL,

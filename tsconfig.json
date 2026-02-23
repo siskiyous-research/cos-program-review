@@ -40,6 +40,7 @@
   ],
   "exclude": [
     "node_modules",
-    "program-review-assistant-original-google-ai-studio"
+    "program-review-assistant-original-google-ai-studio",
+    "scripts"
   ]
 }

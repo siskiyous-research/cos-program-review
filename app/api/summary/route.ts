@@ -1,6 +1,6 @@
 /**
  * POST /api/summary
- * Generates an executive summary of the program review
+ * Generates an executive summary of the program review with RAG context
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -9,15 +9,21 @@ import { HistoricalReview } from '@/lib/types';
 
 export async function POST(req: NextRequest) {
   try {
-    const { fullReviewText, historicalData, knowledgeBaseData } = await req.json();
+    const { fullReviewText, historicalData, knowledgeBaseData, programName, programCategory } = await req.json();
 
     // Validate required fields
     if (!fullReviewText) {
       return NextResponse.json({ ok: false, error: 'Missing required field: fullReviewText' }, { status: 400 });
     }
 
-    // Call Gemini service for summary generation
-    const summary = await getExecutiveSummary(fullReviewText, (historicalData || []) as HistoricalReview[], knowledgeBaseData);
+    // Call AI service for summary generation with RAG context
+    const summary = await getExecutiveSummary(
+      fullReviewText,
+      (historicalData || []) as HistoricalReview[],
+      knowledgeBaseData,
+      programName,
+      programCategory
+    );
 
     return NextResponse.json({ ok: true, summary });
   } catch (error) {

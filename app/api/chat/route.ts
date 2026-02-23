@@ -1,6 +1,6 @@
 /**
  * POST /api/chat
- * Handles chat messages with program context
+ * Handles chat messages with program context + RAG
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -9,15 +9,21 @@ import { ProgramData, ChatMessage } from '@/lib/types';
 
 export async function POST(req: NextRequest) {
   try {
-    const { message, chatHistory, programData, knowledgeBaseData } = await req.json();
+    const { message, chatHistory, programData, knowledgeBaseData, programCategory } = await req.json();
 
     // Validate required fields
     if (!message || !programData) {
       return NextResponse.json({ ok: false, error: 'Missing required fields: message, programData' }, { status: 400 });
     }
 
-    // Call Gemini service for chat response
-    const response = await getChatResponse(message, programData as ProgramData, (chatHistory || []) as ChatMessage[], knowledgeBaseData);
+    // Call AI service for chat response with RAG context
+    const response = await getChatResponse(
+      message,
+      programData as ProgramData,
+      (chatHistory || []) as ChatMessage[],
+      knowledgeBaseData,
+      programCategory
+    );
 
     return NextResponse.json({ ok: true, response });
   } catch (error) {

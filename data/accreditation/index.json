@@ -1,0 +1,53 @@
+{
+  "source": "siskiyous.edu/accreditation",
+  "scrapedAt": "2026-02-23T00:01:10.201Z",
+  "totalDocs": 9,
+  "documents": [
+    {
+      "title": "ACCJC Action Letter",
+      "url": "https://www.siskiyous.edu/accreditation/documents/ACCJC_AccreditationLetter.pdf",
+      "type": "action_letter"
+    },
+    {
+      "title": "Peer Review Team Report",
+      "url": "https://www.siskiyous.edu/accreditation/documents/2023_PeerReviewTeamReport.pdf",
+      "type": "peer_review"
+    },
+    {
+      "title": "2022 Institutional Self Evaluation Report",
+      "url": "https://www.siskiyous.edu/accreditation/documents/2022_ISER_final.pdf",
+      "type": "other",
+      "year": 2022
+    },
+    {
+      "title": "ADHS Accreditation Documents",
+      "url": "https://www.siskiyous.edu/accreditation/documents/ADHScerts.pdf",
+      "type": "other"
+    },
+    {
+      "title": "EMT - Paramedic Accreditation documents",
+      "url": "https://www.siskiyous.edu/accreditation/documents/CAAHEPaccreditation.pdf",
+      "type": "other"
+    },
+    {
+      "title": "LVN Accreditation Documents",
+      "url": "https://www.siskiyous.edu/accreditation/documents/VNinfo.pdf",
+      "type": "other"
+    },
+    {
+      "title": "LVN to RN Step-up Accreditation Documents",
+      "url": "https://www.siskiyous.edu/accreditation/documents/2017RNinfo.pdf",
+      "type": "other"
+    },
+    {
+      "title": "CNA Accreditation Documents",
+      "url": "https://www.siskiyous.edu/accreditation/documents/CNAinfo.pdf",
+      "type": "other"
+    },
+    {
+      "title": "Student Rights and Responsibilities",
+      "url": "https://www.siskiyous.edu/studentservices/documents/rightsandresponsibilities.pdf",
+      "type": "other"
+    }
+  ]
+}
