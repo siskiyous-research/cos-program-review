@@ -12,7 +12,9 @@
     "scrape:policies": "tsx scripts/scrape/scrape-bpap.ts",
     "scrape:reviews": "tsx scripts/scrape/scrape-boarddocs-reviews.ts",
     "scrape:accreditation": "tsx scripts/scrape/scrape-accreditation.ts",
-    "scrape:build-index": "tsx scripts/scrape/build-index.ts"
+    "scrape:build-index": "tsx scripts/scrape/build-index.ts",
+    "scrape:download-pdfs": "tsx scripts/download-review-pdfs.ts",
+    "refresh-reviews": "tsx scripts/scrape/scrape-boarddocs-reviews.ts && tsx scripts/download-review-pdfs.ts && tsx scripts/scrape/build-index.ts"
   },
   "dependencies": {
     "next": "^15.0.0",

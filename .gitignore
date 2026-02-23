@@ -37,3 +37,6 @@ yarn-error.log*
 # OS
 Thumbs.db
 .DS_Store
+
+# Downloaded review PDFs (regenerate with: npm run refresh-reviews)
+public/reviews/**/*.pdf

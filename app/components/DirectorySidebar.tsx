@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { HistoricalData, HistoricalReview } from '@/lib/types';
 import { FolderIcon } from './icons/FolderIcon';
 import { FileIcon } from './icons/FileIcon';
@@ -13,9 +13,16 @@ interface DirectorySidebarProps {
   historicalData: HistoricalData;
   currentProgram: string;
   onAddReview: (programName: string, review: HistoricalReview) => void;
+  onHistoricalDataLoaded?: (data: HistoricalData) => void;
 }
 
 const allPrograms = Object.values(PROGRAM_LIST).flat();
+
+interface ManifestEntry {
+  program: string;
+  category: string;
+  files: { title: string; year: number; type: string; filename: string }[];
+}
 
 const parseFileInfo = (fileName: string): { programName: string | null; year: number | null } => {
   let programName: string | null = null;
@@ -38,14 +45,66 @@ export const DirectorySidebar: React.FC<DirectorySidebarProps> = ({
   historicalData,
   currentProgram,
   onAddReview,
+  onHistoricalDataLoaded,
 }) => {
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({
     [currentProgram]: true,
   });
   const [isDragging, setIsDragging] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<string | null>(null);
+
+  // Load manifest on mount to populate the sidebar with downloaded PDFs
+  useEffect(() => {
+    fetch('/reviews/manifest.json')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((manifest: Record<string, ManifestEntry> | null) => {
+        if (!manifest || !onHistoricalDataLoaded) return;
+
+        const data: HistoricalData = {};
+        for (const [key, entry] of Object.entries(manifest)) {
+          const program = entry.program;
+          if (!program || program === 'Unmatched') continue;
+
+          data[program] = entry.files
+            .map((f) => ({
+              year: f.year,
+              type: f.type as 'Annual' | 'Comprehensive',
+              title: f.title,
+              content: '',
+              url: `/reviews/${key}/${encodeURIComponent(f.filename)}`,
+            }))
+            .sort((a, b) => b.year - a.year);
+        }
+
+        onHistoricalDataLoaded(data);
+      })
+      .catch(() => {});
+  }, [onHistoricalDataLoaded]);
 
   const toggleFolder = (programName: string) => {
     setOpenFolders((prev) => ({ ...prev, [programName]: !prev[programName] }));
+  };
+
+  const handleSync = async () => {
+    setIsSyncing(true);
+    setSyncStatus('Syncing from BoardDocs...');
+    try {
+      const res = await fetch('/api/refresh-reviews', { method: 'POST' });
+      const result = await res.json();
+      if (result.ok) {
+        setSyncStatus('Sync complete! Reloading...');
+        // Reload manifest
+        setTimeout(() => window.location.reload(), 1000);
+      } else {
+        setSyncStatus(`Error: ${result.error}`);
+      }
+    } catch {
+      setSyncStatus('Sync failed. Check console.');
+    } finally {
+      setIsSyncing(false);
+      setTimeout(() => setSyncStatus(null), 5000);
+    }
   };
 
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
@@ -112,11 +171,26 @@ export const DirectorySidebar: React.FC<DirectorySidebarProps> = ({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <div className="p-4 border-b border-slate-700 flex items-center justify-between">
-        <h2 className="text-white font-semibold">Review Archive</h2>
-        <button onClick={onToggle} className="text-slate-400 hover:text-slate-200">
-          <ChevronRightIcon className="w-5 h-5 transform rotate-180" />
+      <div className="p-4 border-b border-slate-700">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-white font-semibold">Review Archive</h2>
+          <button onClick={onToggle} className="text-slate-400 hover:text-slate-200">
+            <ChevronRightIcon className="w-5 h-5 transform rotate-180" />
+          </button>
+        </div>
+        <button
+          onClick={handleSync}
+          disabled={isSyncing}
+          className="w-full flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium rounded bg-blue-600 hover:bg-blue-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white transition-colors"
+        >
+          <svg className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          {isSyncing ? 'Syncing...' : 'Sync from BoardDocs'}
         </button>
+        {syncStatus && (
+          <p className="text-xs text-slate-400 mt-1 text-center">{syncStatus}</p>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -155,17 +229,34 @@ export const DirectorySidebar: React.FC<DirectorySidebarProps> = ({
                   </button>
 
                   {isOpen &&
-                    reviews.map((review) => (
-                      <div key={`${program}-${review.year}`} className="ml-6 p-2 text-xs text-slate-400">
-                        <div className="flex items-start gap-2">
-                          <FileIcon className="w-3 h-3 flex-shrink-0 mt-0.5" />
-                          <div className="min-w-0 flex-1">
-                            <p className="font-semibold text-slate-300 truncate">{review.title}</p>
-                            <p className="text-slate-500">
-                              {review.year} ({review.type})
-                            </p>
+                    reviews.map((review, idx) => (
+                      <div key={`${program}-${review.year}-${idx}`} className="ml-6 p-2 text-xs text-slate-400">
+                        {review.url ? (
+                          <a
+                            href={review.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-start gap-2 hover:text-blue-400 transition-colors"
+                          >
+                            <FileIcon className="w-3 h-3 flex-shrink-0 mt-0.5" />
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-slate-300 truncate">{review.title}</p>
+                              <p className="text-slate-500">
+                                {review.year} ({review.type})
+                              </p>
+                            </div>
+                          </a>
+                        ) : (
+                          <div className="flex items-start gap-2">
+                            <FileIcon className="w-3 h-3 flex-shrink-0 mt-0.5" />
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-slate-300 truncate">{review.title}</p>
+                              <p className="text-slate-500">
+                                {review.year} ({review.type})
+                              </p>
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     ))}
                 </div>

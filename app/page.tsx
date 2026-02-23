@@ -18,22 +18,8 @@ type ReviewType = 'annual' | 'comprehensive_instructional' | 'comprehensive_non_
 
 const defaultProgram = PROGRAM_LIST.instructional[0] || 'Nursing';
 
-const MOCK_HISTORICAL_DATA: HistoricalData = {
-  Nursing: [
-    {
-      year: 2022,
-      type: 'Comprehensive',
-      title: 'Nursing Program Comprehensive Review 2022',
-      content: 'Summary of 2022 comprehensive review focusing on SLO assessment and clinical placement improvements.',
-    },
-    {
-      year: 2023,
-      type: 'Annual',
-      title: 'Nursing Program Annual Review 2023',
-      content: 'Updated enrollment data and RAR requests for simulation equipment.',
-    },
-  ],
-};
+// Historical data is loaded from the reviews manifest (public/reviews/manifest.json)
+// via the DirectorySidebar component on mount.
 
 export default function Home() {
   const [reviewType, setReviewType] = useState<ReviewType>('annual');
@@ -51,11 +37,8 @@ export default function Home() {
   const [summaryContent, setSummaryContent] = useState<string>('');
   const [isGeneratingSummary, setIsGeneratingSummary] = useState<boolean>(false);
   const [isArchiveOpen, setIsArchiveOpen] = useState<boolean>(true);
-  const [historicalData, setHistoricalData] = useState<HistoricalData>(MOCK_HISTORICAL_DATA);
-  const [knowledgeBaseData, setKnowledgeBaseData] = useState<Record<string, string>>({
-    Nursing:
-      'Fall 2023 Student Survey Results:\n- 85% of students reported satisfaction with clinical placements.\n- 60% requested more flexible scheduling options.\n\nBudget Allocation Note 2022:\n- Received one-time grant of $50,000 for simulation equipment upgrades.',
-  });
+  const [historicalData, setHistoricalData] = useState<HistoricalData>({});
+  const [knowledgeBaseData, setKnowledgeBaseData] = useState<Record<string, string>>({});
 
   const currentTemplate =
     reviewType === 'annual'
@@ -310,6 +293,22 @@ export default function Home() {
           historicalData={historicalData}
           currentProgram={programName}
           onAddReview={handleAddHistoricalReview}
+          onHistoricalDataLoaded={useCallback((data: HistoricalData) => {
+            setHistoricalData((prev) => {
+              const merged = { ...data };
+              // Preserve any manually-added reviews from drag & drop
+              for (const [prog, reviews] of Object.entries(prev)) {
+                if (!merged[prog]) merged[prog] = reviews;
+                else {
+                  const existingTitles = new Set(merged[prog].map((r) => r.title));
+                  for (const r of reviews) {
+                    if (!existingTitles.has(r.title)) merged[prog].push(r);
+                  }
+                }
+              }
+              return merged;
+            });
+          }, [])}
         />
 
         <main className="flex-1 p-4 md:p-8 overflow-y-auto">
