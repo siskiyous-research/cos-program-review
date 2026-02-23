@@ -5,9 +5,9 @@
  */
 
 import OpenAI from 'openai';
-import { ProgramData, ChatMessage, HistoricalReview } from './types';
-import { buildAccjcContext } from './accjc-standards';
-import { retrieveContext, formatRAGContext } from './rag-service';
+import { ProgramData, ChatMessage, HistoricalReview, Citation } from './types';
+import { buildAccjcContext, getMappedStandards, getStandardById, getComplianceChecklist, getKeyQuestions } from './accjc-standards';
+import { retrieveContext, formatRAGContext, formatRAGContextWithCitations } from './rag-service';
 
 const MODEL = 'xiaomi/mimo-v2-flash';
 
@@ -62,9 +62,16 @@ export async function generateProgramData(programName: string): Promise<ProgramD
   }
 }
 
+export interface SectionAssistanceResult {
+  text: string;
+  citations: Citation[];
+}
+
 /**
  * Get AI assistance for a specific review section
- * ACCJC Integration: Includes relevant standards in the prompt
+ * Supports two modes:
+ * - Empty notes: generates a starter draft from RAG data only
+ * - With notes: expands/refines user notes with citations
  */
 export async function getSectionAssistance(
   sectionId: string,
@@ -74,23 +81,43 @@ export async function getSectionAssistance(
   userNotes: string,
   knowledgeBaseData?: string,
   programCategory?: string
-): Promise<string> {
+): Promise<SectionAssistanceResult> {
   const accjcContext = buildAccjcContext(sectionId);
+  const hasNotes = userNotes.trim().length > 0;
 
-  // Retrieve RAG context for this section
+  // Retrieve RAG context with numbered citations
   const ragContext = retrieveContext({
     programName: programData.programName,
     programCategory,
     sectionId,
   });
-  const ragText = formatRAGContext(ragContext);
+  const { promptText: ragText, citations } = formatRAGContextWithCitations(ragContext);
 
   const createTailoredPrompt = () => {
-    const baseIntro = `You are an expert academic program review assistant for a community college. Your task is to act as a writing partner to a faculty member.
-They have provided notes for the '${sectionTitle}' section of their program review.
-Your goal is to expand their notes into a well-written, professional paragraph or two.
-Integrate insights from the provided Program Data and Knowledge Base to support or add context to the user's points.
-Do NOT introduce new topics not mentioned in the user's notes. Focus on elaborating what is provided.`;
+    const citationRules = `You MUST cite sources using bracket notation [1], [2] etc. matching the numbered references in the Institutional Context below. Do NOT state any fact that is not supported by the provided data.`;
+
+    let baseIntro: string;
+    let modeInstruction: string;
+
+    if (!hasNotes) {
+      // Draft-from-scratch mode
+      baseIntro = `You are an expert academic program review assistant for College of the Siskiyous. Your task is to generate a starter draft for the '${sectionTitle}' section of a program review for the ${programData.programName} program.
+
+${citationRules}
+
+Generate a starter draft for this section using ONLY the provided institutional data. If no relevant data is available for a topic, state: 'No institutional data available for this area — please add your own observations.' Do not fabricate or assume any facts not present in the provided data.`;
+      modeInstruction = `Write 2-3 professional paragraphs that address the section description: "${sectionDescription}"`;
+    } else {
+      // Expand/refine mode
+      baseIntro = `You are an expert academic program review assistant for College of the Siskiyous. Your task is to act as a writing partner to a faculty member.
+They have provided notes for the '${sectionTitle}' section of their program review for the ${programData.programName} program.
+Your goal is to expand their notes into well-written, professional paragraphs.
+Integrate insights from the provided institutional data to support or add context to the user's points.
+Do NOT introduce new topics not mentioned in the user's notes. Focus on elaborating what is provided.
+
+${citationRules}`;
+      modeInstruction = `User's notes: "${userNotes}"`;
+    }
 
     let specificInstruction = '';
     switch (sectionId) {
@@ -98,27 +125,27 @@ Do NOT introduce new topics not mentioned in the user's notes. Focus on elaborat
         specificInstruction = `Focus on how the described improvement actions are addressing past challenges and how their success could be measured using the available data (e.g., improved completion rates).`;
         break;
       case 'slo_assessment':
-        specificInstruction = `Elaborate on the user's description of progress on assessing Student Learning Outcomes. Frame the notes in a reflective tone, emphasizing the importance of continuous assessment for program quality.`;
+        specificInstruction = `Elaborate on progress assessing Student Learning Outcomes. Frame the content in a reflective tone, emphasizing the importance of continuous assessment for program quality.`;
         break;
       case 'budgetary_needs':
-        specificInstruction = `Turn the user's notes into a clear and concise justification for budgetary needs. If possible, link the requested resources to specific data points (e.g., 'To support the 15% increase in enrollment, additional lab supplies are required.').`;
+        specificInstruction = `Write a clear and concise justification for budgetary needs. If possible, link the requested resources to specific data points (e.g., 'To support the 15% increase in enrollment, additional lab supplies are required.').`;
         break;
       case 'analysis':
       case 'ni_evaluation':
-        specificInstruction = `The user is analyzing what is going well and what isn't. Expand on their points by connecting them to specific metrics in the program data. For example, if they say 'enrollment is strong', you can add '...as evidenced by a ${Math.round(((programData?.enrollment?.[programData.enrollment.length - 1]?.count || 0) - (programData?.enrollment?.[0]?.count || 1)) / (programData?.enrollment?.[0]?.count || 1) * 100)}% increase.'`;
+        specificInstruction = `Analyze what is going well and what isn't. Connect points to specific metrics in the program data.`;
         break;
       case 'outcomes_assessment':
-        specificInstruction = `Elaborate on assessment activities and evaluation methodologies. Emphasize the importance of systematic assessment and continuous improvement cycles.`;
+        specificInstruction = `Elaborate on assessment activities and evaluation methodologies. Emphasize systematic assessment and continuous improvement cycles.`;
         break;
       default:
-        specificInstruction = `Provide a professional, well-structured expansion of the user's notes that aligns with college program review standards.`;
+        specificInstruction = `Provide a professional, well-structured response that aligns with college program review standards.`;
     }
 
     return `${baseIntro}
 
 ${specificInstruction}
 
-User's notes: "${userNotes}"
+${modeInstruction}
 
 Program Data Summary:
 - Enrollment trend: ${programData?.enrollment?.map(e => `${e.year}: ${e.count}`).join(', ')}
@@ -133,12 +160,73 @@ ${ragText}
 
 ${accjcContext}
 
-Generate a well-written, professional response that expands on the user's notes without introducing new topics. Reference specific COS policies, historical data, or accreditation findings when relevant.`;
+Generate a well-written, professional response. Reference specific COS policies, historical data, or accreditation findings using [1], [2] bracket citations when relevant.`;
   };
 
   const response = await getClient().chat.completions.create({
     model: MODEL,
     messages: [{ role: 'user', content: createTailoredPrompt() }],
+  });
+
+  return {
+    text: response.choices[0]?.message?.content ?? '',
+    citations,
+  };
+}
+
+/**
+ * Get ACCJC guidance for a section draft
+ * Reviews the user's current draft and provides coaching tips
+ * based on applicable ACCJC standards
+ */
+export async function getSectionGuidance(
+  sectionId: string,
+  sectionTitle: string,
+  sectionContent: string,
+  programData: ProgramData,
+  programCategory?: string
+): Promise<string> {
+  // Build rich ACCJC context
+  const standards = getMappedStandards(sectionId);
+  const standardDetails = standards
+    .map(stdId => {
+      const std = getStandardById(stdId);
+      if (!std) return '';
+      const checklist = getComplianceChecklist(stdId);
+      const questions = getKeyQuestions(stdId);
+      return `### Standard ${std.id}: ${std.title}
+${std.description}
+
+Compliance checklist:
+${checklist.map(item => `- ${item}`).join('\n')}
+
+Key questions:
+${questions.map(q => `- ${q}`).join('\n')}`;
+    })
+    .filter(Boolean)
+    .join('\n\n');
+
+  const prompt = `You are an ACCJC accreditation coach helping a faculty member strengthen their program review for the ${programData.programName} program at College of the Siskiyous.
+
+The user has written the following draft for the "${sectionTitle}" section:
+
+---
+${sectionContent}
+---
+
+The following ACCJC standards apply to this section:
+
+${standardDetails}
+
+Review this draft and provide constructive guidance. For each ACCJC standard that applies, give 1-2 specific suggestions for how the user could strengthen their response. Frame suggestions as questions or prompts (e.g., "Consider discussing...", "You might strengthen this by...", "Have you addressed...?").
+
+Do NOT rewrite the content — coach the user. Be specific about what's missing or could be improved. If the draft already addresses a standard well, briefly acknowledge that.
+
+Format your response with clear headings for each standard.`;
+
+  const response = await getClient().chat.completions.create({
+    model: MODEL,
+    messages: [{ role: 'user', content: prompt }],
   });
 
   return response.choices[0]?.message?.content ?? '';

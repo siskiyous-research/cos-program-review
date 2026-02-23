@@ -7,7 +7,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { DataChunk, SearchIndex, SearchIndexEntry, RAGContext } from './types';
+import { DataChunk, SearchIndex, SearchIndexEntry, RAGContext, Citation, RAGContextWithCitations } from './types';
 import { getMappedStandards } from './accjc-standards';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -231,6 +231,60 @@ export function formatRAGContext(context: RAGContext): string {
   }
 
   return `\n# Institutional Context (RAG Data)\nThe following is real institutional data from College of the Siskiyous. Use this to ground your response in actual COS context.\n\n${sections.join('\n\n---\n\n')}\n`;
+}
+
+/**
+ * Build a source URL for a data chunk
+ */
+function buildSourceUrl(chunk: DataChunk): string | undefined {
+  switch (chunk.source) {
+    case 'policy': {
+      // BoardDocs URL for board policies/admin procedures
+      const num = chunk.metadata.policyNumber || '';
+      const type = chunk.metadata.policyType === 'AP' ? 'AP' : 'BP';
+      if (num) {
+        return `https://go.boarddocs.com/ca/siskiyous/Board.nsf/Public#action=search&terms=${type}+${num}`;
+      }
+      return undefined;
+    }
+    case 'review':
+      // Historical review PDFs in public/reviews/
+      return `/reviews/${chunk.sourceId}.pdf`;
+    case 'accreditation':
+      // Accreditation docs on the college site
+      return `https://www.siskiyous.edu/accreditation/`;
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * Format RAG context with numbered citations for AI prompts
+ * Returns both the prompt text (with [1], [2] tags) and a citations array for the client
+ */
+export function formatRAGContextWithCitations(context: RAGContext): RAGContextWithCitations {
+  if (context.chunks.length === 0) {
+    return { promptText: '', citations: [] };
+  }
+
+  const citations: Citation[] = [];
+  const numberedSections: string[] = [];
+
+  context.chunks.forEach((chunk, index) => {
+    const num = index + 1;
+    const url = buildSourceUrl(chunk);
+    citations.push({
+      id: num,
+      title: chunk.title,
+      source: chunk.source,
+      url,
+    });
+    numberedSections.push(`[${num}] ${chunk.title} (${chunk.source})\n${chunk.text}`);
+  });
+
+  const promptText = `\n# Institutional Context (RAG Data)\nThe following is real institutional data from College of the Siskiyous. Each item is tagged with a number [1], [2], etc. You MUST cite these numbers when using facts from this data.\n\n${numberedSections.join('\n\n---\n\n')}\n`;
+
+  return { promptText, citations };
 }
 
 /**

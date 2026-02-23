@@ -1,7 +1,7 @@
 'use client';
 
 import { ReviewSection } from './ReviewSection';
-import { ReviewTemplateItem } from '@/lib/types';
+import { ReviewTemplateItem, Citation } from '@/lib/types';
 import { DocumentTextIcon } from './icons/DocumentTextIcon';
 import { BookOpenIcon } from './icons/BookOpenIcon';
 
@@ -15,6 +15,10 @@ interface ProgramReviewFormProps {
   onExport: () => void;
   onGenerateSummary: () => void;
   isGeneratingSummary: boolean;
+  sectionCitations: Record<string, Citation[]>;
+  sectionGuidance: Record<string, string>;
+  onGetGuidance: (sectionId: string) => void;
+  isGeneratingGuidance: string | null;
 }
 
 export const ProgramReviewForm: React.FC<ProgramReviewFormProps> = ({
@@ -27,6 +31,10 @@ export const ProgramReviewForm: React.FC<ProgramReviewFormProps> = ({
   onExport,
   onGenerateSummary,
   isGeneratingSummary,
+  sectionCitations,
+  sectionGuidance,
+  onGetGuidance,
+  isGeneratingGuidance,
 }) => {
   return (
     <div className="space-y-8">
@@ -51,6 +59,10 @@ export const ProgramReviewForm: React.FC<ProgramReviewFormProps> = ({
           onContentChange={(text) => onSectionTextChange(section.id, text)}
           onAiAssist={() => onAiAssist(section.id)}
           isGenerating={isGeneratingSection === section.id}
+          citations={sectionCitations[section.id]}
+          guidance={sectionGuidance[section.id]}
+          onGetGuidance={() => onGetGuidance(section.id)}
+          isGeneratingGuidance={isGeneratingGuidance === section.id}
         />
       ))}
 

@@ -5,7 +5,7 @@ import { Sidebar } from './components/Sidebar';
 import { ProgramReviewForm } from './components/ProgramReviewForm';
 import { SummaryModal } from './components/SummaryModal';
 import { DirectorySidebar } from './components/DirectorySidebar';
-import { ChatMessage, ProgramData, HistoricalData, HistoricalReview } from '@/lib/types';
+import { ChatMessage, ProgramData, HistoricalData, HistoricalReview, Citation } from '@/lib/types';
 import {
   ANNUAL_PROGRAM_REVIEW_TEMPLATE,
   COMPREHENSIVE_PROGRAM_REVIEW_TEMPLATE,
@@ -39,6 +39,9 @@ export default function Home() {
   const [isArchiveOpen, setIsArchiveOpen] = useState<boolean>(true);
   const [historicalData, setHistoricalData] = useState<HistoricalData>({});
   const [knowledgeBaseData, setKnowledgeBaseData] = useState<Record<string, string>>({});
+  const [sectionCitations, setSectionCitations] = useState<Record<string, Citation[]>>({});
+  const [sectionGuidance, setSectionGuidance] = useState<Record<string, string>>({});
+  const [isGeneratingGuidance, setIsGeneratingGuidance] = useState<string | null>(null);
 
   const currentTemplate =
     reviewType === 'annual'
@@ -98,26 +101,34 @@ export default function Home() {
   };
 
   /**
+   * Determine the program category based on program list membership
+   */
+  const getProgramCategory = (name: string): string => {
+    if (PROGRAM_LIST.instructional.includes(name)) return 'instructional';
+    if (PROGRAM_LIST.academicAffairs.includes(name)) return 'academicAffairs';
+    if (PROGRAM_LIST.presidentsOffice.includes(name)) return 'presidentsOffice';
+    if (PROGRAM_LIST.administrativeServices.includes(name)) return 'administrativeServices';
+    if (PROGRAM_LIST.studentServices.includes(name)) return 'studentServices';
+    return 'instructional';
+  };
+
+  /**
    * Call AI Assist API for section assistance
-   * ACCJC Integration: API automatically includes ACCJC standards context
+   * Supports empty notes (draft from scratch) and notes expansion
+   * Returns citations from RAG data
    */
   const handleAiAssist = async (sectionId: string) => {
     if (!programData) return;
 
     const userNotes = reviewSections[sectionId]?.trim() || '';
-    if (!userNotes) {
-      setError(
-        'Please provide some notes or bullet points in the text area before using AI Assist. The AI will use your input to expand and elaborate.'
-      );
-      setTimeout(() => setError(null), 5000);
-      return;
-    }
 
     setIsGeneratingSection(sectionId);
     setError(null);
     try {
       const section = currentTemplate.find((s) => s.id === sectionId);
       if (section) {
+        // Determine program category for RAG retrieval
+        const programCategory = getProgramCategory(programName);
         const response = await fetch('/api/section-assistance', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -128,6 +139,7 @@ export default function Home() {
             programData,
             userNotes,
             knowledgeBaseData: knowledgeBaseData[programName],
+            programCategory,
           }),
         });
 
@@ -137,12 +149,56 @@ export default function Home() {
         }
 
         setReviewSections((prev) => ({ ...prev, [sectionId]: result.assistance }));
+        if (result.citations) {
+          setSectionCitations((prev) => ({ ...prev, [sectionId]: result.citations }));
+        }
       }
     } catch (e) {
       console.error('Failed to get AI assistance:', e);
       setError('An error occurred while generating content. Please try again.');
     } finally {
       setIsGeneratingSection(null);
+    }
+  };
+
+  /**
+   * Get ACCJC guidance for a section's current content
+   */
+  const handleGetGuidance = async (sectionId: string) => {
+    if (!programData) return;
+    const sectionContent = reviewSections[sectionId]?.trim() || '';
+    if (!sectionContent) return;
+
+    setIsGeneratingGuidance(sectionId);
+    setError(null);
+    try {
+      const section = currentTemplate.find((s) => s.id === sectionId);
+      if (section) {
+        const programCategory = getProgramCategory(programName);
+        const response = await fetch('/api/section-guidance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sectionId: section.id,
+            sectionTitle: section.title,
+            sectionContent,
+            programData,
+            programCategory,
+          }),
+        });
+
+        const result = await response.json();
+        if (!result.ok) {
+          throw new Error(result.error || 'Failed to generate guidance');
+        }
+
+        setSectionGuidance((prev) => ({ ...prev, [sectionId]: result.guidance }));
+      }
+    } catch (e) {
+      console.error('Failed to get ACCJC guidance:', e);
+      setError('An error occurred while generating guidance. Please try again.');
+    } finally {
+      setIsGeneratingGuidance(null);
     }
   };
 
@@ -426,6 +482,10 @@ export default function Home() {
                 onExport={handleExportReview}
                 onGenerateSummary={handleGenerateSummary}
                 isGeneratingSummary={isGeneratingSummary}
+                sectionCitations={sectionCitations}
+                sectionGuidance={sectionGuidance}
+                onGetGuidance={handleGetGuidance}
+                isGeneratingGuidance={isGeneratingGuidance}
               />
             </>
           )}

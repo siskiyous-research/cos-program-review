@@ -86,6 +86,18 @@ export interface RAGContext {
   sources: string[];
 }
 
+export interface Citation {
+  id: number;
+  title: string;
+  source: DataChunk['source'];
+  url?: string;
+}
+
+export interface RAGContextWithCitations {
+  promptText: string;
+  citations: Citation[];
+}
+
 /**
  * ACCJC-related types for compliance tracking
  */
