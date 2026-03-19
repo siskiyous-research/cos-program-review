@@ -11,7 +11,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const deleted = deleteUpload(id);
+    const deleted = await deleteUpload(id);
     if (!deleted) {
       return NextResponse.json({ ok: false, error: 'Upload not found' }, { status: 404 });
     }
@@ -32,7 +32,7 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await request.json();
-    const updated = updateUpload(id, body);
+    const updated = await updateUpload(id, body);
     if (!updated) {
       return NextResponse.json({ ok: false, error: 'Upload not found' }, { status: 404 });
     }
@@ -52,7 +52,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const text = getUploadText(id);
+    const text = await getUploadText(id);
     if (text === null) {
       return NextResponse.json({ ok: false, error: 'Upload not found' }, { status: 404 });
     }

@@ -7,7 +7,7 @@ import { listUploads } from '@/lib/kb-store';
 
 export async function GET() {
   try {
-    const uploads = listUploads();
+    const uploads = await listUploads();
     return NextResponse.json({ ok: true, uploads });
   } catch (error) {
     console.error('Admin uploads list error:', error);

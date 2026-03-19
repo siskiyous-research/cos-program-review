@@ -7,10 +7,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { extractText, extractFromURL, estimateProcessingTime } from '@/lib/doc-parser';
 import { addUpload, KBUploadEntry } from '@/lib/kb-store';
 
-function generateId(): string {
-  return `kb_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-}
-
 export async function POST(request: NextRequest) {
   try {
     const contentType = request.headers.get('content-type') || '';
@@ -27,9 +23,8 @@ export async function POST(request: NextRequest) {
       const result = await extractFromURL(url);
       const processingTime = (Date.now() - startTime) / 1000;
 
-      const id = generateId();
       const entry: KBUploadEntry = {
-        id,
+        id: '', // will be assigned by Supabase
         filename: new URL(url).hostname,
         fileType: 'url',
         fileSize: result.text.length,
@@ -39,12 +34,12 @@ export async function POST(request: NextRequest) {
         textLength: result.text.length,
       };
 
-      addUpload(entry, result.text);
+      const id = await addUpload(entry, result.text);
 
       return NextResponse.json({
         ok: true,
         files: [{
-          id,
+          id: id || entry.id,
           name: entry.filename,
           type: 'url',
           size: result.text.length,
@@ -73,9 +68,8 @@ export async function POST(request: NextRequest) {
       const result = await extractText(buffer, file.name);
       const processingTime = (Date.now() - startTime) / 1000;
 
-      const id = generateId();
       const entry: KBUploadEntry = {
-        id,
+        id: '', // will be assigned by Supabase
         filename: file.name,
         fileType: ext,
         fileSize: file.size,
@@ -85,10 +79,10 @@ export async function POST(request: NextRequest) {
         textLength: result.text.length,
       };
 
-      addUpload(entry, result.text);
+      const id = await addUpload(entry, result.text);
 
       results.push({
-        id,
+        id: id || entry.id,
         name: file.name,
         type: ext,
         size: file.size,

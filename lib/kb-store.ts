@@ -1,11 +1,9 @@
 /**
- * Server-side KB file storage
- * Stores upload metadata in data/kb-uploads/manifest.json
- * and extracted text in data/kb-uploads/texts/{id}.txt
+ * Server-side KB file storage via Supabase
+ * Uses pr_kb_files table instead of local filesystem
  */
 
-import fs from 'fs';
-import path from 'path';
+import { createClient } from '@/lib/supabase/server';
 
 export interface KBUploadEntry {
   id: string;
@@ -18,63 +16,105 @@ export interface KBUploadEntry {
   textLength: number;
 }
 
-const KB_DIR = path.join(process.cwd(), 'data', 'kb-uploads');
-const MANIFEST_PATH = path.join(KB_DIR, 'manifest.json');
-const TEXTS_DIR = path.join(KB_DIR, 'texts');
+export async function listUploads(program?: string): Promise<KBUploadEntry[]> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
 
-function ensureDirs() {
-  if (!fs.existsSync(KB_DIR)) fs.mkdirSync(KB_DIR, { recursive: true });
-  if (!fs.existsSync(TEXTS_DIR)) fs.mkdirSync(TEXTS_DIR, { recursive: true });
+  let query = supabase
+    .from('pr_kb_files')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+
+  if (program) {
+    query = query.eq('program_name', program);
+  }
+
+  const { data, error } = await query;
+  if (error || !data) return [];
+
+  return data.map((row) => ({
+    id: row.id,
+    filename: row.file_name,
+    fileType: row.file_type || '',
+    fileSize: row.file_size || 0,
+    program: row.program_name,
+    uploadedAt: row.created_at,
+    textPreview: (row.text_content || '').slice(0, 200),
+    textLength: (row.text_content || '').length,
+  }));
 }
 
-function readManifest(): KBUploadEntry[] {
-  ensureDirs();
-  if (!fs.existsSync(MANIFEST_PATH)) return [];
-  const raw = fs.readFileSync(MANIFEST_PATH, 'utf-8');
-  return JSON.parse(raw) as KBUploadEntry[];
+export async function getUploadText(id: string): Promise<string | null> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from('pr_kb_files')
+    .select('text_content')
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .single();
+
+  if (error || !data) return null;
+  return data.text_content;
 }
 
-function writeManifest(entries: KBUploadEntry[]) {
-  ensureDirs();
-  fs.writeFileSync(MANIFEST_PATH, JSON.stringify(entries, null, 2));
+export async function addUpload(entry: KBUploadEntry, text: string): Promise<string | null> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from('pr_kb_files')
+    .insert({
+      user_id: user.id,
+      program_name: entry.program,
+      file_name: entry.filename,
+      file_type: entry.fileType,
+      file_size: entry.fileSize,
+      text_content: text,
+    })
+    .select('id')
+    .single();
+
+  if (error || !data) {
+    console.error('Failed to save KB file:', error);
+    return null;
+  }
+
+  return data.id;
 }
 
-export function listUploads(program?: string): KBUploadEntry[] {
-  const entries = readManifest();
-  if (program) return entries.filter(e => e.program === program);
-  return entries;
+export async function deleteUpload(id: string): Promise<boolean> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  const { error } = await supabase
+    .from('pr_kb_files')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', user.id);
+
+  return !error;
 }
 
-export function getUploadText(id: string): string | null {
-  const textPath = path.join(TEXTS_DIR, `${id}.txt`);
-  if (!fs.existsSync(textPath)) return null;
-  return fs.readFileSync(textPath, 'utf-8');
-}
+export async function updateUpload(id: string, changes: Partial<Pick<KBUploadEntry, 'program'>>): Promise<boolean> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
 
-export function addUpload(entry: KBUploadEntry, text: string) {
-  ensureDirs();
-  const entries = readManifest();
-  entries.push(entry);
-  writeManifest(entries);
-  fs.writeFileSync(path.join(TEXTS_DIR, `${entry.id}.txt`), text);
-}
+  const update: Record<string, string> = {};
+  if (changes.program !== undefined) update.program_name = changes.program;
 
-export function deleteUpload(id: string): boolean {
-  const entries = readManifest();
-  const idx = entries.findIndex(e => e.id === id);
-  if (idx === -1) return false;
-  entries.splice(idx, 1);
-  writeManifest(entries);
-  const textPath = path.join(TEXTS_DIR, `${id}.txt`);
-  if (fs.existsSync(textPath)) fs.unlinkSync(textPath);
-  return true;
-}
+  const { error } = await supabase
+    .from('pr_kb_files')
+    .update(update)
+    .eq('id', id)
+    .eq('user_id', user.id);
 
-export function updateUpload(id: string, changes: Partial<Pick<KBUploadEntry, 'program'>>): boolean {
-  const entries = readManifest();
-  const entry = entries.find(e => e.id === id);
-  if (!entry) return false;
-  if (changes.program !== undefined) entry.program = changes.program;
-  writeManifest(entries);
-  return true;
+  return !error;
 }
