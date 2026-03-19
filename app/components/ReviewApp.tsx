@@ -340,7 +340,7 @@ export default function ReviewApp({ user }: ReviewAppProps) {
         throw new Error(result.error || 'Failed to get chat response');
       }
 
-      setChatHistory((prev) => [...prev, { role: 'model', content: result.response }]);
+      setChatHistory((prev) => [...prev, { role: 'model', content: result.response, citations: result.citations }]);
     } catch (e) {
       console.error('Failed to get chat response:', e);
       setChatHistory((prev) => [
