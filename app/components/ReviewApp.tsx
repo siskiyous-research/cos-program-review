@@ -542,7 +542,9 @@ export default function ReviewApp({ user }: ReviewAppProps) {
           <header className="mb-8">
             <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
               <div>
-                <h1 className="text-4xl font-bold text-slate-900">Program Review Assistant</h1>
+                <a href="/" className="hover:opacity-80 transition-opacity">
+                  <h1 className="text-4xl font-bold text-slate-900">Program Review Assistant</h1>
+                </a>
                 <p className="text-lg text-slate-600 flex items-center gap-2">
                   <span>College of the Siskiyous</span>
                   <span className="text-2xl">🎓</span>

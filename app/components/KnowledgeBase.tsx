@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { DatabaseIcon } from './icons/DatabaseIcon';
 import { ChevronRightIcon } from './icons/ChevronRightIcon';
+import { RichTextEditor } from './RichTextEditor';
 
 export interface KBFile {
   id: string;
@@ -173,15 +174,15 @@ export const KnowledgeBase: React.FC<KnowledgeBaseProps> = ({
             </div>
           )}
 
-          {/* Notes textarea */}
+          {/* Community Notes - Rich Text Editor */}
           <div>
-            <textarea
-              value={knowledgeBaseNotes}
-              onChange={(e) => onNotesUpdate(e.target.value)}
-              placeholder="Quick notes or extra context..."
-              className="w-full h-16 p-2 text-xs border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-none"
+            <p className="text-xs font-medium text-slate-600 mb-1">Community Notes</p>
+            <RichTextEditor
+              content={knowledgeBaseNotes}
+              onChange={onNotesUpdate}
+              placeholder="Add notes, links, or context for this program..."
             />
-            <div className="text-right">
+            <div className="text-right mt-1">
               <button
                 onClick={handleSaveNotes}
                 className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
