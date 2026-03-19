@@ -241,13 +241,13 @@ export async function getChatResponse(
   chatHistory: ChatMessage[],
   knowledgeBaseData?: string,
   programCategory?: string
-): Promise<string> {
-  // Retrieve RAG context for chat
+): Promise<{ text: string; citations: Citation[] }> {
+  // Retrieve RAG context for chat with citations
   const ragContext = retrieveContext({
     programName: programData.programName,
     programCategory,
   });
-  const ragText = formatRAGContext(ragContext);
+  const { promptText: ragText, citations } = formatRAGContextWithCitations(ragContext);
 
   const systemPrompt = `You are a knowledgeable program review assistant for College of the Siskiyous. You have access to program data, institutional policies, and historical context to help faculty members with their program reviews.
 
@@ -286,7 +286,10 @@ Response rules:
     messages,
   });
 
-  return response.choices[0]?.message?.content ?? '';
+  return {
+    text: response.choices[0]?.message?.content ?? '',
+    citations,
+  };
 }
 
 /**

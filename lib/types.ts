@@ -19,6 +19,7 @@ export interface ProgramData {
 export interface ChatMessage {
   role: 'user' | 'model';
   content: string;
+  citations?: Citation[];
 }
 
 export interface ReviewTemplateItem {

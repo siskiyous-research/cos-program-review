@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { ChatMessage, ProgramData } from '@/lib/types';
+import { ChatMessage, ProgramData, Citation } from '@/lib/types';
 import { PaperAirplaneIcon } from './icons/PaperAirplaneIcon';
 import { KnowledgeBase, KBFile } from './KnowledgeBase';
 
@@ -82,7 +82,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 msg.role === 'user' ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-800'
               }`}
             >
-              <div className={`text-sm break-words prose prose-sm max-w-none ${
+              <div className={`text-sm break-words prose prose-sm max-w-none prose-p:mb-2 prose-p:mt-0 ${
                 msg.role === 'user'
                   ? 'prose-invert prose-a:text-blue-200'
                   : 'prose-a:text-blue-600'
@@ -91,6 +91,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {msg.content}
                 </ReactMarkdown>
               </div>
+              {/* Referenced documents */}
+              {msg.role === 'model' && msg.citations && msg.citations.length > 0 && (
+                <div className="mt-2 pt-2 border-t border-slate-300">
+                  <p className="text-[10px] font-semibold text-slate-500 mb-1">Referenced Documents</p>
+                  <div className="space-y-0.5">
+                    {msg.citations.map((cite) => (
+                      <div key={cite.id} className="text-[10px] text-slate-500">
+                        <span className="font-mono text-blue-600 font-semibold">[{cite.id}]</span>{' '}
+                        {cite.url ? (
+                          <a
+                            href={cite.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 hover:underline"
+                          >
+                            {cite.title}
+                          </a>
+                        ) : (
+                          <span>{cite.title}</span>
+                        )}
+                        <span className="text-slate-400 ml-1">({cite.source})</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ))}

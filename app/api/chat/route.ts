@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Call AI service for chat response with RAG context
-    const response = await getChatResponse(
+    const result = await getChatResponse(
       message,
       programData as ProgramData,
       (chatHistory || []) as ChatMessage[],
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       programCategory
     );
 
-    return NextResponse.json({ ok: true, response });
+    return NextResponse.json({ ok: true, response: result.text, citations: result.citations });
   } catch (error) {
     console.error('Error getting chat response:', error);
     const message = error instanceof Error ? error.message : 'Failed to get chat response';
