@@ -231,7 +231,7 @@ async function main() {
   fs.mkdirSync(baseDir, { recursive: true });
 
   const seenUrls = new Set<string>();
-  const manifest: Record<string, { program: string; category: string; files: { title: string; year: number; type: string; filename: string }[] }> = {};
+  const manifest: Record<string, { program: string; category: string; files: { title: string; year: number; type: string; filename: string; sourceUrl: string }[] }> = {};
   let downloaded = 0;
   let skipped = 0;
 
@@ -281,6 +281,7 @@ async function main() {
         year: review.year || 0,
         type: review.reviewType,
         filename,
+        sourceUrl: review.url,
       });
     } catch (err) {
       console.error(`    ERROR: ${err instanceof Error ? err.message : err}`);

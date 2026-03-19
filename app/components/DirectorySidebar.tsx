@@ -21,7 +21,7 @@ const allPrograms = Object.values(PROGRAM_LIST).flat();
 interface ManifestEntry {
   program: string;
   category: string;
-  files: { title: string; year: number; type: string; filename: string }[];
+  files: { title: string; year: number; type: string; filename: string; sourceUrl?: string }[];
 }
 
 const parseFileInfo = (fileName: string): { programName: string | null; year: number | null } => {

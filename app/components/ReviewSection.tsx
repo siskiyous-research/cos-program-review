@@ -18,6 +18,7 @@ interface ReviewSectionProps {
   guidance?: string;
   onGetGuidance?: () => void;
   isGeneratingGuidance?: boolean;
+  saveStatus?: 'idle' | 'saving' | 'saved' | 'error';
 }
 
 export const ReviewSection: React.FC<ReviewSectionProps> = ({
@@ -32,8 +33,8 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({
   guidance,
   onGetGuidance,
   isGeneratingGuidance,
+  saveStatus,
 }) => {
-  const [isSaved, setIsSaved] = useState(false);
   const [isCitationsOpen, setIsCitationsOpen] = useState(true);
   const [isGuidanceOpen, setIsGuidanceOpen] = useState(true);
   // ACCJC Integration: Get mapped standards for this section
@@ -42,13 +43,6 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({
   const hasContent = content.trim().length > 0;
   const hasCitations = citations && citations.length > 0;
   const hasGuidance = guidance && guidance.trim().length > 0;
-
-  const handleSave = () => {
-    setIsSaved(true);
-    setTimeout(() => {
-      setIsSaved(false);
-    }, 2000);
-  };
 
   const sourceLabel: Record<string, string> = {
     policy: 'policy',
@@ -150,16 +144,19 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({
         </div>
       )}
 
-      <div className="mt-4 flex flex-col sm:flex-row justify-end gap-2">
-        <button
-          onClick={handleSave}
-          disabled={isGenerating}
-          className={`px-4 py-2 font-semibold rounded-md transition-colors duration-200 shadow-sm hover:shadow-md disabled:cursor-not-allowed ${
-            isSaved ? 'bg-green-600 text-white' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
-          }`}
-        >
-          {isSaved ? 'Saved' : 'Save'}
-        </button>
+      <div className="mt-4 flex flex-col sm:flex-row justify-end items-center gap-2">
+        {saveStatus === 'saving' && (
+          <span className="text-sm text-blue-600 flex items-center gap-1">
+            <span className="w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin inline-block"></span>
+            Saving...
+          </span>
+        )}
+        {saveStatus === 'saved' && (
+          <span className="text-sm text-green-600">Saved</span>
+        )}
+        {saveStatus === 'error' && (
+          <span className="text-sm text-red-600">Save failed</span>
+        )}
 
         {/* ACCJC Guidance Button - visible once content exists */}
         {hasContent && onGetGuidance && (
