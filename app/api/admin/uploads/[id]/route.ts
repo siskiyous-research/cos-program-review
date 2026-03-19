@@ -4,11 +4,15 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { deleteUpload, updateUpload, getUploadText } from '@/lib/kb-store';
+import { requireAuth } from '@/lib/auth';
 
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { error: authError } = await requireAuth();
+  if (authError) return authError;
+
   try {
     const { id } = await params;
     const deleted = await deleteUpload(id);
@@ -29,6 +33,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { error: authError } = await requireAuth();
+  if (authError) return authError;
+
   try {
     const { id } = await params;
     const body = await request.json();
@@ -50,6 +57,9 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { error: authError } = await requireAuth();
+  if (authError) return authError;
+
   try {
     const { id } = await params;
     const text = await getUploadText(id);

@@ -1,26 +1,53 @@
 /**
- * OpenRouter API Service
- * Backend service for calling Xiaomi MiMo-V2-Flash via OpenRouter
- * IMPORTANT: This is backend-only code. API key is kept secure.
+ * AI Service
+ * Backend service for AI completions via OpenRouter (cloud) or local AI (Ollama, LM Studio, etc.)
+ * Dynamically switches between cloud and local based on settings.
+ * IMPORTANT: This is backend-only code. API keys are kept secure.
  */
 
 import OpenAI from 'openai';
 import { ProgramData, ChatMessage, HistoricalReview, Citation } from './types';
 import { buildAccjcContext, getMappedStandards, getStandardById, getComplianceChecklist, getKeyQuestions } from './accjc-standards';
 import { retrieveContext, formatRAGContext, formatRAGContextWithCitations } from './rag-service';
+import { getSetting } from './settings';
 
-const MODEL = 'xiaomi/mimo-v2-flash';
+const CLOUD_DEFAULT_MODEL = 'xiaomi/mimo-v2-flash';
 
-// Lazily initialize OpenRouter client so builds don't fail when env vars aren't present.
-function getClient() {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
-    throw new Error('OPENROUTER_API_KEY environment variable is not set.');
+async function getClientAndModel(): Promise<{ client: OpenAI; model: string }> {
+  const aiMode = await getSetting('ai_mode') || 'local';
+
+  if (aiMode === 'local') {
+    const localUrl = await getSetting('local_ai_url');
+    const localModel = await getSetting('local_ai_model');
+
+    if (!localUrl || !localModel) {
+      throw new Error(
+        'Local AI is not configured. Go to Settings to set your local AI endpoint and model.'
+      );
+    }
+
+    return {
+      client: new OpenAI({
+        baseURL: localUrl,
+        apiKey: 'not-needed',
+      }),
+      model: localModel,
+    };
   }
-  return new OpenAI({
-    baseURL: 'https://openrouter.ai/api/v1',
-    apiKey,
-  });
+
+  // Cloud mode
+  const apiKey = await getSetting('openrouter_api_key') || process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    throw new Error('OpenRouter API key is not configured. Go to Settings or set OPENROUTER_API_KEY.');
+  }
+
+  return {
+    client: new OpenAI({
+      baseURL: 'https://openrouter.ai/api/v1',
+      apiKey,
+    }),
+    model: CLOUD_DEFAULT_MODEL,
+  };
 }
 
 /**
@@ -44,8 +71,9 @@ export async function generateProgramData(programName: string): Promise<ProgramD
     "demographics": { "caucasian": number, "hispanic": number, "asian": number, "africanAmerican": number, "other": number }
   }`;
 
-  const response = await getClient().chat.completions.create({
-    model: MODEL,
+  const { client, model } = await getClientAndModel();
+  const response = await client.chat.completions.create({
+    model,
     messages: [{ role: 'user', content: prompt }],
     response_format: { type: 'json_object' },
   });
@@ -163,8 +191,9 @@ ${accjcContext}
 Generate a well-written, professional response. Reference specific COS policies, historical data, or accreditation findings using [1], [2] bracket citations when relevant.`;
   };
 
-  const response = await getClient().chat.completions.create({
-    model: MODEL,
+  const { client, model } = await getClientAndModel();
+  const response = await client.chat.completions.create({
+    model,
     messages: [{ role: 'user', content: createTailoredPrompt() }],
   });
 
@@ -224,8 +253,9 @@ Do NOT rewrite the content — coach the user. Be specific about what's missing 
 
 Format your response with clear headings for each standard.`;
 
-  const response = await getClient().chat.completions.create({
-    model: MODEL,
+  const { client, model } = await getClientAndModel();
+  const response = await client.chat.completions.create({
+    model,
     messages: [{ role: 'user', content: prompt }],
   });
 
@@ -281,8 +311,9 @@ Response rules:
     { role: 'user', content: userMessage },
   ];
 
-  const response = await getClient().chat.completions.create({
-    model: MODEL,
+  const { client, model } = await getClientAndModel();
+  const response = await client.chat.completions.create({
+    model,
     messages,
   });
 
@@ -334,8 +365,9 @@ ${ragText}
 
 Generate a professional, constructive executive summary that references specific institutional context when available.`;
 
-  const response = await getClient().chat.completions.create({
-    model: MODEL,
+  const { client, model } = await getClientAndModel();
+  const response = await client.chat.completions.create({
+    model,
     messages: [{ role: 'user', content: prompt }],
   });
 

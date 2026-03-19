@@ -5,8 +5,12 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { generateProgramData } from '@/lib/gemini-service';
+import { requireAuth } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
+  const { error: authError } = await requireAuth();
+  if (authError) return authError;
+
   try {
     const { programName } = await req.json();
 

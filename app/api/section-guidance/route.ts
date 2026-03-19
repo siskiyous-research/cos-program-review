@@ -5,9 +5,12 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSectionGuidance } from '@/lib/gemini-service';
+import { requireAuth } from '@/lib/auth';
 import { ProgramData } from '@/lib/types';
 
 export async function POST(req: NextRequest) {
+  const { error: authError } = await requireAuth();
+  if (authError) return authError;
   try {
     const { sectionId, sectionTitle, sectionContent, programData, programCategory } = await req.json();
 

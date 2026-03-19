@@ -7,8 +7,12 @@
 
 import { NextResponse } from 'next/server';
 import { execSync } from 'child_process';
+import { requireAuth } from '@/lib/auth';
 
 export async function POST() {
+  const { error: authError } = await requireAuth();
+  if (authError) return authError;
+
   try {
     const cwd = process.cwd();
 

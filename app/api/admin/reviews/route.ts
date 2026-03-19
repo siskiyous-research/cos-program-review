@@ -5,8 +5,12 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { requireAuth } from '@/lib/auth';
 
 export async function GET() {
+  const { error: authError } = await requireAuth();
+  if (authError) return authError;
+
   try {
     const manifestPath = path.join(process.cwd(), 'public', 'reviews', 'manifest.json');
     if (!fs.existsSync(manifestPath)) {

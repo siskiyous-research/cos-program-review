@@ -4,8 +4,12 @@
 
 import { NextResponse } from 'next/server';
 import { listUploads } from '@/lib/kb-store';
+import { requireAuth } from '@/lib/auth';
 
 export async function GET() {
+  const { error: authError } = await requireAuth();
+  if (authError) return authError;
+
   try {
     const uploads = await listUploads();
     return NextResponse.json({ ok: true, uploads });

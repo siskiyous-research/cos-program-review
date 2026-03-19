@@ -6,8 +6,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { extractText, extractFromURL, estimateProcessingTime } from '@/lib/doc-parser';
 import { addUpload, KBUploadEntry } from '@/lib/kb-store';
+import { requireAuth } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
+  const { error: authError } = await requireAuth();
+  if (authError) return authError;
   try {
     const contentType = request.headers.get('content-type') || '';
 

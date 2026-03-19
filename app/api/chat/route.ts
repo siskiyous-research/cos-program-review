@@ -5,9 +5,13 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getChatResponse } from '@/lib/gemini-service';
+import { requireAuth } from '@/lib/auth';
 import { ProgramData, ChatMessage } from '@/lib/types';
 
 export async function POST(req: NextRequest) {
+  const { error: authError } = await requireAuth();
+  if (authError) return authError;
+
   try {
     const { message, chatHistory, programData, knowledgeBaseData, programCategory } = await req.json();
 
