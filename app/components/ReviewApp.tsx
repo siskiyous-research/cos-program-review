@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Sidebar } from './Sidebar';
 import { ProgramReviewForm } from './ProgramReviewForm';
 import { SummaryModal } from './SummaryModal';
@@ -56,6 +56,35 @@ export default function ReviewApp({ user }: ReviewAppProps) {
 
   // Review persistence state
   const [reviewId, setReviewId] = useState<string | null>(null);
+
+  // Resizable sidebar
+  const [sidebarWidth, setSidebarWidth] = useState(380);
+  const isResizing = useRef(false);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing.current) return;
+      const newWidth = window.innerWidth - e.clientX;
+      setSidebarWidth(Math.max(280, Math.min(newWidth, 700)));
+    };
+    const handleMouseUp = () => {
+      isResizing.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, []);
+
+  const startResizing = useCallback(() => {
+    isResizing.current = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }, []);
 
   const currentTemplate =
     reviewType === 'annual'
@@ -686,7 +715,12 @@ export default function ReviewApp({ user }: ReviewAppProps) {
           )}
         </main>
 
-        <aside className="w-full md:w-1/3 xl:w-1/4 bg-white border-l border-slate-200 flex flex-col h-full max-h-screen">
+        <aside className="relative bg-white border-l border-slate-200 flex flex-col h-full max-h-screen" style={{ width: sidebarWidth }}>
+          {/* Resize handle */}
+          <div
+            onMouseDown={startResizing}
+            className="absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-blue-400 active:bg-blue-500 transition-colors z-10"
+          />
           <Sidebar
             chatHistory={chatHistory}
             programData={programData}

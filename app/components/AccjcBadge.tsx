@@ -42,7 +42,7 @@ export const AccjcBadge: React.FC<AccjcBadgeProps> = ({ standards }) => {
       </div>
 
       {showTooltip && (
-        <div className="absolute left-0 mt-2 bg-slate-800 text-white text-xs p-3 rounded-md shadow-lg z-10 w-64 break-words">
+        <div className="absolute right-0 mt-2 bg-slate-800 text-white text-xs p-3 rounded-md shadow-lg z-50 w-64 break-words">
           <p className="font-semibold mb-2">Applicable ACCJC Standards:</p>
           {standardDetails.map(detail => (
             <div key={detail.id} className="mb-2 pb-2 border-b border-slate-600 last:border-b-0">

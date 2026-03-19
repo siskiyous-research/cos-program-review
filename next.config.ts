@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '20mb',
     },
   },
+  serverExternalPackages: ['pdf-parse', 'pdfjs-dist'],
 }
 
 export default nextConfig
