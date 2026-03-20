@@ -11,7 +11,8 @@ import { DataChunk, SearchIndex, SearchIndexEntry, RAGContext, Citation, RAGCont
 import { getMappedStandards } from './accjc-standards';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
-const MAX_RAG_TOKENS = 3000;
+const MAX_RAG_TOKENS = 2000;
+const MIN_RELEVANCE_SCORE = 10;
 
 // Cached search index (loaded once per server lifecycle)
 let cachedIndex: SearchIndex | null = null;
@@ -107,7 +108,7 @@ interface RetrievalOptions {
 function scoreEntry(entry: SearchIndexEntry, opts: RetrievalOptions): number {
   let score = 0;
 
-  // For reviews: ONLY include if they match the current program (or have no program set)
+  // For reviews: ONLY include if they match the current program exactly
   if (entry.source === 'review') {
     if (opts.programName && entry.metadata.program) {
       if (entry.metadata.program === opts.programName) {
@@ -116,12 +117,9 @@ function scoreEntry(entry: SearchIndexEntry, opts: RetrievalOptions): number {
         // Different program's review → exclude entirely
         return 0;
       }
-    } else if (opts.programCategory && entry.metadata.programCategory) {
-      if (entry.metadata.programCategory === opts.programCategory) {
-        score += 30;
-      } else {
-        return 0;
-      }
+    } else {
+      // No program match possible → exclude
+      return 0;
     }
     // Recency bonus for reviews
     if (entry.metadata.year) {
@@ -134,26 +132,22 @@ function scoreEntry(entry: SearchIndexEntry, opts: RetrievalOptions): number {
     return score;
   }
 
-  // For policies: section-based chapter match
-  if (opts.sectionId) {
-    const relevantChapters = SECTION_CHAPTER_MAP[opts.sectionId] || [];
-    if (entry.metadata.chapter && relevantChapters.includes(entry.metadata.chapter)) {
-      score += 40;
-    }
+  // Exclude policies — too noisy for program reviews
+  if (entry.source === 'policy') return 0;
 
-    // ACCJC standard match
-    const mappedStandards = getMappedStandards(opts.sectionId);
-    for (const std of mappedStandards) {
-      const stdTag = `accjc-${std.toLowerCase().replace('.', '')}`;
-      if (entry.tags.includes(stdTag)) {
-        score += 20;
+  // Accreditation docs: only include if section has a matching ACCJC standard
+  if (entry.source === 'accreditation') {
+    if (opts.sectionId) {
+      const mappedStandards = getMappedStandards(opts.sectionId);
+      for (const std of mappedStandards) {
+        const stdTag = `accjc-${std.toLowerCase().replace('.', '')}`;
+        if (entry.tags.includes(stdTag)) {
+          return 15;
+        }
       }
     }
+    return 0;
   }
-
-  // Source type scoring for non-review sources
-  if (entry.source === 'policy') score += 5;
-  if (entry.source === 'accreditation') score += 3;
 
   return score;
 }
@@ -169,10 +163,10 @@ export function retrieveContext(opts: RetrievalOptions): RAGContext {
 
   const maxTokens = opts.maxTokens || MAX_RAG_TOKENS;
 
-  // Score all entries
+  // Score all entries — filter out low-relevance chunks
   const scored = index.entries
     .map((entry) => ({ entry, score: scoreEntry(entry, opts) }))
-    .filter((item) => item.score > 0)
+    .filter((item) => item.score >= MIN_RELEVANCE_SCORE)
     .sort((a, b) => b.score - a.score);
 
   // Load chunks up to token budget
