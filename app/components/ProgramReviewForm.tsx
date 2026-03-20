@@ -20,6 +20,7 @@ interface ProgramReviewFormProps {
   onGetGuidance: (sectionId: string) => void;
   isGeneratingGuidance: string | null;
   saveStatus?: 'idle' | 'saving' | 'saved' | 'error';
+  onSaveSection: (sectionId: string) => void;
 }
 
 export const ProgramReviewForm: React.FC<ProgramReviewFormProps> = ({
@@ -38,6 +39,7 @@ export const ProgramReviewForm: React.FC<ProgramReviewFormProps> = ({
   onGetGuidance,
   isGeneratingGuidance,
   saveStatus,
+  onSaveSection,
 }) => {
   return (
     <div className="space-y-8">
@@ -67,6 +69,7 @@ export const ProgramReviewForm: React.FC<ProgramReviewFormProps> = ({
           onGetGuidance={() => onGetGuidance(section.id)}
           isGeneratingGuidance={isGeneratingGuidance === section.id}
           saveStatus={saveStatus}
+          onSave={() => onSaveSection(section.id)}
         />
       ))}
 

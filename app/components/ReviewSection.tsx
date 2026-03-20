@@ -20,6 +20,7 @@ interface ReviewSectionProps {
   onGetGuidance?: () => void;
   isGeneratingGuidance?: boolean;
   saveStatus?: 'idle' | 'saving' | 'saved' | 'error';
+  onSave?: () => void;
 }
 
 export const ReviewSection: React.FC<ReviewSectionProps> = ({
@@ -35,6 +36,7 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({
   onGetGuidance,
   isGeneratingGuidance,
   saveStatus,
+  onSave,
 }) => {
   const [isCitationsOpen, setIsCitationsOpen] = useState(false);
   const [isGuidanceOpen, setIsGuidanceOpen] = useState(true);
@@ -144,6 +146,7 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({
       )}
 
       <div className="mt-4 flex flex-col sm:flex-row justify-end items-center gap-2">
+        {/* Save status */}
         {saveStatus === 'saving' && (
           <span className="text-sm text-blue-600 flex items-center gap-1">
             <span className="w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin inline-block"></span>
@@ -155,6 +158,17 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({
         )}
         {saveStatus === 'error' && (
           <span className="text-sm text-red-600">Save failed</span>
+        )}
+
+        {/* Per-section Save button */}
+        {onSave && (
+          <button
+            onClick={onSave}
+            disabled={isGenerating || saveStatus === 'saving'}
+            className="px-4 py-2 bg-slate-200 text-slate-700 font-semibold rounded-md hover:bg-slate-300 disabled:bg-slate-100 disabled:cursor-not-allowed transition-colors duration-200 shadow-sm"
+          >
+            Save
+          </button>
         )}
 
         {/* ACCJC Guidance Button - visible once content exists */}

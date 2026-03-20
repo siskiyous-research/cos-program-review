@@ -506,6 +506,7 @@ export default function ReviewApp({ user }: ReviewAppProps) {
 <body>
   <button class="print-btn no-print" onclick="window.print()">Print / Save as PDF</button>
   <div class="header">
+    <img src="${window.location.origin}/cos-logo.png" alt="College of the Siskiyous" style="height: 80px; margin: 0 auto 0.75rem;" />
     <h1>College of the Siskiyous</h1>
     <p>${reviewTypeLabel}</p>
   </div>
@@ -548,6 +549,24 @@ export default function ReviewApp({ user }: ReviewAppProps) {
 
   const handleSaveAll = () => {
     flushSave();
+  };
+
+  const handleSaveSection = async (sectionId: string) => {
+    if (!reviewId) return;
+    try {
+      await fetch(`/api/reviews/${reviewId}/sections`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sectionId,
+          content: reviewSections[sectionId] || '',
+          citations: sectionCitations[sectionId] || null,
+          guidance: sectionGuidance[sectionId] || null,
+        }),
+      });
+    } catch (e) {
+      console.error('Failed to save section:', e);
+    }
   };
 
   /**
@@ -770,6 +789,7 @@ export default function ReviewApp({ user }: ReviewAppProps) {
                 onPreview={handlePreviewReview}
                 onSubmit={handleSubmitReview}
                 onSaveAll={handleSaveAll}
+                onSaveSection={handleSaveSection}
                 sectionCitations={sectionCitations}
                 sectionGuidance={sectionGuidance}
                 onGetGuidance={handleGetGuidance}
