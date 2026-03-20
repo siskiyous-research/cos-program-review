@@ -36,7 +36,7 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({
   isGeneratingGuidance,
   saveStatus,
 }) => {
-  const [isCitationsOpen, setIsCitationsOpen] = useState(true);
+  const [isCitationsOpen, setIsCitationsOpen] = useState(false);
   const [isGuidanceOpen, setIsGuidanceOpen] = useState(true);
   // ACCJC Integration: Get mapped standards for this section
   const mappedStandards = getMappedStandards(id);

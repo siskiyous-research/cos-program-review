@@ -304,16 +304,34 @@ export function formatRAGContextWithCitations(context: RAGContext): RAGContextWi
 
   const citations: Citation[] = [];
   const numberedSections: string[] = [];
+  // Deduplicate citations: strip "(Part N)" to get the base document name
+  const seenDocuments = new Map<string, number>(); // base title → citation id
 
-  context.chunks.forEach((chunk, index) => {
-    const num = index + 1;
-    const url = buildSourceUrl(chunk);
-    citations.push({
-      id: num,
-      title: chunk.title,
-      source: chunk.source,
-      url,
-    });
+  function getBaseTitle(title: string): string {
+    return title.replace(/\s*\(Part\s*\d+\)\s*$/i, '').trim();
+  }
+
+  let citationNum = 0;
+  context.chunks.forEach((chunk) => {
+    const baseTitle = getBaseTitle(chunk.title);
+    const docKey = `${baseTitle}::${chunk.source}`;
+
+    let num: number;
+    if (seenDocuments.has(docKey)) {
+      num = seenDocuments.get(docKey)!;
+    } else {
+      citationNum++;
+      num = citationNum;
+      seenDocuments.set(docKey, num);
+      const url = buildSourceUrl(chunk);
+      citations.push({
+        id: num,
+        title: baseTitle,
+        source: chunk.source,
+        url,
+      });
+    }
+
     numberedSections.push(`[${num}] ${chunk.title} (${chunk.source})\n${chunk.text}`);
   });
 
