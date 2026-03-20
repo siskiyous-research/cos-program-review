@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { SparklesIcon } from './icons/SparklesIcon';
 import { AccjcBadge } from './AccjcBadge';
+import { RichTextEditor } from './RichTextEditor';
 import { getMappedStandards } from '@/lib/accjc-standards';
 import { Citation } from '@/lib/types';
 
@@ -63,15 +64,13 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({
       <p className="text-slate-500 mb-4">{description}</p>
 
       <div className="relative">
-        <textarea
-          value={content}
-          onChange={(e) => onContentChange(e.target.value)}
-          placeholder="Enter your analysis for this section..."
-          className="w-full h-48 p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow duration-200 resize-y"
-          disabled={isGenerating}
+        <RichTextEditor
+          variant="full"
+          content={content}
+          onChange={onContentChange}
         />
         {isGenerating && (
-          <div className="absolute inset-0 bg-white/50 flex items-center justify-center rounded-md">
+          <div className="absolute inset-0 bg-white/50 flex items-center justify-center rounded-md z-10">
             <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
         )}

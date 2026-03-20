@@ -4,23 +4,30 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
-import { useEffect, useCallback } from 'react';
+import Image from '@tiptap/extension-image';
+import Underline from '@tiptap/extension-underline';
+import { useEffect, useCallback, useRef } from 'react';
 
 interface RichTextEditorProps {
   content: string;
   onChange: (html: string) => void;
   placeholder?: string;
+  variant?: 'compact' | 'full';
 }
 
-export function RichTextEditor({ content, onChange, placeholder }: RichTextEditorProps) {
+export function RichTextEditor({ content, onChange, placeholder, variant = 'compact' }: RichTextEditorProps) {
+  const isFull = variant === 'full';
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: false,
+        heading: isFull ? { levels: [2, 3] } : false,
         codeBlock: false,
-        blockquote: false,
-        horizontalRule: false,
+        blockquote: isFull ? {} : false,
+        horizontalRule: isFull ? {} : false,
       }),
+      Underline,
       Link.configure({
         openOnClick: true,
         HTMLAttributes: {
@@ -30,13 +37,26 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
         },
       }),
       Placeholder.configure({
-        placeholder: placeholder || 'Quick notes or extra context...',
+        placeholder: placeholder || (isFull ? 'Enter your analysis for this section...' : 'Quick notes or extra context...'),
       }),
+      ...(isFull
+        ? [
+            Image.configure({
+              inline: false,
+              allowBase64: true,
+              HTMLAttributes: {
+                class: 'max-w-full rounded-md my-2',
+              },
+            }),
+          ]
+        : []),
     ],
     content,
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none min-h-[4rem] p-2 text-xs',
+        class: isFull
+          ? 'prose prose-sm max-w-none focus:outline-none min-h-[12rem] p-3 text-sm'
+          : 'prose prose-sm max-w-none focus:outline-none min-h-[4rem] p-2 text-xs',
       },
     },
     onUpdate: ({ editor }) => {
@@ -44,7 +64,6 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
     },
   });
 
-  // Sync external content changes
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
       editor.commands.setContent(content);
@@ -63,12 +82,53 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
     editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
   }, [editor]);
 
+  const addImage = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleImageUpload = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file || !editor) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result as string;
+        editor.chain().focus().setImage({ src: base64 }).run();
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
+    },
+    [editor]
+  );
+
   if (!editor) return null;
 
   return (
     <div className="border border-slate-300 rounded overflow-hidden focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500">
       {/* Toolbar */}
-      <div className="flex items-center gap-0.5 px-1 py-0.5 bg-slate-50 border-b border-slate-200">
+      <div className="flex flex-wrap items-center gap-0.5 px-1 py-0.5 bg-slate-50 border-b border-slate-200">
+        {/* Headings (full only) */}
+        {isFull && (
+          <>
+            <ToolbarButton
+              onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+              isActive={editor.isActive('heading', { level: 2 })}
+              title="Heading 2"
+            >
+              <span className="font-bold text-[10px]">H2</span>
+            </ToolbarButton>
+            <ToolbarButton
+              onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+              isActive={editor.isActive('heading', { level: 3 })}
+              title="Heading 3"
+            >
+              <span className="font-bold text-[10px]">H3</span>
+            </ToolbarButton>
+            <Separator />
+          </>
+        )}
+
+        {/* Bold / Italic / Underline */}
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           isActive={editor.isActive('bold')}
@@ -84,11 +144,21 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           <span className="italic">I</span>
         </ToolbarButton>
         <ToolbarButton
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          isActive={editor.isActive('underline')}
+          title="Underline"
+        >
+          <span className="underline">U</span>
+        </ToolbarButton>
+        <Separator />
+
+        {/* Lists */}
+        <ToolbarButton
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           isActive={editor.isActive('bulletList')}
           title="Bullet List"
         >
-          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
           </svg>
         </ToolbarButton>
@@ -97,17 +167,32 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           isActive={editor.isActive('orderedList')}
           title="Numbered List"
         >
-          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </ToolbarButton>
-        <div className="w-px h-4 bg-slate-300 mx-0.5" />
+
+        {/* Blockquote (full only) */}
+        {isFull && (
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleBlockquote().run()}
+            isActive={editor.isActive('blockquote')}
+            title="Blockquote"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg>
+          </ToolbarButton>
+        )}
+        <Separator />
+
+        {/* Link */}
         <ToolbarButton
           onClick={addLink}
           isActive={editor.isActive('link')}
           title="Add Link"
         >
-          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
           </svg>
         </ToolbarButton>
@@ -117,10 +202,36 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
             isActive={false}
             title="Remove Link"
           >
-            <svg className="w-3 h-3 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-3.5 h-3.5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636" />
             </svg>
           </ToolbarButton>
+        )}
+
+        {/* Image & HR (full only) */}
+        {isFull && (
+          <>
+            <Separator />
+            <ToolbarButton onClick={addImage} isActive={false} title="Insert Image">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </ToolbarButton>
+            <ToolbarButton
+              onClick={() => editor.chain().focus().setHorizontalRule().run()}
+              isActive={false}
+              title="Horizontal Rule"
+            >
+              <span className="text-[10px] font-mono">---</span>
+            </ToolbarButton>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+          </>
         )}
       </div>
 
@@ -128,6 +239,10 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
       <EditorContent editor={editor} />
     </div>
   );
+}
+
+function Separator() {
+  return <div className="w-px h-4 bg-slate-300 mx-0.5" />;
 }
 
 function ToolbarButton({

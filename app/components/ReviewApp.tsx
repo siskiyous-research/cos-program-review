@@ -94,7 +94,7 @@ export default function ReviewApp({ user }: ReviewAppProps) {
         : NON_INSTRUCTIONAL_COMPREHENSIVE_TEMPLATE;
 
   // Auto-save hook
-  const { saveStatus, markClean } = useAutoSave({
+  const { saveStatus, flushSave, markClean } = useAutoSave({
     reviewId,
     reviewSections,
     sectionCitations,
@@ -461,29 +461,93 @@ export default function ReviewApp({ user }: ReviewAppProps) {
       .join('\n\n---\n\n');
   };
 
-  const handleExportReview = () => {
-    const fullText = getFullReviewText();
+  const reviewTypeLabel =
+    reviewType === 'annual'
+      ? 'Annual Program Review'
+      : reviewType === 'comprehensive_instructional'
+        ? 'Comprehensive Program Review (Instructional)'
+        : 'Comprehensive Program Review (Non-Instructional)';
+
+  const buildReviewHTML = () => {
+    const sections = currentTemplate
+      .map(
+        (section) =>
+          `<div class="section">
+            <h2>${section.title}</h2>
+            <div class="content">${reviewSections[section.id] || '<p><em>No content provided.</em></p>'}</div>
+          </div>`
+      )
+      .join('');
+
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>${programName} - ${reviewTypeLabel}</title>
+  <style>
+    @media print { .no-print { display: none; } .section { page-break-inside: avoid; } }
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; line-height: 1.7; padding: 2rem 3rem; max-width: 900px; margin: 0 auto; color: #1e293b; }
+    .header { text-align: center; border-bottom: 3px solid #1e40af; padding-bottom: 1.5rem; margin-bottom: 2rem; }
+    .header h1 { color: #1e3a8a; font-size: 1.75rem; margin: 0; }
+    .header p { color: #64748b; margin: 0.25rem 0 0; }
+    .meta { display: flex; justify-content: space-between; font-size: 0.875rem; color: #64748b; margin-bottom: 2rem; }
+    h2 { color: #1e40af; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; margin-top: 2.5rem; font-size: 1.25rem; }
+    .content { margin-top: 0.75rem; }
+    .content p { margin: 0.5rem 0; }
+    .content ul, .content ol { margin: 0.5rem 0; padding-left: 1.5rem; }
+    .content li { margin: 0.25rem 0; }
+    .content img { max-width: 100%; border-radius: 0.5rem; margin: 1rem 0; }
+    .content blockquote { border-left: 4px solid #cbd5e1; padding-left: 1rem; margin: 1rem 0; color: #475569; }
+    a { color: #2563eb; }
+    .print-btn { position: fixed; top: 1rem; right: 1rem; padding: 0.5rem 1.5rem; background: #1e40af; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-size: 0.875rem; }
+    .print-btn:hover { background: #1e3a8a; }
+  </style>
+</head>
+<body>
+  <button class="print-btn no-print" onclick="window.print()">Print / Save as PDF</button>
+  <div class="header">
+    <h1>College of the Siskiyous</h1>
+    <p>${reviewTypeLabel}</p>
+  </div>
+  <div class="meta">
+    <span><strong>Program:</strong> ${programName}</span>
+    <span><strong>Date:</strong> ${new Date().toLocaleDateString()}</span>
+  </div>
+  ${sections}
+</body>
+</html>`;
+  };
+
+  const handlePreviewReview = () => {
+    const html = buildReviewHTML();
     const newWindow = window.open('', '_blank');
     if (newWindow) {
-      newWindow.document.write(`
-        <html>
-          <head>
-            <title>${programName} Program Review</title>
-            <style>
-              body { font-family: sans-serif; line-height: 1.6; padding: 2rem; }
-              h1 { color: #1e3a8a; }
-              h2 { color: #1e40af; border-bottom: 2px solid #ddd; padding-bottom: 0.5rem; margin-top: 2rem;}
-              pre { background-color: #f4f4f5; padding: 1rem; border-radius: 0.5rem; white-space: pre-wrap; word-wrap: break-word; }
-            </style>
-          </head>
-          <body>
-            <h1>${programName} Program Review</h1>
-            <pre>${fullText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
-          </body>
-        </html>
-      `);
+      newWindow.document.write(html);
       newWindow.document.close();
     }
+  };
+
+  const handleExportReview = () => {
+    const html = buildReviewHTML();
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${programName} - ${reviewTypeLabel}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleSubmitReview = () => {
+    const subject = encodeURIComponent(`[Program Review] ${programName} - ${reviewTypeLabel} - ${new Date().toLocaleDateString()}`);
+    const body = encodeURIComponent(
+      `Hello,\n\nPlease find the program review for ${programName} (${reviewTypeLabel}).\n\nReview Link: ${window.location.href}\n\nThank you,\n${user.email || ''}`
+    );
+    window.location.href = `mailto:JT@siskiyous.edu?subject=${subject}&body=${body}`;
+  };
+
+  const handleSaveAll = () => {
+    flushSave();
   };
 
   /**
@@ -703,8 +767,9 @@ export default function ReviewApp({ user }: ReviewAppProps) {
                 onAiAssist={handleAiAssist}
                 isGeneratingSection={isGeneratingSection}
                 onExport={handleExportReview}
-                onGenerateSummary={handleGenerateSummary}
-                isGeneratingSummary={isGeneratingSummary}
+                onPreview={handlePreviewReview}
+                onSubmit={handleSubmitReview}
+                onSaveAll={handleSaveAll}
                 sectionCitations={sectionCitations}
                 sectionGuidance={sectionGuidance}
                 onGetGuidance={handleGetGuidance}
