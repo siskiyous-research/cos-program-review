@@ -31,8 +31,9 @@ export async function POST(request: Request) {
 
     // Build SharePoint link
     const spBase = 'https://siskiyous0.sharepoint.com/sites/ProgramReview';
-    const encodedPath = encodeURIComponent(`/sites/ProgramReview/${folderPath}/${fileName}`);
-    const encodedParent = encodeURIComponent(`/sites/ProgramReview/${folderPath}`);
+    const cleanFolder = folderPath.replace(/^\//, '');
+    const encodedPath = encodeURIComponent(`/sites/ProgramReview/${cleanFolder}/${fileName}`);
+    const encodedParent = encodeURIComponent(`/sites/ProgramReview/${cleanFolder}`);
     const sharePointLink = `${spBase}/Shared%20Documents/Forms/AllItems.aspx?id=${encodedPath}&parent=${encodedParent}&p=true&ga=1`;
 
     const response = await fetch(POWER_AUTOMATE_URL, {
