@@ -160,25 +160,23 @@ export default function ReviewApp({ user }: ReviewAppProps) {
   }, [kbFiles, knowledgeBaseNotes]);
 
   /**
-   * Initialize program data by calling the API
+   * Initialize review for selected program
    */
   const initializeData = useCallback(async () => {
     if (!programName) return;
     setIsLoadingData(true);
     setError(null);
     try {
-      const response = await fetch('/api/generate-program-data', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ programName }),
+      // Set minimal program data (real data will come from ZogoTech later)
+      setProgramData({
+        programName,
+        summary: { strengths: [], weaknesses: [] },
+        enrollment: [],
+        completionRate: 0,
+        jobPlacementRate: 0,
+        demographics: {},
       });
 
-      const result = await response.json();
-      if (!result.ok) {
-        throw new Error(result.error || 'Failed to generate program data');
-      }
-
-      setProgramData(result.data);
       const initialSections = currentTemplate.reduce(
         (acc, section) => {
           acc[section.id] = '';
@@ -191,15 +189,15 @@ export default function ReviewApp({ user }: ReviewAppProps) {
       setChatHistory([
         {
           role: 'model',
-          content: `Hello! I'm here to help you with your program review for the ${programName} department. Ask me anything about the provided data.`,
+          content: `Hello! I'm here to help you with your program review for the ${programName} department. Ask me anything about institutional data, policies, or accreditation standards.`,
         },
       ]);
 
-      // Load/create review after program data is ready
+      // Load/create review
       await loadReview(programName, reviewType);
     } catch (e) {
-      console.error('Failed to initialize program data:', e);
-      setError('An error occurred while fetching program data. Please check your API key and try again.');
+      console.error('Failed to initialize:', e);
+      setError('An error occurred while loading. Please try again.');
     } finally {
       setIsLoadingData(false);
     }
