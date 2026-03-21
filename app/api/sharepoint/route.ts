@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { fileName, content, programName, reviewType } = await request.json();
+    const { fileName, content, programName, reviewType, folderPath } = await request.json();
 
     if (!fileName || !content) {
       return NextResponse.json(
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     const response = await fetch(POWER_AUTOMATE_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileName, content, programName, reviewType }),
+      body: JSON.stringify({ fileName, content, programName, reviewType, folderPath }),
     });
 
     if (!response.ok) {
