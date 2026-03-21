@@ -556,12 +556,15 @@ export function getProgramsForYear(year: string): ScheduleEntry[] {
   return allPrograms.filter((program) => program.years[year]);
 }
 
-// Helper function to get all unique years
+// Helper function to get all unique years (capped at 2027-2028)
 export function getAllYears(): string[] {
+  const maxYear = '2027-2028';
   const allPrograms = [...INSTRUCTIONAL_SCHEDULE, ...NON_INSTRUCTIONAL_SCHEDULE];
   const yearsSet = new Set<string>();
   allPrograms.forEach((program) => {
-    Object.keys(program.years).forEach((year) => yearsSet.add(year));
+    Object.keys(program.years).forEach((year) => {
+      if (year <= maxYear) yearsSet.add(year);
+    });
   });
   return Array.from(yearsSet).sort();
 }
