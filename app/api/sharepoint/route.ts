@@ -29,10 +29,16 @@ export async function POST(request: Request) {
     const notifyName = await getSetting('notify_name') || '';
     const notifyEmail = await getSetting('notify_email') || '';
 
+    // Build SharePoint link
+    const spBase = 'https://siskiyous0.sharepoint.com/sites/ProgramReview';
+    const encodedPath = encodeURIComponent(`/sites/ProgramReview/${folderPath}/${fileName}`);
+    const encodedParent = encodeURIComponent(`/sites/ProgramReview/${folderPath}`);
+    const sharePointLink = `${spBase}/Shared%20Documents/Forms/AllItems.aspx?id=${encodedPath}&parent=${encodedParent}&p=true&ga=1`;
+
     const response = await fetch(POWER_AUTOMATE_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileName, content, programName, reviewType, folderPath, notifyName, notifyEmail }),
+      body: JSON.stringify({ fileName, content, programName, reviewType, folderPath, notifyName, notifyEmail, sharePointLink }),
     });
 
     if (!response.ok) {
