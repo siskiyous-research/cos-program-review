@@ -549,6 +549,34 @@ export default function ReviewApp({ user }: ReviewAppProps) {
     flushSave();
   };
 
+  const [sharePointStatus, setSharePointStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+  const handleSaveToSharePoint = async () => {
+    setSharePointStatus('saving');
+    try {
+      const html = buildReviewHTML();
+      const fileName = `${programName} - ${reviewTypeLabel} - ${new Date().toLocaleDateString().replace(/\//g, '-')}.html`;
+      const res = await fetch('/api/sharepoint', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileName,
+          content: html,
+          programName,
+          reviewType,
+        }),
+      });
+      const result = await res.json();
+      if (!result.ok) throw new Error(result.error);
+      setSharePointStatus('saved');
+      setTimeout(() => setSharePointStatus('idle'), 3000);
+    } catch (e) {
+      console.error('SharePoint save failed:', e);
+      setSharePointStatus('error');
+      setTimeout(() => setSharePointStatus('idle'), 3000);
+    }
+  };
+
   const handleSaveSection = async (sectionId: string) => {
     if (!reviewId) return;
     try {
@@ -787,6 +815,8 @@ export default function ReviewApp({ user }: ReviewAppProps) {
                 onPreview={handlePreviewReview}
                 onSubmit={handleSubmitReview}
                 onSaveAll={handleSaveAll}
+                onSaveToSharePoint={handleSaveToSharePoint}
+                sharePointStatus={sharePointStatus}
                 onSaveSection={handleSaveSection}
                 sectionCitations={sectionCitations}
                 sectionGuidance={sectionGuidance}
