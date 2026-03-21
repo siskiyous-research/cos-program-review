@@ -651,7 +651,10 @@ export default function ReviewApp({ user }: ReviewAppProps) {
       const parentFolder = mapping?.parent || (isInstructional ? 'Instructional Program Reviews' : 'Non Instructional Program Reviews');
       const programFolder = mapping?.folder || programName;
       const folderPath = `/Shared Documents/General/${parentFolder}/${programFolder}`;
-      const fileName = `${programName} - ${reviewTypeLabel} - ${new Date().toLocaleDateString().replace(/\//g, '-')}.html`;
+      const now = new Date();
+      const date = now.toLocaleDateString().replace(/\//g, '-');
+      const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).replace(/[: ]/g, '');
+      const fileName = `${programName} - ${reviewTypeLabel} - ${date}_${time}.html`;
       const res = await fetch('/api/sharepoint', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
