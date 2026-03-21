@@ -14,6 +14,7 @@ import {
   PROGRAM_LIST,
 } from '@/lib/constants';
 import { AccjcFeedback } from './AccjcFeedback';
+import { DropZone } from './DropZone';
 import { useAutoSave } from '@/app/hooks/useAutoSave';
 
 type ReviewType = 'annual' | 'comprehensive_instructional' | 'comprehensive_non_instructional';
@@ -550,6 +551,47 @@ export default function ReviewApp({ user }: ReviewAppProps) {
   };
 
   const [sharePointStatus, setSharePointStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [isProcessingDrop, setIsProcessingDrop] = useState(false);
+
+  const handleFileDrop = async (files: File[]) => {
+    if (files.length === 0) return;
+    setIsProcessingDrop(true);
+    try {
+      const formData = new FormData();
+      formData.append('program', programName);
+      for (const file of files) {
+        formData.append('files', file);
+      }
+      const res = await fetch('/api/kb-upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const result = await res.json();
+      if (!result.ok) throw new Error(result.error);
+
+      // Use extracted text as the first section's content
+      const extractedText = result.files.map((f: { name: string; textContent: string }) =>
+        f.textContent
+      ).join('\n\n');
+
+      if (extractedText.trim()) {
+        // Put content into the first empty section, or the first section
+        const firstEmptySection = currentTemplate.find(s => !reviewSections[s.id]?.trim());
+        const targetSection = firstEmptySection || currentTemplate[0];
+        if (targetSection) {
+          setReviewSections(prev => ({
+            ...prev,
+            [targetSection.id]: extractedText,
+          }));
+        }
+      }
+    } catch (e) {
+      console.error('File drop processing failed:', e);
+      setError('Failed to process uploaded file. Please try again.');
+    } finally {
+      setIsProcessingDrop(false);
+    }
+  };
 
   // Map app program names to exact SharePoint folder names
   const sharePointFolderMap: Record<string, { parent: string; folder: string }> = {
@@ -589,14 +631,14 @@ export default function ReviewApp({ user }: ReviewAppProps) {
     'Student Housing': { parent: 'Non Instructional Program Reviews', folder: 'Student Lodges' },
     'Student Services Division': { parent: 'Non Instructional Program Reviews', folder: 'Student Services' },
     'Technology Services': { parent: 'Non Instructional Program Reviews', folder: 'Technology Services' },
-    'Dual Enrollment': { parent: 'Non Instructional Program Reviews', folder: 'Distance Learning' },
-    'Student Equity & Achievement': { parent: 'Non Instructional Program Reviews', folder: 'Student Services' },
-    'Outreach & Retention': { parent: 'Non Instructional Program Reviews', folder: 'Student Services' },
-    'Special Populations – EOPS, CARE CalWORKs, NextUP, TRIO': { parent: 'Non Instructional Program Reviews', folder: 'Student Services' },
-    'Student Services – AB 19, Health Clinic, International Students, Mental Health': { parent: 'Non Instructional Program Reviews', folder: 'Student Services' },
-    'Student Life': { parent: 'Non Instructional Program Reviews', folder: 'Student Lodges' },
-    'Fiscal Services': { parent: 'Non Instructional Program Reviews', folder: 'Bookstore' },
-    'Administrative Services Division': { parent: 'Non Instructional Program Reviews', folder: 'Bookstore' },
+    'Dual Enrollment': { parent: 'Non Instructional Program Reviews', folder: 'Dual Enrollment' },
+    'Student Equity & Achievement': { parent: 'Non Instructional Program Reviews', folder: 'Student Equity & Achievement' },
+    'Outreach & Retention': { parent: 'Non Instructional Program Reviews', folder: 'Outreach & Retention' },
+    'Special Populations – EOPS, CARE CalWORKs, NextUP, TRIO': { parent: 'Non Instructional Program Reviews', folder: 'Special Populations' },
+    'Student Services – AB 19, Health Clinic, International Students, Mental Health': { parent: 'Non Instructional Program Reviews', folder: 'Student Services - AB19 Health Mental Health' },
+    'Student Life': { parent: 'Non Instructional Program Reviews', folder: 'Student Life' },
+    'Fiscal Services': { parent: 'Non Instructional Program Reviews', folder: 'Fiscal Services' },
+    'Administrative Services Division': { parent: 'Non Instructional Program Reviews', folder: 'Administrative Services' },
   };
 
   const handleSaveToSharePoint = async () => {
@@ -858,6 +900,9 @@ export default function ReviewApp({ user }: ReviewAppProps) {
             <>
               {/* ACCJC Integration: Show feedback on page load */}
               <AccjcFeedback sectionId="program_info" showCommonIssues={true} />
+
+              {/* Drop zone for existing reviews */}
+              <DropZone onFileDrop={handleFileDrop} isProcessing={isProcessingDrop} />
 
               <ProgramReviewForm
                 programName={programName}

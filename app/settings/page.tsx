@@ -12,6 +12,10 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
+  // Notification settings
+  const [notifyName, setNotifyName] = useState('');
+  const [notifyEmail, setNotifyEmail] = useState('');
+
   // AI Provider state
   const [mode, setMode] = useState<'cloud' | 'local'>('local');
   const [apiKey, setApiKey] = useState('');
@@ -40,6 +44,8 @@ export default function SettingsPage() {
       if (map.openrouter_api_key) setApiKey(map.openrouter_api_key);
       if (map.local_ai_url) setLocalUrl(map.local_ai_url);
       if (map.local_ai_model) setLocalModel(map.local_ai_model);
+      if (map.notify_name) setNotifyName(map.notify_name);
+      if (map.notify_email) setNotifyEmail(map.notify_email);
     } catch {
       // Settings not available yet
     } finally {
@@ -186,6 +192,20 @@ export default function SettingsPage() {
           })
         );
       }
+
+      // Always save notification settings
+      saves.push(
+        fetch('/api/settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key: 'notify_name', value: notifyName }),
+        }),
+        fetch('/api/settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key: 'notify_email', value: notifyEmail }),
+        })
+      );
 
       await Promise.all(saves);
       setSaveMessage('Settings saved successfully');
@@ -402,6 +422,45 @@ export default function SettingsPage() {
               {saveMessage}
             </div>
           )}
+        </div>
+
+        {/* Notification Settings */}
+        <div className="bg-white rounded-lg border border-slate-200 p-6 mt-6">
+          <h2 className="text-lg font-semibold text-slate-800 mb-2">SharePoint Notifications</h2>
+          <p className="text-sm text-slate-500 mb-4">
+            When a program review is saved to SharePoint, an email notification will be sent to this person.
+          </p>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                First & Last Name
+              </label>
+              <input
+                type="text"
+                value={notifyName}
+                onChange={(e) => setNotifyName(e.target.value)}
+                placeholder="Jane Smith"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Email Address
+              </label>
+              <input
+                type="email"
+                value={notifyEmail}
+                onChange={(e) => setNotifyEmail(e.target.value)}
+                placeholder="jsmith@siskiyous.edu"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          </div>
+
+          <p className="text-xs text-slate-400 mt-3">
+            Settings are saved together with AI provider settings using the Save button above.
+          </p>
         </div>
       </div>
     </div>

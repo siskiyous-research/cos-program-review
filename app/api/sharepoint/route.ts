@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
+import { getSetting } from '@/lib/settings';
 
 const POWER_AUTOMATE_URL = process.env.POWER_AUTOMATE_WEBHOOK_URL;
 
@@ -24,10 +25,14 @@ export async function POST(request: Request) {
       );
     }
 
+    // Get notification settings
+    const notifyName = await getSetting('notify_name') || '';
+    const notifyEmail = await getSetting('notify_email') || '';
+
     const response = await fetch(POWER_AUTOMATE_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileName, content, programName, reviewType, folderPath }),
+      body: JSON.stringify({ fileName, content, programName, reviewType, folderPath, notifyName, notifyEmail }),
     });
 
     if (!response.ok) {
