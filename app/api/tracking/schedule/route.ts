@@ -69,6 +69,7 @@ export async function GET(request: Request) {
         status,
         draftSubmitted: tracking?.draft_submitted || false,
         finalSubmitted: tracking?.final_submitted || false,
+        presented: tracking?.presented || false,
         engagementCount,
         lastEngagementDate: lastEngagement?.engagement_date || null,
         notes: tracking?.notes || '',

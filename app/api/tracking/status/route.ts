@@ -9,7 +9,7 @@ export async function PUT(request: Request) {
     return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { programName, academicYear, programType, draftSubmitted, finalSubmitted, statusOverride, notes } =
+  const { programName, academicYear, programType, draftSubmitted, finalSubmitted, presented, statusOverride, notes } =
     await request.json();
 
   if (!programName || !academicYear || !programType) {
@@ -35,6 +35,7 @@ export async function PUT(request: Request) {
       .update({
         draft_submitted: draftSubmitted ?? undefined,
         final_submitted: finalSubmitted ?? undefined,
+        presented: presented ?? undefined,
         status_override: statusOverride ?? undefined,
         notes: notes ?? undefined,
         updated_by: user.id,
@@ -58,6 +59,7 @@ export async function PUT(request: Request) {
         academic_year: academicYear,
         draft_submitted: draftSubmitted || false,
         final_submitted: finalSubmitted || false,
+        presented: presented || false,
         status_override: statusOverride || null,
         notes: notes || null,
         updated_by: user.id,
