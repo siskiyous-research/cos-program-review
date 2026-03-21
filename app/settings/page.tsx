@@ -29,6 +29,8 @@ export default function SettingsPage() {
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ valid: boolean; error?: string } | null>(null);
   const [saveMessage, setSaveMessage] = useState('');
+  const [savingNotify, setSavingNotify] = useState(false);
+  const [notifyMessage, setNotifyMessage] = useState('');
 
   const loadSettings = useCallback(async () => {
     try {
@@ -193,8 +195,21 @@ export default function SettingsPage() {
         );
       }
 
-      // Always save notification settings
-      saves.push(
+      await Promise.all(saves);
+      setSaveMessage('AI settings saved successfully');
+      await loadSettings();
+    } catch {
+      setSaveMessage('Failed to save settings');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveNotify = async () => {
+    setSavingNotify(true);
+    setNotifyMessage('');
+    try {
+      await Promise.all([
         fetch('/api/settings', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -204,16 +219,13 @@ export default function SettingsPage() {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ key: 'notify_email', value: notifyEmail }),
-        })
-      );
-
-      await Promise.all(saves);
-      setSaveMessage('Settings saved successfully');
-      await loadSettings();
+        }),
+      ]);
+      setNotifyMessage('Notification settings saved successfully');
     } catch {
-      setSaveMessage('Failed to save settings');
+      setNotifyMessage('Failed to save notification settings');
     } finally {
-      setSaving(false);
+      setSavingNotify(false);
     }
   };
 
@@ -466,13 +478,23 @@ export default function SettingsPage() {
 
           <div className="mt-4">
             <button
-              onClick={handleSave}
-              disabled={saving}
+              onClick={handleSaveNotify}
+              disabled={savingNotify}
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {saving ? 'Saving...' : 'Save Notification Settings'}
+              {savingNotify ? 'Saving...' : 'Save Notification Settings'}
             </button>
           </div>
+
+          {notifyMessage && (
+            <div className={`mt-3 p-3 rounded-md text-sm ${
+              notifyMessage.includes('success')
+                ? 'bg-green-50 border border-green-200 text-green-800'
+                : 'bg-red-50 border border-red-200 text-red-800'
+            }`}>
+              {notifyMessage}
+            </div>
+          )}
         </div>
       </div>
     </div>
