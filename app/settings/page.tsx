@@ -428,13 +428,28 @@ export default function SettingsPage() {
         <div className="bg-white rounded-lg border border-slate-200 p-6 mt-6">
           <h2 className="text-lg font-semibold text-slate-800 mb-2">SharePoint Notifications</h2>
           <p className="text-sm text-slate-500 mb-4">
-            When a program review is saved to SharePoint, an email notification will be sent to this person.
+            When a program review is saved to SharePoint, an email notification will be sent via Power Automate (Office 365).
           </p>
 
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                First & Last Name
+                Notification Recipients
+              </label>
+              <input
+                type="text"
+                value={notifyEmail}
+                onChange={(e) => setNotifyEmail(e.target.value)}
+                placeholder="jsmith@siskiyous.edu, jdoe@siskiyous.edu"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                Separate multiple emails with commas
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Recipient Name (for email greeting)
               </label>
               <input
                 type="text"
@@ -444,23 +459,17 @@ export default function SettingsPage() {
                 className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Email Address
-              </label>
-              <input
-                type="email"
-                value={notifyEmail}
-                onChange={(e) => setNotifyEmail(e.target.value)}
-                placeholder="jsmith@siskiyous.edu"
-                className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
           </div>
 
-          <p className="text-xs text-slate-400 mt-3">
-            Settings are saved together with AI provider settings using the Save button above.
-          </p>
+          <div className="mt-4">
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {saving ? 'Saving...' : 'Save Notification Settings'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
