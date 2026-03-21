@@ -120,7 +120,7 @@ export default function TrackingDashboard() {
                 <th
                   key={year}
                   className={`border-b border-r border-gray-200 px-3 py-3 text-center text-xs font-semibold whitespace-nowrap ${
-                    year === currentYear ? 'bg-green-50 text-green-800' : 'text-gray-500'
+                    year === currentYear ? 'bg-emerald-50/70 text-emerald-800' : 'text-gray-500'
                   }`}
                 >
                   {year}
@@ -176,7 +176,7 @@ export default function TrackingDashboard() {
                       <td
                         key={`${program.name}-${year}`}
                         className={`border-b border-r border-gray-200 px-2 py-2.5 text-center ${
-                          isCurrentYear ? 'bg-green-50/50' : ''
+                          isCurrentYear ? 'bg-emerald-50/70' : ''
                         }`}
                       >
                         {reviewType ? (
