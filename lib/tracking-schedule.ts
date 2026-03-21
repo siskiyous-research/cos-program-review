@@ -78,7 +78,7 @@ export const NON_INSTRUCTIONAL_SCHEDULE: ScheduleEntry[] = [
 
 // Instructional programs
 export const INSTRUCTIONAL_SCHEDULE: ScheduleEntry[] = [
-  // Group 1: PR cycle 2026-2027 → next ~2030-2031
+  // CTE programs: 2-year PR cycle, PR in 2026-2027 → next 2028-2029
   ...[
     'Alcohol & Drug Studies',
     'Administration of Justice',
@@ -86,10 +86,23 @@ export const INSTRUCTIONAL_SCHEDULE: ScheduleEntry[] = [
     'Early Childhood Education',
     'EMS',
     'Fire',
-    'Health/PE/Recreation',
-    'Humanities & Social Sciences',
     'Nursing',
     'Welding',
+  ].map((name): ScheduleEntry => ({
+    name,
+    type: 'instructional',
+    years: {
+      '2025-2026': 'AU',
+      '2026-2027': 'PR',
+      '2027-2028': 'AU',
+      '2028-2029': 'PR',
+      '2029-2030': 'AU',
+    },
+  })),
+  // Non-CTE instructional: 4-year PR cycle
+  ...[
+    'Health/PE/Recreation',
+    'Humanities & Social Sciences',
   ].map((name): ScheduleEntry => ({
     name,
     type: 'instructional',
@@ -101,7 +114,7 @@ export const INSTRUCTIONAL_SCHEDULE: ScheduleEntry[] = [
       '2029-2030': 'AU',
     },
   })),
-  // Group 2: PR cycle 2027-2028 → next ~2031-2032
+  // Non-CTE instructional: 4-year PR cycle, offset
   ...[
     'Fine & Performing Arts',
     'Math',
