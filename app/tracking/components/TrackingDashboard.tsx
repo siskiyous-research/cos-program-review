@@ -113,7 +113,7 @@ export default function TrackingDashboard() {
               <th className="sticky left-0 z-10 bg-gray-50 border-b border-r border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">
                 Program
               </th>
-              <th className="border-b border-r border-gray-200 px-3 py-3 text-center text-xs font-semibold text-gray-500 w-20">
+              <th className="border-b border-r border-gray-200 px-3 py-3 text-center text-xs font-semibold text-gray-500 w-28">
                 Status
               </th>
               {years.map((year) => (
@@ -126,9 +126,6 @@ export default function TrackingDashboard() {
                   {year}
                 </th>
               ))}
-              <th className="border-b border-gray-200 px-3 py-3 text-center text-xs font-semibold text-gray-500 w-24">
-                Activity
-              </th>
             </tr>
           </thead>
           <tbody>
@@ -139,13 +136,31 @@ export default function TrackingDashboard() {
               return (
                 <tr key={program.name} className="hover:bg-gray-50/50">
                   <td className="sticky left-0 z-10 bg-white border-b border-r border-gray-200 px-4 py-2.5">
-                    <p className="font-medium text-gray-900 text-sm">{program.name}</p>
-                    <p className="text-[10px] text-gray-400">
-                      {program.type === 'instructional' ? 'Instructional' : 'Non-Instructional'}
-                    </p>
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
+                        <p className="font-medium text-gray-900 text-sm">{program.name}</p>
+                        <p className="text-[10px] text-gray-400">
+                          {program.type === 'instructional' ? 'Instructional' : 'Non-Instructional'}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setEngagementPanel({ program: program.name, type: program.type })}
+                        className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors flex-shrink-0"
+                      >
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Log
+                        {s && s.engagementCount > 0 && (
+                          <span className="ml-0.5 rounded-full bg-blue-600 text-white px-1.5 py-0 text-[10px]">
+                            {s.engagementCount}
+                          </span>
+                        )}
+                      </button>
+                    </div>
                   </td>
                   <td className="border-b border-r border-gray-200 px-2 py-2.5 text-center">
-                    <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                    <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
                       status === 'red' ? 'bg-red-100 text-red-700' :
                       status === 'yellow' ? 'bg-yellow-100 text-yellow-700' :
                       'bg-green-100 text-green-700'
@@ -178,22 +193,6 @@ export default function TrackingDashboard() {
                       </td>
                     );
                   })}
-                  <td className="border-b border-gray-200 px-2 py-2.5 text-center">
-                    <button
-                      onClick={() => setEngagementPanel({ program: program.name, type: program.type })}
-                      className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors"
-                    >
-                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                      </svg>
-                      Log
-                      {s && s.engagementCount > 0 && (
-                        <span className="ml-0.5 rounded-full bg-blue-600 text-white px-1.5 py-0 text-[10px]">
-                          {s.engagementCount}
-                        </span>
-                      )}
-                    </button>
-                  </td>
                 </tr>
               );
             })}
