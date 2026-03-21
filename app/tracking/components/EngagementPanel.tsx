@@ -23,6 +23,8 @@ const engagementTypeLabels: Record<string, string> = {
   email: '✉️ Email',
   data_collection: '📊 Data Collection',
   phone_call: '☎️ Phone Call',
+  submitted: '✅ Review Submitted',
+  presented: '🎤 Review Presented',
   other: '📝 Other',
 };
 

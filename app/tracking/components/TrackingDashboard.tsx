@@ -45,29 +45,14 @@ export default function TrackingDashboard() {
     fetchStatuses();
   }, [fetchStatuses]);
 
-  const toggleField = async (programName: string, programType: string, field: 'draftSubmitted' | 'finalSubmitted' | 'presented', value: boolean) => {
-    try {
-      await fetch('/api/tracking/status', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          programName,
-          programType,
-          academicYear: currentYear,
-          [field]: value,
-        }),
-      });
-      fetchStatuses();
-    } catch {
-      // silent
-    }
-  };
+  type Status = 'red' | 'yellow' | 'submitted' | 'presented';
 
-  const getStatus = (name: string): 'green' | 'yellow' | 'red' => {
+  const getStatus = (name: string): Status => {
     const s = statuses[name];
     if (!s) return 'red';
-    if (s.finalSubmitted || s.presented) return 'green';
-    if (s.draftSubmitted || s.engagementCount > 0) return 'yellow';
+    if (s.presented) return 'presented';
+    if (s.finalSubmitted) return 'submitted';
+    if (s.engagementCount > 0) return 'yellow';
     return 'red';
   };
 
@@ -76,21 +61,24 @@ export default function TrackingDashboard() {
     if (filterType === 'non_instructional') return p.type === 'non_instructional';
     if (filterType === 'needs_followup') return getStatus(p.name) === 'red';
     if (filterType === 'engaged') return getStatus(p.name) === 'yellow';
-    if (filterType === 'complete') return getStatus(p.name) === 'green';
+    if (filterType === 'complete') return getStatus(p.name) === 'submitted' || getStatus(p.name) === 'presented';
     return true;
   });
 
   const stats = {
     red: allPrograms.filter((p) => getStatus(p.name) === 'red').length,
     yellow: allPrograms.filter((p) => getStatus(p.name) === 'yellow').length,
-    green: allPrograms.filter((p) => getStatus(p.name) === 'green').length,
+    complete: allPrograms.filter((p) => {
+      const s = getStatus(p.name);
+      return s === 'submitted' || s === 'presented';
+    }).length,
   };
 
   const filters: { key: FilterType; label: string }[] = [
     { key: 'all', label: `All (${allPrograms.length})` },
     { key: 'needs_followup', label: `Needs Follow-up (${stats.red})` },
     { key: 'engaged', label: `Engaged (${stats.yellow})` },
-    { key: 'complete', label: `Complete (${stats.green})` },
+    { key: 'complete', label: `Complete (${stats.complete})` },
     { key: 'instructional', label: 'Instructional' },
     { key: 'non_instructional', label: 'Non-Instructional' },
   ];
@@ -163,50 +151,33 @@ export default function TrackingDashboard() {
                           {program.type === 'instructional' ? 'Instructional' : 'Non-Instructional'}
                         </p>
                       </div>
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        <button
-                          onClick={() => toggleField(program.name, program.type, 'finalSubmitted', !s?.finalSubmitted)}
-                          className={`rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
-                            s?.finalSubmitted
-                              ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                              : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                          }`}
-                          title={s?.finalSubmitted ? 'Mark as not submitted' : 'Mark as submitted'}
-                        >
-                          {s?.finalSubmitted ? 'Submitted' : 'Submit'}
-                        </button>
-                        <button
-                          onClick={() => toggleField(program.name, program.type, 'presented', !s?.presented)}
-                          className={`rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
-                            s?.presented
-                              ? 'bg-purple-100 text-purple-700 hover:bg-purple-200'
-                              : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                          }`}
-                          title={s?.presented ? 'Mark as not presented' : 'Mark as presented'}
-                        >
-                          {s?.presented ? 'Presented' : 'Present'}
-                        </button>
-                        <button
-                          onClick={() => setEngagementPanel({ program: program.name, type: program.type })}
-                          className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-[11px] font-medium text-blue-700 hover:bg-blue-100 transition-colors"
-                        >
-                          Log
-                          {s && s.engagementCount > 0 && (
-                            <span className="rounded-full bg-blue-600 text-white px-1.5 py-0 text-[10px]">
-                              {s.engagementCount}
-                            </span>
-                          )}
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => setEngagementPanel({ program: program.name, type: program.type })}
+                        className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-[11px] font-medium text-blue-700 hover:bg-blue-100 transition-colors flex-shrink-0"
+                      >
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Log
+                        {s && s.engagementCount > 0 && (
+                          <span className="rounded-full bg-blue-600 text-white px-1.5 py-0 text-[10px]">
+                            {s.engagementCount}
+                          </span>
+                        )}
+                      </button>
                     </div>
                   </td>
                   <td className="border-b border-r border-gray-200 px-2 py-2.5 text-center">
                     <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
                       status === 'red' ? 'bg-red-100 text-red-700' :
                       status === 'yellow' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-green-100 text-green-700'
+                      status === 'submitted' ? 'bg-green-100 text-green-700' :
+                      'bg-green-200 text-green-800'
                     }`}>
-                      {status === 'red' ? 'Follow-up' : status === 'yellow' ? 'Engaged' : 'Complete'}
+                      {status === 'red' ? 'Follow-up' :
+                       status === 'yellow' ? 'Engaged' :
+                       status === 'submitted' ? 'Submitted' :
+                       'Presented'}
                     </span>
                   </td>
                   {years.map((year) => {

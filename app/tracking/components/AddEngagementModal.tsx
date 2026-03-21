@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-type EngagementType = 'meeting' | 'email' | 'data_collection' | 'phone_call' | 'other';
+type EngagementType = 'meeting' | 'email' | 'data_collection' | 'phone_call' | 'submitted' | 'presented' | 'other';
 
 interface AddEngagementModalProps {
   isOpen: boolean;
@@ -64,6 +64,8 @@ export default function AddEngagementModal({
               <option value="email">Email</option>
               <option value="data_collection">Data Collection</option>
               <option value="phone_call">Phone Call</option>
+              <option value="submitted">Review Submitted</option>
+              <option value="presented">Review Presented</option>
               <option value="other">Other</option>
             </select>
           </div>

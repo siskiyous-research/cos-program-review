@@ -25,7 +25,7 @@ export async function GET(request: Request) {
   // Fetch tracking status and engagement counts for each program
   const programsWithStatus = await Promise.all(
     programs.map(async (program) => {
-      const [trackingRes, engagementRes] = await Promise.all([
+      const [trackingRes, engagementRes, engagementTypesRes] = await Promise.all([
         supabase
           .from('pr_program_tracking')
           .select('*')
@@ -37,17 +37,27 @@ export async function GET(request: Request) {
           .select('count', { count: 'exact', head: true })
           .eq('program_name', program.name)
           .eq('academic_year', year),
+        supabase
+          .from('pr_engagement_log')
+          .select('engagement_type')
+          .eq('program_name', program.name)
+          .eq('academic_year', year),
       ]);
 
       const tracking = trackingRes.data;
       const engagementCount = engagementRes.count || 0;
+      const engagementTypes = (engagementTypesRes.data || []).map((e: { engagement_type: string }) => e.engagement_type);
+      const hasSubmitted = engagementTypes.includes('submitted');
+      const hasPresented = engagementTypes.includes('presented');
 
-      // Compute status based on logic
+      // Compute status: presented > submitted > engaged > follow-up
       let status = 'red';
       if (tracking?.status_override) {
         status = tracking.status_override;
-      } else if (tracking?.final_submitted || tracking?.draft_submitted) {
-        status = 'green';
+      } else if (hasPresented) {
+        status = 'presented';
+      } else if (hasSubmitted) {
+        status = 'submitted';
       } else if (engagementCount > 0) {
         status = 'yellow';
       }
@@ -67,9 +77,9 @@ export async function GET(request: Request) {
         type: program.type,
         reviewType: program.years[year],
         status,
-        draftSubmitted: tracking?.draft_submitted || false,
-        finalSubmitted: tracking?.final_submitted || false,
-        presented: tracking?.presented || false,
+        draftSubmitted: hasSubmitted,
+        finalSubmitted: hasSubmitted,
+        presented: hasPresented,
         engagementCount,
         lastEngagementDate: lastEngagement?.engagement_date || null,
         notes: tracking?.notes || '',
