@@ -1,14 +1,35 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSetting } from '@/lib/settings';
-import { getCurrentAcademicYear, INSTRUCTIONAL_SCHEDULE, NON_INSTRUCTIONAL_SCHEDULE } from '@/lib/tracking-schedule';
+import { getCurrentAcademicYear, INSTRUCTIONAL_SCHEDULE, NON_INSTRUCTIONAL_SCHEDULE, ScheduleEntry } from '@/lib/tracking-schedule';
+
+// Map roles to their assigned programs
+const ROLE_PROGRAMS: Record<string, string[]> = {
+  dean_las: ['Fine & Performing Arts', 'Humanities & Social Sciences', 'Math', 'Modern Languages', 'Sciences'],
+  dean_cte: ['Alcohol & Drug Studies', 'Administration of Justice', 'Business & Computer Sciences', 'Early Childhood Education', 'EMS', 'Fire', 'Welding'],
+  dean_nursing: ['Nursing'],
+  director_athletics: ['Health/PE/Recreation'],
+  vp_president: ["President's Office", 'Human Resources', 'Institutional Research', 'Public Information Office'],
+  vp_admin_services: ['Bookstore', 'Fiscal Services', 'Food Services', 'Maintenance/Operations/Transportation', 'Technology Services'],
+  vp_academic_affairs: ['Academic Affairs Division', 'Academic Success Center', 'Distance Learning', 'FIELD Program', 'Dual Enrollment', 'Faculty Diversity Internship Program (FDIP)', 'Library'],
+  vp_student_services: ['Student Services Division', 'Admissions & Records', 'Financial Aid/Veterans/AB540', 'Basecamp', 'Counseling & Advising', 'Student Equity & Achievement', 'Student Housing & Student Life', 'Student Access Services', 'Outreach & Retention', 'Special Populations (EOPS/CARE/CalWORKs/NextUP/TRiO)', 'Student Services-AB19/Health/Mental Health', 'Student Life', 'International Students'],
+};
+
+const ROLE_LABELS: Record<string, string> = {
+  dean_las: 'Dean of Liberal Arts & Sciences',
+  dean_cte: 'Dean of Career & Technical Education',
+  dean_nursing: 'Dean of Nursing & Health Sciences',
+  director_athletics: 'Director of Athletics',
+  vp_president: "President's Office",
+  vp_admin_services: 'VP of Administrative Services',
+  vp_academic_affairs: 'VP of Academic Affairs',
+  vp_student_services: 'VP of Student Services',
+};
 
 export async function GET() {
   const supabase = await createClient();
   const year = getCurrentAcademicYear();
-
-  const deanEmails = await getSetting('dean_emails') || '';
-  const vpEmails = await getSetting('vp_emails') || '';
+  const allPrograms = [...INSTRUCTIONAL_SCHEDULE, ...NON_INSTRUCTIONAL_SCHEDULE];
 
   // Get all engagement data for current year
   const { data: engagements } = await supabase
@@ -54,9 +75,11 @@ export async function GET() {
     }
   }
 
-  function buildHtml(programs: typeof INSTRUCTIONAL_SCHEDULE, title: string): string {
-    const rows = programs
-      .filter(p => p.years[year])
+  function buildHtml(programs: ScheduleEntry[], title: string): string {
+    const activePrograms = programs.filter(p => p.years[year]);
+    if (activePrograms.length === 0) return '';
+
+    const rows = activePrograms
       .map(p => {
         const status = getStatus(p.name);
         const reviewType = p.years[year];
@@ -68,9 +91,7 @@ export async function GET() {
       })
       .join('');
 
-    const needsAttention = programs
-      .filter(p => p.years[year])
-      .filter(p => getStatus(p.name) === 'red').length;
+    const needsAttention = activePrograms.filter(p => getStatus(p.name) === 'red').length;
 
     return `
       <div style="font-family:Segoe UI,sans-serif;max-width:700px;margin:0 auto;">
@@ -96,14 +117,29 @@ export async function GET() {
     `;
   }
 
-  const instructionalHtml = buildHtml(INSTRUCTIONAL_SCHEDULE, 'Instructional Program Review Status');
-  const nonInstructionalHtml = buildHtml(NON_INSTRUCTIONAL_SCHEDULE, 'Non-Instructional Program Review Status');
+  // Build per-role reminder data
+  const reminders = [];
+  for (const [role, programNames] of Object.entries(ROLE_PROGRAMS)) {
+    const email = await getSetting(`reminder_${role}`) || '';
+    if (!email) continue;
 
-  return NextResponse.json({
-    deanEmails,
-    vpEmails,
-    instructionalHtml,
-    nonInstructionalHtml,
-    year,
-  });
+    const programs = allPrograms.filter(p => programNames.includes(p.name));
+    const html = buildHtml(programs, `Program Review Status — ${ROLE_LABELS[role]}`);
+    if (!html) continue;
+
+    const needsAttention = programs
+      .filter(p => p.years[year])
+      .filter(p => getStatus(p.name) === 'red').length;
+
+    reminders.push({
+      role,
+      label: ROLE_LABELS[role],
+      email,
+      html,
+      needsAttention,
+      totalPrograms: programs.filter(p => p.years[year]).length,
+    });
+  }
+
+  return NextResponse.json({ reminders, year });
 }

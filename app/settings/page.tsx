@@ -17,8 +17,16 @@ export default function SettingsPage() {
   const [notifyEmail, setNotifyEmail] = useState('');
 
   // Reminder settings
-  const [deanEmails, setDeanEmails] = useState('');
-  const [vpEmails, setVpEmails] = useState('');
+  const [reminderEmails, setReminderEmails] = useState<Record<string, string>>({
+    dean_las: '',
+    dean_cte: '',
+    dean_nursing: '',
+    director_athletics: '',
+    vp_president: '',
+    vp_admin_services: '',
+    vp_academic_affairs: '',
+    vp_student_services: '',
+  });
   const [savingReminders, setSavingReminders] = useState(false);
   const [reminderMessage, setReminderMessage] = useState('');
 
@@ -54,8 +62,12 @@ export default function SettingsPage() {
       if (map.local_ai_model) setLocalModel(map.local_ai_model);
       if (map.notify_name) setNotifyName(map.notify_name);
       if (map.notify_email) setNotifyEmail(map.notify_email);
-      if (map.dean_emails) setDeanEmails(map.dean_emails);
-      if (map.vp_emails) setVpEmails(map.vp_emails);
+      const roles = ['dean_las', 'dean_cte', 'dean_nursing', 'director_athletics', 'vp_president', 'vp_admin_services', 'vp_academic_affairs', 'vp_student_services'];
+      const loaded: Record<string, string> = {};
+      for (const role of roles) {
+        if (map[`reminder_${role}`]) loaded[role] = map[`reminder_${role}`];
+      }
+      setReminderEmails(prev => ({ ...prev, ...loaded }));
     } catch {
       // Settings not available yet
     } finally {
@@ -241,24 +253,24 @@ export default function SettingsPage() {
     setSavingReminders(true);
     setReminderMessage('');
     try {
-      await Promise.all([
+      const saves = Object.entries(reminderEmails).map(([role, email]) =>
         fetch('/api/settings', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ key: 'dean_emails', value: deanEmails }),
-        }),
-        fetch('/api/settings', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ key: 'vp_emails', value: vpEmails }),
-        }),
-      ]);
+          body: JSON.stringify({ key: `reminder_${role}`, value: email }),
+        })
+      );
+      await Promise.all(saves);
       setReminderMessage('Reminder settings saved successfully');
     } catch {
       setReminderMessage('Failed to save reminder settings');
     } finally {
       setSavingReminders(false);
     }
+  };
+
+  const updateReminderEmail = (role: string, value: string) => {
+    setReminderEmails(prev => ({ ...prev, [role]: value }));
   };
 
   const formatSize = (bytes?: number) => {
@@ -533,40 +545,51 @@ export default function SettingsPage() {
         <div className="bg-white rounded-lg border border-slate-200 p-6 mt-6">
           <h2 className="text-lg font-semibold text-slate-800 mb-2">Scheduled Reminders</h2>
           <p className="text-sm text-slate-500 mb-4">
-            Automated reminders for outstanding program reviews. Deans receive instructional program statuses, VPs receive non-instructional.
+            Each role receives status reminders only for their assigned programs. Comma-separate multiple emails per role.
           </p>
 
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Instructional Dean(s)
-              </label>
-              <input
-                type="text"
-                value={deanEmails}
-                onChange={(e) => setDeanEmails(e.target.value)}
-                placeholder="dean1@siskiyous.edu, dean2@siskiyous.edu"
-                className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-              <p className="text-xs text-slate-500 mt-1">
-                Receives status updates for all instructional programs. Comma-separate multiple emails.
-              </p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Non-Instructional VP(s)
-              </label>
-              <input
-                type="text"
-                value={vpEmails}
-                onChange={(e) => setVpEmails(e.target.value)}
-                placeholder="vp1@siskiyous.edu, vp2@siskiyous.edu"
-                className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-              <p className="text-xs text-slate-500 mt-1">
-                Receives status updates for all non-instructional programs. Comma-separate multiple emails.
-              </p>
-            </div>
+          <div className="space-y-5">
+            <h3 className="text-sm font-semibold text-slate-600 border-b border-slate-200 pb-1">Instructional</h3>
+
+            {[
+              { role: 'dean_las', label: 'Dean of Liberal Arts & Sciences', hint: 'Fine & Performing Arts, Humanities & Social Sciences, Math, Modern Languages, Sciences' },
+              { role: 'dean_cte', label: 'Dean of Career & Technical Education', hint: 'ADHS, Administration of Justice, Business & Computer Sciences, ECE, EMS, Fire, Welding' },
+              { role: 'dean_nursing', label: 'Dean of Nursing & Health Sciences', hint: 'Nursing' },
+              { role: 'director_athletics', label: 'Director of Athletics', hint: 'Health, Physical Education and Recreation' },
+            ].map(({ role, label, hint }) => (
+              <div key={role}>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
+                <input
+                  type="text"
+                  value={reminderEmails[role] || ''}
+                  onChange={(e) => updateReminderEmail(role, e.target.value)}
+                  placeholder="email@siskiyous.edu"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                <p className="text-xs text-slate-400 mt-0.5">{hint}</p>
+              </div>
+            ))}
+
+            <h3 className="text-sm font-semibold text-slate-600 border-b border-slate-200 pb-1 pt-2">Non-Instructional</h3>
+
+            {[
+              { role: 'vp_president', label: "President's Office", hint: "President's Office, Human Resources, Institutional Research, Public Information Office" },
+              { role: 'vp_admin_services', label: 'VP of Administrative Services', hint: 'Bookstore, Fiscal Services, Food Services, Maintenance/Operations/Transportation, Technology Services' },
+              { role: 'vp_academic_affairs', label: 'VP of Academic Affairs', hint: 'Academic Affairs Division, ASC, Distance Learning, FIELD, Dual Enrollment, FDIP, Library' },
+              { role: 'vp_student_services', label: 'VP of Student Services', hint: 'Student Services Division, Admissions & Records, Financial Aid, Basecamp, Counseling, Student Equity, Housing, Student Access, Outreach, Special Populations, AB19/Health/Mental Health, Student Life, International Students' },
+            ].map(({ role, label, hint }) => (
+              <div key={role}>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
+                <input
+                  type="text"
+                  value={reminderEmails[role] || ''}
+                  onChange={(e) => updateReminderEmail(role, e.target.value)}
+                  placeholder="email@siskiyous.edu"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                <p className="text-xs text-slate-400 mt-0.5">{hint}</p>
+              </div>
+            ))}
           </div>
 
           <div className="mt-4">
@@ -593,11 +616,11 @@ export default function SettingsPage() {
           <div className="mt-6 bg-slate-50 border border-slate-200 rounded-md p-4">
             <h3 className="text-sm font-semibold text-slate-700 mb-2">Power Automate Setup</h3>
             <p className="text-xs text-slate-600 mb-3">
-              Create a scheduled flow in Power Automate to send monthly reminders:
+              Create a scheduled flow to send monthly reminders to each role:
             </p>
             <ol className="text-xs text-slate-600 space-y-2 list-decimal list-inside">
               <li>Go to <a href="https://make.powerautomate.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">make.powerautomate.com</a></li>
-              <li>Create → Scheduled cloud flow → set to run monthly (e.g., 1st of each month)</li>
+              <li>Create → <strong>Scheduled cloud flow</strong> → set to run monthly (e.g., 1st of each month)</li>
               <li>Add action: <strong>HTTP</strong> → Method: GET → URL:<br />
                 <code className="bg-slate-200 px-1 py-0.5 rounded text-[11px] break-all">
                   {typeof window !== 'undefined' ? window.location.origin : 'https://your-app-url'}/api/tracking/reminders
@@ -607,18 +630,34 @@ export default function SettingsPage() {
                 <pre className="bg-slate-200 p-2 rounded text-[10px] mt-1 overflow-x-auto">{`{
   "type": "object",
   "properties": {
-    "deanEmails": { "type": "string" },
-    "vpEmails": { "type": "string" },
-    "instructionalHtml": { "type": "string" },
-    "nonInstructionalHtml": { "type": "string" }
+    "reminders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": { "type": "string" },
+          "label": { "type": "string" },
+          "email": { "type": "string" },
+          "html": { "type": "string" },
+          "needsAttention": { "type": "integer" },
+          "totalPrograms": { "type": "integer" }
+        }
+      }
+    },
+    "year": { "type": "string" }
   }
 }`}</pre>
               </li>
-              <li>Add <strong>Condition</strong>: if <code>deanEmails</code> is not empty →<br />
-                <strong>Send an email (V2)</strong> → To: <code>deanEmails</code>, Subject: &quot;Program Review Status - Instructional&quot;, Body: <code>instructionalHtml</code> (set body to HTML mode)</li>
-              <li>Add another <strong>Condition</strong>: if <code>vpEmails</code> is not empty →<br />
-                <strong>Send an email (V2)</strong> → To: <code>vpEmails</code>, Subject: &quot;Program Review Status - Non-Instructional&quot;, Body: <code>nonInstructionalHtml</code></li>
+              <li>Add <strong>Apply to each</strong> → select <code>reminders</code> array</li>
+              <li>Inside the loop, add <strong>Send an email (V2)</strong>:<br />
+                • To: <code>email</code> (current item)<br />
+                • Subject: <code>Program Review Status - @{'{'}items(&apos;Apply_to_each&apos;)?[&apos;label&apos;]{'}'}</code><br />
+                • Body: <code>html</code> (current item) — switch to HTML/code view<br />
+              </li>
             </ol>
+            <p className="text-xs text-slate-500 mt-3">
+              The API only returns roles that have an email configured. Each role gets their own email with only their assigned programs.
+            </p>
           </div>
         </div>
       </div>
