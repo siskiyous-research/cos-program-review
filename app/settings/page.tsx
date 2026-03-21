@@ -16,6 +16,12 @@ export default function SettingsPage() {
   const [notifyName, setNotifyName] = useState('');
   const [notifyEmail, setNotifyEmail] = useState('');
 
+  // Reminder settings
+  const [deanEmails, setDeanEmails] = useState('');
+  const [vpEmails, setVpEmails] = useState('');
+  const [savingReminders, setSavingReminders] = useState(false);
+  const [reminderMessage, setReminderMessage] = useState('');
+
   // AI Provider state
   const [mode, setMode] = useState<'cloud' | 'local'>('local');
   const [apiKey, setApiKey] = useState('');
@@ -48,6 +54,8 @@ export default function SettingsPage() {
       if (map.local_ai_model) setLocalModel(map.local_ai_model);
       if (map.notify_name) setNotifyName(map.notify_name);
       if (map.notify_email) setNotifyEmail(map.notify_email);
+      if (map.dean_emails) setDeanEmails(map.dean_emails);
+      if (map.vp_emails) setVpEmails(map.vp_emails);
     } catch {
       // Settings not available yet
     } finally {
@@ -226,6 +234,30 @@ export default function SettingsPage() {
       setNotifyMessage('Failed to save notification settings');
     } finally {
       setSavingNotify(false);
+    }
+  };
+
+  const handleSaveReminders = async () => {
+    setSavingReminders(true);
+    setReminderMessage('');
+    try {
+      await Promise.all([
+        fetch('/api/settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key: 'dean_emails', value: deanEmails }),
+        }),
+        fetch('/api/settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key: 'vp_emails', value: vpEmails }),
+        }),
+      ]);
+      setReminderMessage('Reminder settings saved successfully');
+    } catch {
+      setReminderMessage('Failed to save reminder settings');
+    } finally {
+      setSavingReminders(false);
     }
   };
 
@@ -495,6 +527,99 @@ export default function SettingsPage() {
               {notifyMessage}
             </div>
           )}
+        </div>
+
+        {/* Scheduled Reminder Settings */}
+        <div className="bg-white rounded-lg border border-slate-200 p-6 mt-6">
+          <h2 className="text-lg font-semibold text-slate-800 mb-2">Scheduled Reminders</h2>
+          <p className="text-sm text-slate-500 mb-4">
+            Automated reminders for outstanding program reviews. Deans receive instructional program statuses, VPs receive non-instructional.
+          </p>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Instructional Dean(s)
+              </label>
+              <input
+                type="text"
+                value={deanEmails}
+                onChange={(e) => setDeanEmails(e.target.value)}
+                placeholder="dean1@siskiyous.edu, dean2@siskiyous.edu"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                Receives status updates for all instructional programs. Comma-separate multiple emails.
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Non-Instructional VP(s)
+              </label>
+              <input
+                type="text"
+                value={vpEmails}
+                onChange={(e) => setVpEmails(e.target.value)}
+                placeholder="vp1@siskiyous.edu, vp2@siskiyous.edu"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                Receives status updates for all non-instructional programs. Comma-separate multiple emails.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <button
+              onClick={handleSaveReminders}
+              disabled={savingReminders}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {savingReminders ? 'Saving...' : 'Save Reminder Settings'}
+            </button>
+          </div>
+
+          {reminderMessage && (
+            <div className={`mt-3 p-3 rounded-md text-sm ${
+              reminderMessage.includes('success')
+                ? 'bg-green-50 border border-green-200 text-green-800'
+                : 'bg-red-50 border border-red-200 text-red-800'
+            }`}>
+              {reminderMessage}
+            </div>
+          )}
+
+          {/* Power Automate Setup Instructions */}
+          <div className="mt-6 bg-slate-50 border border-slate-200 rounded-md p-4">
+            <h3 className="text-sm font-semibold text-slate-700 mb-2">Power Automate Setup</h3>
+            <p className="text-xs text-slate-600 mb-3">
+              Create a scheduled flow in Power Automate to send monthly reminders:
+            </p>
+            <ol className="text-xs text-slate-600 space-y-2 list-decimal list-inside">
+              <li>Go to <a href="https://make.powerautomate.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">make.powerautomate.com</a></li>
+              <li>Create → Scheduled cloud flow → set to run monthly (e.g., 1st of each month)</li>
+              <li>Add action: <strong>HTTP</strong> → Method: GET → URL:<br />
+                <code className="bg-slate-200 px-1 py-0.5 rounded text-[11px] break-all">
+                  {typeof window !== 'undefined' ? window.location.origin : 'https://your-app-url'}/api/tracking/reminders
+                </code>
+              </li>
+              <li>Add action: <strong>Parse JSON</strong> → Content: Body from HTTP step → Schema:
+                <pre className="bg-slate-200 p-2 rounded text-[10px] mt-1 overflow-x-auto">{`{
+  "type": "object",
+  "properties": {
+    "deanEmails": { "type": "string" },
+    "vpEmails": { "type": "string" },
+    "instructionalHtml": { "type": "string" },
+    "nonInstructionalHtml": { "type": "string" }
+  }
+}`}</pre>
+              </li>
+              <li>Add <strong>Condition</strong>: if <code>deanEmails</code> is not empty →<br />
+                <strong>Send an email (V2)</strong> → To: <code>deanEmails</code>, Subject: &quot;Program Review Status - Instructional&quot;, Body: <code>instructionalHtml</code> (set body to HTML mode)</li>
+              <li>Add another <strong>Condition</strong>: if <code>vpEmails</code> is not empty →<br />
+                <strong>Send an email (V2)</strong> → To: <code>vpEmails</code>, Subject: &quot;Program Review Status - Non-Instructional&quot;, Body: <code>nonInstructionalHtml</code></li>
+            </ol>
+          </div>
         </div>
       </div>
     </div>
