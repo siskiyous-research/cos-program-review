@@ -551,13 +551,64 @@ export default function ReviewApp({ user }: ReviewAppProps) {
 
   const [sharePointStatus, setSharePointStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
+  // Map app program names to exact SharePoint folder names
+  const sharePointFolderMap: Record<string, { parent: string; folder: string }> = {
+    // Instructional
+    'Administration of Justice': { parent: 'Instructional Program Reviews', folder: 'Administration of Justice (CTE)' },
+    'Alcohol & Drug Studies (ADHS)': { parent: 'Instructional Program Reviews', folder: 'Alcohol & Drug Studies (CTE)' },
+    'Business and Computer Sciences': { parent: 'Instructional Program Reviews', folder: 'Business and Computer Sciences (CTE)' },
+    'Early Childhood Education': { parent: 'Instructional Program Reviews', folder: 'Early Childhood Education (CTE)' },
+    'Emergency Medical Services (EMS)': { parent: 'Instructional Program Reviews', folder: 'EMS (CTE)' },
+    'Fine and Performing Arts': { parent: 'Instructional Program Reviews', folder: 'Fine and Performing Arts' },
+    'Fire': { parent: 'Instructional Program Reviews', folder: 'Fire (CTE)' },
+    'Health, Physical Education and Recreation': { parent: 'Instructional Program Reviews', folder: 'Health, Physical Education and Recreation' },
+    'Humanities and Social Sciences': { parent: 'Instructional Program Reviews', folder: 'Humanities and Social Sciences' },
+    'Math': { parent: 'Instructional Program Reviews', folder: 'Math' },
+    'Modern Languages': { parent: 'Instructional Program Reviews', folder: 'Modern Languages (MLAN)' },
+    'Nursing': { parent: 'Instructional Program Reviews', folder: 'Nursing (CTE)' },
+    'Sciences': { parent: 'Instructional Program Reviews', folder: 'Sciences' },
+    'Welding': { parent: 'Instructional Program Reviews', folder: 'Welding (CTE)' },
+    // Non-Instructional
+    'Academic Affairs Division': { parent: 'Non Instructional Program Reviews', folder: 'Academic Affairs' },
+    'Academic Success Center (ASC)': { parent: 'Non Instructional Program Reviews', folder: 'Academic Success Center' },
+    'Admissions and Records': { parent: 'Non Instructional Program Reviews', folder: 'Admissions and Records' },
+    'Basecamp': { parent: 'Non Instructional Program Reviews', folder: 'Basecamp' },
+    'Bookstore': { parent: 'Non Instructional Program Reviews', folder: 'Bookstore' },
+    'Counseling & Advising - Transfer & Orientation': { parent: 'Non Instructional Program Reviews', folder: 'Counseling' },
+    'Distance Learning': { parent: 'Non Instructional Program Reviews', folder: 'Distance Learning' },
+    'FIELD Program (ISA)': { parent: 'Non Instructional Program Reviews', folder: 'FIELD' },
+    'Financial Aid, Veterans and AB540': { parent: 'Non Instructional Program Reviews', folder: 'Financial Aid' },
+    'Food Services': { parent: 'Non Instructional Program Reviews', folder: 'Food Services' },
+    'Human Resources': { parent: 'Non Instructional Program Reviews', folder: 'Human Resources' },
+    'Library': { parent: 'Non Instructional Program Reviews', folder: 'Library' },
+    'Maintenance, Operations & Transportation': { parent: 'Non Instructional Program Reviews', folder: 'Maintenance, Operations & Transportation' },
+    'Institutional Research': { parent: 'Non Instructional Program Reviews', folder: 'Planning Assessment & Research' },
+    "President's Office": { parent: 'Non Instructional Program Reviews', folder: "President's Office" },
+    'Public Information Office': { parent: 'Non Instructional Program Reviews', folder: 'Public Information Office' },
+    'Student Access Services': { parent: 'Non Instructional Program Reviews', folder: 'Student Access Services (SAS)' },
+    'Student Housing': { parent: 'Non Instructional Program Reviews', folder: 'Student Lodges' },
+    'Student Services Division': { parent: 'Non Instructional Program Reviews', folder: 'Student Services' },
+    'Technology Services': { parent: 'Non Instructional Program Reviews', folder: 'Technology Services' },
+    'Dual Enrollment': { parent: 'Non Instructional Program Reviews', folder: 'Distance Learning' },
+    'Student Equity & Achievement': { parent: 'Non Instructional Program Reviews', folder: 'Student Services' },
+    'Outreach & Retention': { parent: 'Non Instructional Program Reviews', folder: 'Student Services' },
+    'Special Populations – EOPS, CARE CalWORKs, NextUP, TRIO': { parent: 'Non Instructional Program Reviews', folder: 'Student Services' },
+    'Student Services – AB 19, Health Clinic, International Students, Mental Health': { parent: 'Non Instructional Program Reviews', folder: 'Student Services' },
+    'Student Life': { parent: 'Non Instructional Program Reviews', folder: 'Student Lodges' },
+    'Fiscal Services': { parent: 'Non Instructional Program Reviews', folder: 'Bookstore' },
+    'Administrative Services Division': { parent: 'Non Instructional Program Reviews', folder: 'Bookstore' },
+  };
+
   const handleSaveToSharePoint = async () => {
     setSharePointStatus('saving');
     try {
       const html = buildReviewHTML();
+      const mapping = sharePointFolderMap[programName];
       const category = getProgramCategory(programName);
       const isInstructional = category === 'instructional';
-      const folderPath = `/Shared Documents/General/${isInstructional ? 'Instructional Program Reviews' : 'Non Instructional Program Reviews'}`;
+      const parentFolder = mapping?.parent || (isInstructional ? 'Instructional Program Reviews' : 'Non Instructional Program Reviews');
+      const programFolder = mapping?.folder || programName;
+      const folderPath = `/Shared Documents/General/${parentFolder}/${programFolder}`;
       const fileName = `${programName} - ${reviewTypeLabel} - ${new Date().toLocaleDateString().replace(/\//g, '-')}.html`;
       const res = await fetch('/api/sharepoint', {
         method: 'POST',
