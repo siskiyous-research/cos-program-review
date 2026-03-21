@@ -557,7 +557,7 @@ export default function ReviewApp({ user }: ReviewAppProps) {
       const html = buildReviewHTML();
       const category = getProgramCategory(programName);
       const isInstructional = category === 'instructional';
-      const folderPath = `/General/${isInstructional ? 'Instructional Program Reviews' : 'Non-Instructional Program Reviews'}`;
+      const folderPath = `/Shared Documents/General/${isInstructional ? 'Instructional Program Reviews' : 'Non-Instructional Program Reviews'}`;
       const fileName = `${programName} - ${reviewTypeLabel} - ${new Date().toLocaleDateString().replace(/\//g, '-')}.html`;
       const res = await fetch('/api/sharepoint', {
         method: 'POST',
