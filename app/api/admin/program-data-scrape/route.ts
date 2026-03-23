@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { fetchProgramData, fetchFilterDimensions } from '@/lib/program-data-queries';
-import { saveProgramDataCache, getAllCachedSubjects, clearExpiredCache } from '@/lib/program-data-cache';
+import { saveProgramDataCache, getAllCachedSubjects } from '@/lib/program-data-cache';
 import { ALL_SUBJECT_CODES } from '@/lib/constants';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -28,7 +28,6 @@ export async function POST(req: NextRequest) {
           subject_code: '_dimensions',
           data: dimensions,
           cached_at: new Date().toISOString(),
-          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         }, { onConflict: 'subject_code' });
       console.log('✓ Cached filter dimensions (academic years, terms, depts, majors, course numbers)');
     } catch (error) {
@@ -48,8 +47,6 @@ export async function POST(req: NextRequest) {
         console.error(`✗ Failed to cache ${subject}: ${errorMsg}`);
       }
     }
-
-    await clearExpiredCache();
 
     return NextResponse.json({
       ok: true,

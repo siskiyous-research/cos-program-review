@@ -1,7 +1,7 @@
 /**
  * Program Data Cache
  * Stores and retrieves cached program data from Supabase
- * Allows periodic scraping to keep data fresh locally
+ * Data persists until manually re-scraped — no expiration
  */
 
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -23,7 +23,6 @@ export async function saveProgramDataCache(
         subject_code: subject,
         data: data,
         cached_at: new Date().toISOString(),
-        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       },
       { onConflict: 'subject_code' }
     );
@@ -34,7 +33,7 @@ export async function saveProgramDataCache(
 }
 
 /**
- * Retrieve cached program data
+ * Retrieve cached program data (no expiration check)
  */
 export async function getCachedProgramData(subject: string): Promise<AggregatedProgramData | null> {
   const supabase = createAdminClient();
@@ -43,7 +42,6 @@ export async function getCachedProgramData(subject: string): Promise<AggregatedP
     .from('program_data_cache')
     .select('data')
     .eq('subject_code', subject)
-    .gt('expires_at', new Date().toISOString())
     .single();
 
   if (error || !data) {
@@ -57,13 +55,13 @@ export async function getCachedProgramData(subject: string): Promise<AggregatedP
  * Get all cached subjects
  */
 export async function getAllCachedSubjects(): Promise<
-  Array<{ subject: string; cachedAt: string; expiresAt: string }>
+  Array<{ subject: string; cachedAt: string }>
 > {
   const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from('program_data_cache')
-    .select('subject_code, cached_at, expires_at')
+    .select('subject_code, cached_at')
     .order('cached_at', { ascending: false });
 
   if (error) {
@@ -74,23 +72,6 @@ export async function getAllCachedSubjects(): Promise<
     data?.map(row => ({
       subject: row.subject_code,
       cachedAt: row.cached_at,
-      expiresAt: row.expires_at,
     })) || []
   );
-}
-
-/**
- * Clear expired cache entries
- */
-export async function clearExpiredCache(): Promise<void> {
-  const supabase = createAdminClient();
-
-  const { error } = await supabase
-    .from('program_data_cache')
-    .delete()
-    .lt('expires_at', new Date().toISOString());
-
-  if (error) {
-    console.error('Failed to clear expired cache:', error.message);
-  }
 }
