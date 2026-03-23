@@ -5,7 +5,6 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ChatMessage, ProgramData, Citation } from '@/lib/types';
 import { PaperAirplaneIcon } from './icons/PaperAirplaneIcon';
-import { KnowledgeBase, KBFile } from './KnowledgeBase';
 
 interface SidebarProps {
   chatHistory: ChatMessage[];
@@ -13,14 +12,6 @@ interface SidebarProps {
   isLoadingData: boolean;
   isChatting: boolean;
   onChatSubmit: (prompt: string) => void;
-  knowledgeBaseNotes: string;
-  onKnowledgeBaseUpdate: (data: string) => void;
-  kbFiles: KBFile[];
-  onKBUpload: (files: File[]) => void;
-  onKBUrlFetch: (url: string) => void;
-  onKBFileRemove: (fileId: string) => void;
-  isUploading: boolean;
-  uploadProgress?: string;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -29,14 +20,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isLoadingData,
   isChatting,
   onChatSubmit,
-  knowledgeBaseNotes,
-  onKnowledgeBaseUpdate,
-  kbFiles,
-  onKBUpload,
-  onKBUrlFetch,
-  onKBFileRemove,
-  isUploading,
-  uploadProgress,
 }) => {
   const [prompt, setPrompt] = useState('');
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -60,18 +43,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <header className="p-4 border-b border-slate-200">
         <h3 className="text-lg font-semibold text-slate-800">Data Chat Assistant</h3>
       </header>
-
-      {/* Knowledge Base at top */}
-      <KnowledgeBase
-        kbFiles={kbFiles}
-        onUpload={onKBUpload}
-        onUrlFetch={onKBUrlFetch}
-        onFileRemove={onKBFileRemove}
-        isUploading={isUploading}
-        uploadProgress={uploadProgress}
-        knowledgeBaseNotes={knowledgeBaseNotes}
-        onNotesUpdate={onKnowledgeBaseUpdate}
-      />
 
       {/* Chat messages */}
       <div ref={chatContainerRef} className="flex-1 p-4 space-y-4 overflow-y-auto">

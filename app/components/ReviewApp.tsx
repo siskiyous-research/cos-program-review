@@ -6,7 +6,7 @@ import { ProgramReviewForm } from './ProgramReviewForm';
 import { SummaryModal } from './SummaryModal';
 import { DirectorySidebar } from './DirectorySidebar';
 import { AuthHeader } from './AuthHeader';
-import { ChatMessage, ProgramData, HistoricalData, HistoricalReview, Citation, KBFile } from '@/lib/types';
+import { ChatMessage, ProgramData, HistoricalData, HistoricalReview, Citation } from '@/lib/types';
 import {
   ANNUAL_PROGRAM_REVIEW_TEMPLATE,
   COMPREHENSIVE_PROGRAM_REVIEW_TEMPLATE,
@@ -14,7 +14,6 @@ import {
   PROGRAM_LIST,
 } from '@/lib/constants';
 import { AccjcFeedback } from './AccjcFeedback';
-import { DropZone } from './DropZone';
 import { useAutoSave } from '@/app/hooks/useAutoSave';
 
 type ReviewType = 'annual' | 'comprehensive_instructional' | 'comprehensive_non_instructional';
@@ -45,15 +44,9 @@ export default function ReviewApp({ user }: ReviewAppProps) {
   const [isGeneratingSummary, setIsGeneratingSummary] = useState<boolean>(false);
   const [isArchiveOpen, setIsArchiveOpen] = useState<boolean>(true);
   const [historicalData, setHistoricalData] = useState<HistoricalData>({});
-  const [knowledgeBaseNotes, setKnowledgeBaseNotes] = useState<Record<string, string>>({});
   const [sectionCitations, setSectionCitations] = useState<Record<string, Citation[]>>({});
   const [sectionGuidance, setSectionGuidance] = useState<Record<string, string>>({});
   const [isGeneratingGuidance, setIsGeneratingGuidance] = useState<string | null>(null);
-
-  // KB file upload state
-  const [kbFiles, setKbFiles] = useState<Record<string, KBFile[]>>({});
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<string>('');
 
   // Review persistence state
   const [reviewId, setReviewId] = useState<string | null>(null);
@@ -349,101 +342,6 @@ export default function ReviewApp({ user }: ReviewAppProps) {
     } finally {
       setIsChatting(false);
     }
-  };
-
-  // KB Upload handlers
-  const handleKBUpload = async (files: File[]) => {
-    setIsUploading(true);
-    setUploadProgress(`Processing ${files.length} file(s)...`);
-    try {
-      const formData = new FormData();
-      formData.append('program', programName);
-      for (const file of files) {
-        formData.append('files', file);
-      }
-
-      const response = await fetch('/api/kb-upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const result = await response.json();
-      if (!result.ok) throw new Error(result.error);
-
-      const newFiles: KBFile[] = result.files.map((f: KBFile) => ({
-        id: f.id,
-        name: f.name,
-        type: f.type,
-        size: f.size,
-        textContent: f.textContent,
-        processingTime: f.processingTime,
-      }));
-
-      setKbFiles((prev) => ({
-        ...prev,
-        [programName]: [...(prev[programName] || []), ...newFiles],
-      }));
-    } catch (e) {
-      console.error('KB upload failed:', e);
-      setError('Failed to upload file(s). Please try again.');
-    } finally {
-      setIsUploading(false);
-      setUploadProgress('');
-    }
-  };
-
-  const handleKBUrlFetch = async (url: string) => {
-    setIsUploading(true);
-    setUploadProgress('Fetching URL...');
-    try {
-      const response = await fetch('/api/kb-upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, program: programName }),
-      });
-
-      const result = await response.json();
-      if (!result.ok) throw new Error(result.error);
-
-      const newFiles: KBFile[] = result.files.map((f: KBFile) => ({
-        id: f.id,
-        name: f.name,
-        type: f.type,
-        size: f.size,
-        textContent: f.textContent,
-        processingTime: f.processingTime,
-      }));
-
-      setKbFiles((prev) => ({
-        ...prev,
-        [programName]: [...(prev[programName] || []), ...newFiles],
-      }));
-    } catch (e) {
-      console.error('KB URL fetch failed:', e);
-      setError('Failed to fetch URL. Please try again.');
-    } finally {
-      setIsUploading(false);
-      setUploadProgress('');
-    }
-  };
-
-  const handleKBFileRemove = async (fileId: string) => {
-    setKbFiles((prev) => ({
-      ...prev,
-      [programName]: (prev[programName] || []).filter((f) => f.id !== fileId),
-    }));
-    try {
-      await fetch(`/api/admin/uploads/${fileId}`, { method: 'DELETE' });
-    } catch {
-      // Silent fail — file is already removed from client state
-    }
-  };
-
-  const handleKnowledgeBaseNotesUpdate = (data: string) => {
-    setKnowledgeBaseNotes((prev) => ({
-      ...prev,
-      [programName]: data,
-    }));
   };
 
   const handleReviewTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -943,14 +841,6 @@ export default function ReviewApp({ user }: ReviewAppProps) {
             isLoadingData={isLoadingData}
             isChatting={isChatting}
             onChatSubmit={handleChatSubmit}
-            knowledgeBaseNotes={knowledgeBaseNotes[programName] || ''}
-            onKnowledgeBaseUpdate={handleKnowledgeBaseNotesUpdate}
-            kbFiles={kbFiles[programName] || []}
-            onKBUpload={handleKBUpload}
-            onKBUrlFetch={handleKBUrlFetch}
-            onKBFileRemove={handleKBFileRemove}
-            isUploading={isUploading}
-            uploadProgress={uploadProgress}
           />
         </aside>
       </div>
