@@ -129,21 +129,26 @@ export async function getSectionAssistance(
 
     if (!hasNotes) {
       // Draft-from-scratch mode
-      baseIntro = `You are an expert academic program review assistant for College of the Siskiyous. Your task is to generate a starter draft for the '${sectionTitle}' section of a program review for the ${programData.programName} program.
+      baseIntro = `You are an expert academic program review assistant for College of the Siskiyous. Generate a concise starter draft for the '${sectionTitle}' section of a program review for the ${programData.programName} program.
 
 ${citationRules}
 
-Generate a starter draft for this section using ONLY the provided institutional data. If no relevant data is available for a topic, state: 'No institutional data available for this area — please add your own observations.' Do not fabricate or assume any facts not present in the provided data.`;
-      modeInstruction = `Write 2-3 professional paragraphs that address the section description: "${sectionDescription}"`;
+IMPORTANT:
+- Write 2-3 SHORT paragraphs (3-5 sentences each). Be direct and specific.
+- ONLY cite sources that are directly about ${programData.programName}. Ignore sources about other programs.
+- If no relevant data exists, say so briefly. Do not pad with generic statements.
+- Do not fabricate facts not in the provided data.`;
+      modeInstruction = `Address: "${sectionDescription}"`;
     } else {
       // Expand/refine mode
-      baseIntro = `You are an expert academic program review assistant for College of the Siskiyous. Your task is to act as a writing partner to a faculty member.
-They have provided notes for the '${sectionTitle}' section of their program review for the ${programData.programName} program.
-Your goal is to expand their notes into well-written, professional paragraphs.
-Integrate insights from the provided institutional data to support or add context to the user's points.
-Do NOT introduce new topics not mentioned in the user's notes. Focus on elaborating what is provided.
+      baseIntro = `You are a writing partner for a faculty member at College of the Siskiyous. Expand their notes for the '${sectionTitle}' section of a ${programData.programName} program review into professional paragraphs.
 
-${citationRules}`;
+${citationRules}
+
+IMPORTANT:
+- Keep it concise — 2-3 short paragraphs max. Do not pad or repeat.
+- ONLY cite sources directly about ${programData.programName}. Ignore other programs' data.
+- Do NOT introduce topics not in the user's notes.`;
       modeInstruction = `User's notes: "${userNotes}"`;
     }
 

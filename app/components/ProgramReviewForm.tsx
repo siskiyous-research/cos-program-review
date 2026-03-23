@@ -3,7 +3,6 @@
 import { ReviewSection } from './ReviewSection';
 import { ReviewTemplateItem, Citation } from '@/lib/types';
 import { DocumentTextIcon } from './icons/DocumentTextIcon';
-import { BookOpenIcon } from './icons/BookOpenIcon';
 
 interface ProgramReviewFormProps {
   programName: string;
@@ -13,13 +12,17 @@ interface ProgramReviewFormProps {
   onAiAssist: (sectionId: string) => void;
   isGeneratingSection: string | null;
   onExport: () => void;
-  onGenerateSummary: () => void;
-  isGeneratingSummary: boolean;
+  onPreview: () => void;
+  onSubmit: () => void;
+  onSaveAll: () => void;
   sectionCitations: Record<string, Citation[]>;
   sectionGuidance: Record<string, string>;
   onGetGuidance: (sectionId: string) => void;
   isGeneratingGuidance: string | null;
   saveStatus?: 'idle' | 'saving' | 'saved' | 'error';
+  onSaveSection: (sectionId: string) => void;
+  onSaveToSharePoint: () => void;
+  sharePointStatus?: 'idle' | 'saving' | 'saved' | 'error';
 }
 
 export const ProgramReviewForm: React.FC<ProgramReviewFormProps> = ({
@@ -30,13 +33,17 @@ export const ProgramReviewForm: React.FC<ProgramReviewFormProps> = ({
   onAiAssist,
   isGeneratingSection,
   onExport,
-  onGenerateSummary,
-  isGeneratingSummary,
+  onPreview,
+  onSubmit,
+  onSaveAll,
   sectionCitations,
   sectionGuidance,
   onGetGuidance,
   isGeneratingGuidance,
   saveStatus,
+  onSaveSection,
+  onSaveToSharePoint,
+  sharePointStatus,
 }) => {
   return (
     <div className="space-y-8">
@@ -47,7 +54,7 @@ export const ProgramReviewForm: React.FC<ProgramReviewFormProps> = ({
         </h2>
         <p className="mt-2 text-slate-600">
           Complete each section below. You can write your own thoughts or use the
-          AI Assistant to help you draft content based on the program's data.
+          AI Assistant to help you draft content based on the program&apos;s data.
         </p>
       </div>
 
@@ -66,6 +73,7 @@ export const ProgramReviewForm: React.FC<ProgramReviewFormProps> = ({
           onGetGuidance={() => onGetGuidance(section.id)}
           isGeneratingGuidance={isGeneratingGuidance === section.id}
           saveStatus={saveStatus}
+          onSave={() => onSaveSection(section.id)}
         />
       ))}
 
@@ -74,24 +82,80 @@ export const ProgramReviewForm: React.FC<ProgramReviewFormProps> = ({
           Finalize Your Review
         </h3>
         <p className="text-slate-500 mb-4">
-          Once you have completed all sections, you can export the full document or
-          generate an executive summary.
+          Save all sections, preview the full document, or submit for review.
         </p>
         <div className="flex flex-col sm:flex-row gap-4">
           <button
-            onClick={onExport}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-slate-600 text-white font-semibold rounded-md hover:bg-slate-700 disabled:bg-slate-400 transition-colors duration-200 shadow-sm hover:shadow-md"
+            onClick={onSaveAll}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-slate-600 text-white font-semibold rounded-md hover:bg-slate-700 transition-colors duration-200 shadow-sm hover:shadow-md"
           >
-            <DocumentTextIcon className="w-5 h-5" />
-            Export Full Review
+            {saveStatus === 'saving' ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                Saving...
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                </svg>
+                Save All Sections
+              </>
+            )}
           </button>
           <button
-            onClick={onGenerateSummary}
-            disabled={isGeneratingSummary}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors duration-200 shadow-sm hover:shadow-md"
+            onClick={onPreview}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors duration-200 shadow-sm hover:shadow-md"
           >
-            <BookOpenIcon className="w-5 h-5" />
-            {isGeneratingSummary ? 'Generating...' : 'Generate Executive Summary'}
+            <DocumentTextIcon className="w-5 h-5" />
+            Preview Review
+          </button>
+          <button
+            onClick={onExport}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-slate-500 text-white font-semibold rounded-md hover:bg-slate-600 transition-colors duration-200 shadow-sm hover:shadow-md"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export HTML
+          </button>
+          <button
+            onClick={onSubmit}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition-colors duration-200 shadow-sm hover:shadow-md"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            Submit Review
+          </button>
+          <button
+            onClick={onSaveToSharePoint}
+            disabled={sharePointStatus === 'saving'}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 font-semibold rounded-md transition-colors duration-200 shadow-sm hover:shadow-md ${
+              sharePointStatus === 'saved'
+                ? 'bg-green-600 text-white'
+                : sharePointStatus === 'error'
+                  ? 'bg-red-600 text-white'
+                  : 'bg-purple-600 text-white hover:bg-purple-700 disabled:bg-slate-400'
+            }`}
+          >
+            {sharePointStatus === 'saving' ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                Saving...
+              </>
+            ) : sharePointStatus === 'saved' ? (
+              'Saved to SharePoint'
+            ) : sharePointStatus === 'error' ? (
+              'SharePoint Error'
+            ) : (
+              <>
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                Save to SharePoint
+              </>
+            )}
           </button>
         </div>
       </div>

@@ -14,6 +14,7 @@ import {
   PROGRAM_LIST,
 } from '@/lib/constants';
 import { AccjcFeedback } from './AccjcFeedback';
+import { DropZone } from './DropZone';
 import { useAutoSave } from '@/app/hooks/useAutoSave';
 
 type ReviewType = 'annual' | 'comprehensive_instructional' | 'comprehensive_non_instructional';
@@ -94,7 +95,7 @@ export default function ReviewApp({ user }: ReviewAppProps) {
         : NON_INSTRUCTIONAL_COMPREHENSIVE_TEMPLATE;
 
   // Auto-save hook
-  const { saveStatus, markClean } = useAutoSave({
+  const { saveStatus, flushSave, markClean } = useAutoSave({
     reviewId,
     reviewSections,
     sectionCitations,
@@ -160,25 +161,23 @@ export default function ReviewApp({ user }: ReviewAppProps) {
   }, [kbFiles, knowledgeBaseNotes]);
 
   /**
-   * Initialize program data by calling the API
+   * Initialize review for selected program
    */
   const initializeData = useCallback(async () => {
     if (!programName) return;
     setIsLoadingData(true);
     setError(null);
     try {
-      const response = await fetch('/api/generate-program-data', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ programName }),
+      // Set minimal program data (real data will come from ZogoTech later)
+      setProgramData({
+        programName,
+        summary: { strengths: [], weaknesses: [] },
+        enrollment: [],
+        completionRate: 0,
+        jobPlacementRate: 0,
+        demographics: {},
       });
 
-      const result = await response.json();
-      if (!result.ok) {
-        throw new Error(result.error || 'Failed to generate program data');
-      }
-
-      setProgramData(result.data);
       const initialSections = currentTemplate.reduce(
         (acc, section) => {
           acc[section.id] = '';
@@ -191,15 +190,15 @@ export default function ReviewApp({ user }: ReviewAppProps) {
       setChatHistory([
         {
           role: 'model',
-          content: `Hello! I'm here to help you with your program review for the ${programName} department. Ask me anything about the provided data.`,
+          content: `Hello! I'm here to help you with your program review for the ${programName} department. Ask me anything about institutional data, policies, or accreditation standards.`,
         },
       ]);
 
-      // Load/create review after program data is ready
+      // Load/create review
       await loadReview(programName, reviewType);
     } catch (e) {
-      console.error('Failed to initialize program data:', e);
-      setError('An error occurred while fetching program data. Please check your API key and try again.');
+      console.error('Failed to initialize:', e);
+      setError('An error occurred while loading. Please try again.');
     } finally {
       setIsLoadingData(false);
     }
@@ -461,28 +460,238 @@ export default function ReviewApp({ user }: ReviewAppProps) {
       .join('\n\n---\n\n');
   };
 
-  const handleExportReview = () => {
-    const fullText = getFullReviewText();
+  const reviewTypeLabel =
+    reviewType === 'annual'
+      ? 'Annual Program Review'
+      : reviewType === 'comprehensive_instructional'
+        ? 'Comprehensive Program Review (Instructional)'
+        : 'Comprehensive Program Review (Non-Instructional)';
+
+  const buildReviewHTML = () => {
+    const sections = currentTemplate
+      .map(
+        (section) =>
+          `<div class="section">
+            <h2>${section.title}</h2>
+            <div class="content">${reviewSections[section.id] || '<p><em>No content provided.</em></p>'}</div>
+          </div>`
+      )
+      .join('');
+
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>${programName} - ${reviewTypeLabel}</title>
+  <style>
+    @media print { .no-print { display: none; } .section { page-break-inside: avoid; } }
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; line-height: 1.7; padding: 2rem 3rem; max-width: 900px; margin: 0 auto; color: #1e293b; }
+    .header { text-align: center; border-bottom: 3px solid #1e40af; padding-bottom: 1.5rem; margin-bottom: 2rem; }
+    .header h1 { color: #1e3a8a; font-size: 1.75rem; margin: 0; }
+    .header p { color: #64748b; margin: 0.25rem 0 0; }
+    .meta { display: flex; justify-content: space-between; font-size: 0.875rem; color: #64748b; margin-bottom: 2rem; }
+    h2 { color: #1e40af; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; margin-top: 2.5rem; font-size: 1.25rem; }
+    .content { margin-top: 0.75rem; }
+    .content p { margin: 0.5rem 0; }
+    .content ul, .content ol { margin: 0.5rem 0; padding-left: 1.5rem; }
+    .content li { margin: 0.25rem 0; }
+    .content img { max-width: 100%; border-radius: 0.5rem; margin: 1rem 0; }
+    .content blockquote { border-left: 4px solid #cbd5e1; padding-left: 1rem; margin: 1rem 0; color: #475569; }
+    a { color: #2563eb; }
+    .print-btn { position: fixed; top: 1rem; right: 1rem; padding: 0.5rem 1.5rem; background: #1e40af; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-size: 0.875rem; }
+    .print-btn:hover { background: #1e3a8a; }
+  </style>
+</head>
+<body>
+  <button class="print-btn no-print" onclick="window.print()">Print / Save as PDF</button>
+  <div class="header">
+    <img src="${window.location.origin}/cos-logo.png" alt="College of the Siskiyous" style="height: 80px; margin: 0 auto 0.75rem;" />
+    <h1>College of the Siskiyous</h1>
+    <p>${reviewTypeLabel}</p>
+  </div>
+  <div class="meta">
+    <span><strong>Program:</strong> ${programName}</span>
+    <span><strong>Date:</strong> ${new Date().toLocaleDateString()}</span>
+  </div>
+  ${sections}
+</body>
+</html>`;
+  };
+
+  const handlePreviewReview = () => {
+    const html = buildReviewHTML();
     const newWindow = window.open('', '_blank');
     if (newWindow) {
-      newWindow.document.write(`
-        <html>
-          <head>
-            <title>${programName} Program Review</title>
-            <style>
-              body { font-family: sans-serif; line-height: 1.6; padding: 2rem; }
-              h1 { color: #1e3a8a; }
-              h2 { color: #1e40af; border-bottom: 2px solid #ddd; padding-bottom: 0.5rem; margin-top: 2rem;}
-              pre { background-color: #f4f4f5; padding: 1rem; border-radius: 0.5rem; white-space: pre-wrap; word-wrap: break-word; }
-            </style>
-          </head>
-          <body>
-            <h1>${programName} Program Review</h1>
-            <pre>${fullText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
-          </body>
-        </html>
-      `);
+      newWindow.document.write(html);
       newWindow.document.close();
+    }
+  };
+
+  const handleExportReview = () => {
+    const html = buildReviewHTML();
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${programName} - ${reviewTypeLabel}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleSubmitReview = () => {
+    const subject = encodeURIComponent(`[Program Review] ${programName} - ${reviewTypeLabel} - ${new Date().toLocaleDateString()}`);
+    const body = encodeURIComponent(
+      `Hello,\n\nPlease find the program review for ${programName} (${reviewTypeLabel}).\n\nReview Link: ${window.location.href}\n\nThank you,\n${user.email || ''}`
+    );
+    window.location.href = `mailto:JT@siskiyous.edu?subject=${subject}&body=${body}`;
+  };
+
+  const handleSaveAll = () => {
+    flushSave();
+  };
+
+  const [sharePointStatus, setSharePointStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [isProcessingDrop, setIsProcessingDrop] = useState(false);
+
+  const handleFileDrop = async (files: File[]) => {
+    if (files.length === 0) return;
+    setIsProcessingDrop(true);
+    try {
+      const formData = new FormData();
+      formData.append('program', programName);
+      for (const file of files) {
+        formData.append('files', file);
+      }
+      const res = await fetch('/api/kb-upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const result = await res.json();
+      if (!result.ok) throw new Error(result.error);
+
+      // Use extracted text as the first section's content
+      const extractedText = result.files.map((f: { name: string; textContent: string }) =>
+        f.textContent
+      ).join('\n\n');
+
+      if (extractedText.trim()) {
+        // Put content into the first empty section, or the first section
+        const firstEmptySection = currentTemplate.find(s => !reviewSections[s.id]?.trim());
+        const targetSection = firstEmptySection || currentTemplate[0];
+        if (targetSection) {
+          setReviewSections(prev => ({
+            ...prev,
+            [targetSection.id]: extractedText,
+          }));
+        }
+      }
+    } catch (e) {
+      console.error('File drop processing failed:', e);
+      setError('Failed to process uploaded file. Please try again.');
+    } finally {
+      setIsProcessingDrop(false);
+    }
+  };
+
+  // Map app program names to exact SharePoint folder names
+  const sharePointFolderMap: Record<string, { parent: string; folder: string }> = {
+    // Instructional
+    'Administration of Justice': { parent: 'Instructional Program Reviews', folder: 'Administration of Justice (CTE)' },
+    'Alcohol & Drug Studies (ADHS)': { parent: 'Instructional Program Reviews', folder: 'Alcohol & Drug Studies (CTE)' },
+    'Business and Computer Sciences': { parent: 'Instructional Program Reviews', folder: 'Business and Computer Sciences (CTE)' },
+    'Early Childhood Education': { parent: 'Instructional Program Reviews', folder: 'Early Childhood Education (CTE)' },
+    'Emergency Medical Services (EMS)': { parent: 'Instructional Program Reviews', folder: 'EMS (CTE)' },
+    'Fine and Performing Arts': { parent: 'Instructional Program Reviews', folder: 'Fine and Performing Arts' },
+    'Fire': { parent: 'Instructional Program Reviews', folder: 'Fire (CTE)' },
+    'Health, Physical Education and Recreation': { parent: 'Instructional Program Reviews', folder: 'Health, Physical Education and Recreation' },
+    'Humanities and Social Sciences': { parent: 'Instructional Program Reviews', folder: 'Humanities and Social Sciences' },
+    'Math': { parent: 'Instructional Program Reviews', folder: 'Math' },
+    'Modern Languages': { parent: 'Instructional Program Reviews', folder: 'Modern Languages (MLAN)' },
+    'Nursing': { parent: 'Instructional Program Reviews', folder: 'Nursing (CTE)' },
+    'Sciences': { parent: 'Instructional Program Reviews', folder: 'Sciences' },
+    'Welding': { parent: 'Instructional Program Reviews', folder: 'Welding (CTE)' },
+    // Non-Instructional
+    'Academic Affairs Division': { parent: 'Non Instructional Program Reviews', folder: 'Academic Affairs' },
+    'Academic Success Center (ASC)': { parent: 'Non Instructional Program Reviews', folder: 'Academic Success Center' },
+    'Admissions and Records': { parent: 'Non Instructional Program Reviews', folder: 'Admissions and Records' },
+    'Basecamp': { parent: 'Non Instructional Program Reviews', folder: 'Basecamp' },
+    'Bookstore': { parent: 'Non Instructional Program Reviews', folder: 'Bookstore' },
+    'Counseling & Advising - Transfer & Orientation': { parent: 'Non Instructional Program Reviews', folder: 'Counseling' },
+    'Distance Learning': { parent: 'Non Instructional Program Reviews', folder: 'Distance Learning' },
+    'FIELD Program (ISA)': { parent: 'Non Instructional Program Reviews', folder: 'FIELD' },
+    'Financial Aid, Veterans and AB540': { parent: 'Non Instructional Program Reviews', folder: 'Financial Aid' },
+    'Food Services': { parent: 'Non Instructional Program Reviews', folder: 'Food Services' },
+    'Human Resources': { parent: 'Non Instructional Program Reviews', folder: 'Human Resources' },
+    'Library': { parent: 'Non Instructional Program Reviews', folder: 'Library' },
+    'Maintenance, Operations & Transportation': { parent: 'Non Instructional Program Reviews', folder: 'Maintenance, Operations & Transportation' },
+    'Institutional Research': { parent: 'Non Instructional Program Reviews', folder: 'Planning Assessment & Research' },
+    "President's Office": { parent: 'Non Instructional Program Reviews', folder: "President's Office" },
+    'Public Information Office': { parent: 'Non Instructional Program Reviews', folder: 'Public Information Office' },
+    'Student Access Services': { parent: 'Non Instructional Program Reviews', folder: 'Student Access Services (SAS)' },
+    'Student Housing': { parent: 'Non Instructional Program Reviews', folder: 'Student Lodges' },
+    'Student Services Division': { parent: 'Non Instructional Program Reviews', folder: 'Student Services' },
+    'Technology Services': { parent: 'Non Instructional Program Reviews', folder: 'Technology Services' },
+    'Dual Enrollment': { parent: 'Non Instructional Program Reviews', folder: 'Dual Enrollment' },
+    'Student Equity & Achievement': { parent: 'Non Instructional Program Reviews', folder: 'Student Equity & Achievement' },
+    'Outreach & Retention': { parent: 'Non Instructional Program Reviews', folder: 'Outreach & Retention' },
+    'Special Populations – EOPS, CARE CalWORKs, NextUP, TRIO': { parent: 'Non Instructional Program Reviews', folder: 'Special Populations' },
+    'Student Services – AB 19, Health Clinic, International Students, Mental Health': { parent: 'Non Instructional Program Reviews', folder: 'Student Services - AB19 Health Mental Health' },
+    'Student Life': { parent: 'Non Instructional Program Reviews', folder: 'Student Life' },
+    'Fiscal Services': { parent: 'Non Instructional Program Reviews', folder: 'Fiscal Services' },
+    'Administrative Services Division': { parent: 'Non Instructional Program Reviews', folder: 'Administrative Services' },
+  };
+
+  const handleSaveToSharePoint = async () => {
+    setSharePointStatus('saving');
+    try {
+      const html = buildReviewHTML();
+      const mapping = sharePointFolderMap[programName];
+      const category = getProgramCategory(programName);
+      const isInstructional = category === 'instructional';
+      const parentFolder = mapping?.parent || (isInstructional ? 'Instructional Program Reviews' : 'Non Instructional Program Reviews');
+      const programFolder = mapping?.folder || programName;
+      const folderPath = `/Shared Documents/General/${parentFolder}/${programFolder}`;
+      const now = new Date();
+      const date = now.toLocaleDateString().replace(/\//g, '-');
+      const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).replace(/[: ]/g, '');
+      const fileName = `${programName} - ${reviewTypeLabel} - ${date}_${time}.html`;
+      const res = await fetch('/api/sharepoint', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileName,
+          content: html,
+          programName,
+          reviewType,
+          folderPath,
+        }),
+      });
+      const result = await res.json();
+      if (!result.ok) throw new Error(result.error);
+      setSharePointStatus('saved');
+      setTimeout(() => setSharePointStatus('idle'), 3000);
+    } catch (e) {
+      console.error('SharePoint save failed:', e);
+      setSharePointStatus('error');
+      setTimeout(() => setSharePointStatus('idle'), 3000);
+    }
+  };
+
+  const handleSaveSection = async (sectionId: string) => {
+    if (!reviewId) return;
+    try {
+      await fetch(`/api/reviews/${reviewId}/sections`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sectionId,
+          content: reviewSections[sectionId] || '',
+          citations: sectionCitations[sectionId] || null,
+          guidance: sectionGuidance[sectionId] || null,
+        }),
+      });
+    } catch (e) {
+      console.error('Failed to save section:', e);
     }
   };
 
@@ -695,6 +904,9 @@ export default function ReviewApp({ user }: ReviewAppProps) {
               {/* ACCJC Integration: Show feedback on page load */}
               <AccjcFeedback sectionId="program_info" showCommonIssues={true} />
 
+              {/* Drop zone for existing reviews */}
+              <DropZone onFileDrop={handleFileDrop} isProcessing={isProcessingDrop} />
+
               <ProgramReviewForm
                 programName={programName}
                 reviewSections={reviewSections}
@@ -703,8 +915,12 @@ export default function ReviewApp({ user }: ReviewAppProps) {
                 onAiAssist={handleAiAssist}
                 isGeneratingSection={isGeneratingSection}
                 onExport={handleExportReview}
-                onGenerateSummary={handleGenerateSummary}
-                isGeneratingSummary={isGeneratingSummary}
+                onPreview={handlePreviewReview}
+                onSubmit={handleSubmitReview}
+                onSaveAll={handleSaveAll}
+                onSaveToSharePoint={handleSaveToSharePoint}
+                sharePointStatus={sharePointStatus}
+                onSaveSection={handleSaveSection}
                 sectionCitations={sectionCitations}
                 sectionGuidance={sectionGuidance}
                 onGetGuidance={handleGetGuidance}
