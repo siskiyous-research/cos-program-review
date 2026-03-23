@@ -2,7 +2,7 @@
  * Program Data Queries
  * Ports Python query functions to TypeScript/mssql
  * Queries pvc_StudentClasses view from Zogotech SQL Server
- * All queries run in parallel for performance
+ * Column names match the actual view exactly (from working Python dashboard)
  */
 
 import { runQuery } from './zogotech-db';
@@ -28,22 +28,33 @@ interface QueryParams {
 }
 
 /**
+ * Build base WHERE clause matching Python's build_where()
+ * credit_only=true uses Academic Level = 'Credit' only (for success rate queries)
+ */
+function baseWhere(creditOnly = false): string {
+  if (creditOnly) {
+    return "[Academic Level] = 'Credit' AND Enrolled = 'Yes'";
+  }
+  return "[Academic Level] IN ('Credit', 'Non Credit') AND Enrolled = 'Yes'";
+}
+
+/**
  * Enrollment trend by term and academic year
  */
 async function fetchEnrollment(subject: string, yearsAgo: number): Promise<EnrollmentRecord[]> {
-  const query = `
+  const results = await runQuery(`
     SELECT
-      CAST(Term AS VARCHAR) AS term,
-      CAST(TermOrder AS INT) AS termOrder,
-      CAST(AcademicYear AS VARCHAR) AS academicYear,
+      [Term] AS term,
+      [Term Order] AS termOrder,
+      [Academic Year] AS academicYear,
       COUNT(*) AS count
     FROM pvc_StudentClasses
-    WHERE SubjectCode = @subject
-      AND YearsAgo <= @yearsAgo
-    GROUP BY Term, TermOrder, AcademicYear
-    ORDER BY TermOrder DESC
-  `;
-  const results = await runQuery(query, { subject, yearsAgo });
+    WHERE ${baseWhere()}
+      AND Subject = @subject
+      AND [Academic Years Ago] <= @yearsAgo
+    GROUP BY [Term], [Term Order], [Academic Year]
+    ORDER BY [Term Order]
+  `, { subject, yearsAgo });
   return results;
 }
 
@@ -55,20 +66,32 @@ async function fetchSuccessRates(
   yearsAgo: number,
   semester: 'Fall' | 'Spring' | 'Summer/Winter'
 ): Promise<SuccessRecord[]> {
-  const query = `
+  let semesterClause: string;
+  if (semester === 'Summer/Winter') {
+    semesterClause = "AND [Semester] IN ('Summer', 'Winter')";
+  } else {
+    semesterClause = `AND [Semester] = @semester`;
+  }
+
+  const params: Record<string, any> = { subject, yearsAgo };
+  if (semester !== 'Summer/Winter') {
+    params.semester = semester;
+  }
+
+  const results = await runQuery(`
     SELECT
-      CAST(Term AS VARCHAR) AS term,
+      [Term] AS term,
       COUNT(*) AS count,
-      CAST(ROUND(SUM(CASE WHEN Successful = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 1) AS FLOAT) AS successRate,
-      CAST(ROUND(SUM(CASE WHEN Completed = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 1) AS FLOAT) AS completionRate
+      CAST(ROUND(SUM(CAST([Total Successes] AS FLOAT)) * 100.0 / COUNT(*), 1) AS FLOAT) AS successRate,
+      CAST(ROUND(SUM(CAST([Total Completions] AS FLOAT)) * 100.0 / COUNT(*), 1) AS FLOAT) AS completionRate
     FROM pvc_StudentClasses
-    WHERE SubjectCode = @subject
-      AND YearsAgo <= @yearsAgo
-      AND Semester = @semester
-    GROUP BY Term
-    ORDER BY Term DESC
-  `;
-  const results = await runQuery(query, { subject, yearsAgo, semester });
+    WHERE ${baseWhere(true)}
+      AND Subject = @subject
+      AND [Academic Years Ago] <= @yearsAgo
+      ${semesterClause}
+    GROUP BY [Term], [Term Order]
+    ORDER BY [Term Order]
+  `, params);
   return results;
 }
 
@@ -76,58 +99,61 @@ async function fetchSuccessRates(
  * Success rates by ethnicity over time
  */
 async function fetchSuccessByEthnicity(subject: string, yearsAgo: number): Promise<EthnicitySuccessRecord[]> {
-  const query = `
+  const results = await runQuery(`
     SELECT
-      CAST(AcademicYear AS VARCHAR) AS academicYear,
-      CAST(Ethnicity AS VARCHAR) AS ethnicity,
+      [Academic Year] AS academicYear,
+      [Ethnicity] AS ethnicity,
       COUNT(*) AS count,
-      CAST(ROUND(SUM(CASE WHEN Successful = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 1) AS FLOAT) AS successRate
+      CAST(ROUND(SUM(CAST([Total Successes] AS FLOAT)) * 100.0 / COUNT(*), 1) AS FLOAT) AS successRate
     FROM pvc_StudentClasses
-    WHERE SubjectCode = @subject
-      AND YearsAgo <= @yearsAgo
-    GROUP BY AcademicYear, Ethnicity
-    ORDER BY AcademicYear DESC, Ethnicity
-  `;
-  const results = await runQuery(query, { subject, yearsAgo });
+    WHERE ${baseWhere(true)}
+      AND Subject = @subject
+      AND [Academic Years Ago] <= @yearsAgo
+    GROUP BY [Academic Year], [Ethnicity]
+    ORDER BY [Academic Year], [Ethnicity]
+  `, { subject, yearsAgo });
   return results;
 }
 
 /**
- * Demographics by ethnicity (overall snapshot)
+ * Demographics by ethnicity (unique students)
  */
 async function fetchDemographics(subject: string, yearsAgo: number): Promise<DemographicRecord[]> {
-  const query = `
+  const results = await runQuery(`
     SELECT
-      CAST(Ethnicity AS VARCHAR) AS ethnicity,
-      COUNT(*) AS count,
-      CAST(ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM pvc_StudentClasses WHERE SubjectCode = @subject AND YearsAgo <= @yearsAgo), 1) AS FLOAT) AS pct
+      [Ethnicity] AS ethnicity,
+      COUNT(DISTINCT [Student Surrogate Key]) AS count,
+      CAST(ROUND(
+        COUNT(DISTINCT [Student Surrogate Key]) * 100.0 /
+        (SELECT COUNT(DISTINCT [Student Surrogate Key]) FROM pvc_StudentClasses
+         WHERE ${baseWhere()} AND Subject = @subject AND [Academic Years Ago] <= @yearsAgo),
+      1) AS FLOAT) AS pct
     FROM pvc_StudentClasses
-    WHERE SubjectCode = @subject
-      AND YearsAgo <= @yearsAgo
-    GROUP BY Ethnicity
+    WHERE ${baseWhere()}
+      AND Subject = @subject
+      AND [Academic Years Ago] <= @yearsAgo
+    GROUP BY [Ethnicity]
     ORDER BY count DESC
-  `;
-  const results = await runQuery(query, { subject, yearsAgo });
+  `, { subject, yearsAgo });
   return results;
 }
 
 /**
- * Gender distribution by academic year
+ * Gender distribution by academic year (unique students)
  */
 async function fetchGender(subject: string, yearsAgo: number): Promise<GenderRecord[]> {
-  const query = `
+  const results = await runQuery(`
     SELECT
-      CAST(AcademicYear AS VARCHAR) AS academicYear,
-      CAST(Gender AS VARCHAR) AS gender,
-      COUNT(*) AS count
+      [Academic Year] AS academicYear,
+      [Gender] AS gender,
+      COUNT(DISTINCT [Student Surrogate Key]) AS count
     FROM pvc_StudentClasses
-    WHERE SubjectCode = @subject
-      AND YearsAgo <= @yearsAgo
-      AND Gender IS NOT NULL
-    GROUP BY AcademicYear, Gender
-    ORDER BY AcademicYear DESC, Gender
-  `;
-  const results = await runQuery(query, { subject, yearsAgo });
+    WHERE ${baseWhere()}
+      AND Subject = @subject
+      AND [Academic Years Ago] <= @yearsAgo
+    GROUP BY [Academic Year], [Gender]
+    ORDER BY [Academic Year], [Gender]
+  `, { subject, yearsAgo });
   return results;
 }
 
@@ -135,33 +161,18 @@ async function fetchGender(subject: string, yearsAgo: number): Promise<GenderRec
  * Age group distribution by academic year
  */
 async function fetchAgeGroups(subject: string, yearsAgo: number): Promise<AgeGroupRecord[]> {
-  const query = `
+  const results = await runQuery(`
     SELECT
-      CAST(AcademicYear AS VARCHAR) AS academicYear,
-      CAST(CASE
-        WHEN Age < 20 THEN 'Under 20'
-        WHEN Age BETWEEN 20 AND 24 THEN '20-24'
-        WHEN Age BETWEEN 25 AND 29 THEN '25-29'
-        WHEN Age BETWEEN 30 AND 39 THEN '30-39'
-        WHEN Age BETWEEN 40 AND 49 THEN '40-49'
-        ELSE '50+'
-      END AS VARCHAR) AS ageGroup,
+      [Academic Year] AS academicYear,
+      [Age Group] AS ageGroup,
       COUNT(*) AS count
     FROM pvc_StudentClasses
-    WHERE SubjectCode = @subject
-      AND YearsAgo <= @yearsAgo
-      AND Age IS NOT NULL
-    GROUP BY AcademicYear, CASE
-      WHEN Age < 20 THEN 'Under 20'
-      WHEN Age BETWEEN 20 AND 24 THEN '20-24'
-      WHEN Age BETWEEN 25 AND 29 THEN '25-29'
-      WHEN Age BETWEEN 30 AND 39 THEN '30-39'
-      WHEN Age BETWEEN 40 AND 49 THEN '40-49'
-      ELSE '50+'
-    END
-    ORDER BY AcademicYear DESC, ageGroup
-  `;
-  const results = await runQuery(query, { subject, yearsAgo });
+    WHERE ${baseWhere()}
+      AND Subject = @subject
+      AND [Academic Years Ago] <= @yearsAgo
+    GROUP BY [Academic Year], [Age Group]
+    ORDER BY [Academic Year]
+  `, { subject, yearsAgo });
   return results;
 }
 
@@ -169,19 +180,24 @@ async function fetchAgeGroups(subject: string, yearsAgo: number): Promise<AgeGro
  * Modality (Distance Ed vs In-Person) with success rates
  */
 async function fetchModality(subject: string, yearsAgo: number): Promise<ModalityRecord[]> {
-  const query = `
+  const results = await runQuery(`
     SELECT
-      CAST(AcademicYear AS VARCHAR) AS academicYear,
-      CAST(CASE WHEN OnlineIndicator = 1 THEN 'Distance Ed' ELSE 'In-Person' END AS VARCHAR) AS modeGroup,
+      [Academic Year] AS academicYear,
+      CASE WHEN [Instructional Mode] LIKE '%Internet%'
+           OR [Instructional Mode] LIKE '%Dist%'
+        THEN 'Distance Ed' ELSE 'In-Person' END AS modeGroup,
       COUNT(*) AS count,
-      CAST(ROUND(SUM(CASE WHEN Successful = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 1) AS FLOAT) AS successRate
+      CAST(ROUND(SUM(CAST([Total Successes] AS FLOAT)) * 100.0 / COUNT(*), 1) AS FLOAT) AS successRate
     FROM pvc_StudentClasses
-    WHERE SubjectCode = @subject
-      AND YearsAgo <= @yearsAgo
-    GROUP BY AcademicYear, OnlineIndicator
-    ORDER BY AcademicYear DESC, modeGroup
-  `;
-  const results = await runQuery(query, { subject, yearsAgo });
+    WHERE ${baseWhere(true)}
+      AND Subject = @subject
+      AND [Academic Years Ago] <= @yearsAgo
+    GROUP BY [Academic Year],
+      CASE WHEN [Instructional Mode] LIKE '%Internet%'
+           OR [Instructional Mode] LIKE '%Dist%'
+        THEN 'Distance Ed' ELSE 'In-Person' END
+    ORDER BY [Academic Year]
+  `, { subject, yearsAgo });
   return results;
 }
 
@@ -189,39 +205,45 @@ async function fetchModality(subject: string, yearsAgo: number): Promise<Modalit
  * Retention: Year 1 vs Year 2 cohorts
  */
 async function fetchRetention(subject: string, yearsAgo: number): Promise<RetentionRecord[]> {
-  const query = `
+  const results = await runQuery(`
     SELECT
-      CAST(CohortTerm AS VARCHAR) AS cohortTerm,
-      CAST(TermIndex AS INT) AS termIndex,
-      COUNT(DISTINCT StudentId) AS count
+      [Starting Cohort Term] AS cohortTerm,
+      [Term Index] AS termIndex,
+      COUNT(DISTINCT [Student Surrogate Key]) AS count
     FROM pvc_StudentClasses
-    WHERE SubjectCode = @subject
-      AND YearsAgo <= @yearsAgo
-      AND CohortTerm IS NOT NULL
-    GROUP BY CohortTerm, TermIndex
-    ORDER BY CohortTerm DESC, TermIndex
-  `;
-  const results = await runQuery(query, { subject, yearsAgo });
+    WHERE ${baseWhere()}
+      AND Subject = @subject
+      AND [Academic Years Ago] <= @yearsAgo
+      AND [Term Index] IN ('Year 1, Term 1', 'Year 2, Term 1')
+    GROUP BY [Starting Cohort Term], [Starting Cohort Term Order], [Term Index]
+    ORDER BY [Starting Cohort Term Order], [Term Index]
+  `, { subject, yearsAgo });
   return results;
 }
 
 /**
- * Top high schools by enrollment
+ * Top high schools by enrollment (unique students)
  */
 async function fetchHighSchools(subject: string, yearsAgo: number, topN: number = 20): Promise<HighSchoolRecord[]> {
-  const query = `
-    SELECT TOP @topN
-      CAST(HighSchool AS VARCHAR) AS school,
-      COUNT(*) AS count,
-      CAST(ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM pvc_StudentClasses WHERE SubjectCode = @subject AND YearsAgo <= @yearsAgo), 1) AS FLOAT) AS pct
+  const results = await runQuery(`
+    SELECT TOP ${topN}
+      [High School Name] AS school,
+      COUNT(DISTINCT [Student Surrogate Key]) AS count,
+      CAST(ROUND(
+        COUNT(DISTINCT [Student Surrogate Key]) * 100.0 /
+        (SELECT COUNT(DISTINCT [Student Surrogate Key]) FROM pvc_StudentClasses
+         WHERE ${baseWhere()} AND Subject = @subject AND [Academic Years Ago] <= @yearsAgo),
+      1) AS FLOAT) AS pct
     FROM pvc_StudentClasses
-    WHERE SubjectCode = @subject
-      AND YearsAgo <= @yearsAgo
-      AND HighSchool IS NOT NULL
-    GROUP BY HighSchool
+    WHERE ${baseWhere()}
+      AND Subject = @subject
+      AND [Academic Years Ago] <= @yearsAgo
+      AND [High School Name] IS NOT NULL
+      AND [High School Name] != ''
+      AND [High School Name] != '(Blank)'
+    GROUP BY [High School Name]
     ORDER BY count DESC
-  `;
-  const results = await runQuery(query, { subject, yearsAgo, topN });
+  `, { subject, yearsAgo });
   return results;
 }
 
@@ -229,17 +251,17 @@ async function fetchHighSchools(subject: string, yearsAgo: number, topN: number 
  * FTES (Full-Time Equivalent Students) by academic year
  */
 async function fetchFTES(subject: string, yearsAgo: number): Promise<FTESRecord[]> {
-  const query = `
+  const results = await runQuery(`
     SELECT
-      CAST(AcademicYear AS VARCHAR) AS academicYear,
-      CAST(ROUND(SUM(FTES), 2) AS FLOAT) AS ftes
+      [Academic Year] AS academicYear,
+      CAST(ROUND(SUM([FTE EST]), 2) AS FLOAT) AS ftes
     FROM pvc_StudentClasses
-    WHERE SubjectCode = @subject
-      AND YearsAgo <= @yearsAgo
-    GROUP BY AcademicYear
-    ORDER BY AcademicYear DESC
-  `;
-  const results = await runQuery(query, { subject, yearsAgo });
+    WHERE ${baseWhere()}
+      AND Subject = @subject
+      AND [Academic Years Ago] <= @yearsAgo
+    GROUP BY [Academic Year]
+    ORDER BY [Academic Year]
+  `, { subject, yearsAgo });
   return results;
 }
 
@@ -247,40 +269,44 @@ async function fetchFTES(subject: string, yearsAgo: number): Promise<FTESRecord[
  * Course list with withdrawal rates
  */
 async function fetchCourseList(subject: string, yearsAgo: number, degreeApplicable: boolean): Promise<CourseRecord[]> {
-  const query = `
+  const daFilter = degreeApplicable ? "'Y'" : "'N'";
+  const results = await runQuery(`
     SELECT
-      CAST(CourseNumber AS VARCHAR) AS courseNumber,
-      CAST(Title AS VARCHAR) AS title,
+      [Subject and Course Number] AS courseNumber,
+      [Course Title] AS title,
       COUNT(*) AS count,
-      CAST(ROUND(SUM(CASE WHEN Withdrawn = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 1) AS FLOAT) AS withdrawalRate
+      CAST(ROUND(SUM(CAST([Total Withdrawals] AS FLOAT)) * 100.0 / COUNT(*), 1) AS FLOAT) AS withdrawalRate
     FROM pvc_StudentClasses
-    WHERE SubjectCode = @subject
-      AND YearsAgo <= @yearsAgo
-      AND DegreeApplicable = @degreeApplicable
-    GROUP BY CourseNumber, Title
-    ORDER BY count DESC
-  `;
-  const results = await runQuery(query, { subject, yearsAgo, degreeApplicable: degreeApplicable ? 1 : 0 });
+    WHERE ${baseWhere()}
+      AND Subject = @subject
+      AND [Academic Years Ago] <= @yearsAgo
+      AND [Degree Applicable Course] = ${daFilter}
+    GROUP BY [Subject and Course Number], [Course Title]
+    ORDER BY [Subject and Course Number], [Course Title]
+  `, { subject, yearsAgo });
   return results;
 }
 
 /**
- * Location (campus or online indicator)
+ * Location / campus code (unique students)
  */
 async function fetchLocation(subject: string, yearsAgo: number): Promise<LocationRecord[]> {
-  const query = `
+  const results = await runQuery(`
     SELECT
-      CAST(Location AS VARCHAR) AS location,
-      COUNT(*) AS count,
-      CAST(ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM pvc_StudentClasses WHERE SubjectCode = @subject AND YearsAgo <= @yearsAgo), 1) AS FLOAT) AS pct
+      [Location] AS location,
+      COUNT(DISTINCT [Student Surrogate Key]) AS count,
+      CAST(ROUND(
+        COUNT(DISTINCT [Student Surrogate Key]) * 100.0 /
+        (SELECT COUNT(DISTINCT [Student Surrogate Key]) FROM pvc_StudentClasses
+         WHERE ${baseWhere()} AND Subject = @subject AND [Academic Years Ago] <= @yearsAgo),
+      1) AS FLOAT) AS pct
     FROM pvc_StudentClasses
-    WHERE SubjectCode = @subject
-      AND YearsAgo <= @yearsAgo
-      AND Location IS NOT NULL
-    GROUP BY Location
+    WHERE ${baseWhere()}
+      AND Subject = @subject
+      AND [Academic Years Ago] <= @yearsAgo
+    GROUP BY [Location]
     ORDER BY count DESC
-  `;
-  const results = await runQuery(query, { subject, yearsAgo });
+  `, { subject, yearsAgo });
   return results;
 }
 
@@ -290,62 +316,57 @@ async function fetchLocation(subject: string, yearsAgo: number): Promise<Locatio
 export async function fetchProgramData(params: QueryParams): Promise<AggregatedProgramData> {
   const { subject, yearsAgo = 4 } = params;
 
-  try {
-    const [
-      enrollment,
-      successFall,
-      successSpring,
-      successSummerWinter,
-      successByEthnicity,
-      demographics,
-      gender,
-      ageGroups,
-      modality,
-      retention,
-      highSchools,
-      ftes,
-      degreeApplicableCourses,
-      notDegreeApplicableCourses,
-      location,
-    ] = await Promise.all([
-      fetchEnrollment(subject, yearsAgo),
-      fetchSuccessRates(subject, yearsAgo, 'Fall'),
-      fetchSuccessRates(subject, yearsAgo, 'Spring'),
-      fetchSuccessRates(subject, yearsAgo, 'Summer/Winter'),
-      fetchSuccessByEthnicity(subject, yearsAgo),
-      fetchDemographics(subject, yearsAgo),
-      fetchGender(subject, yearsAgo),
-      fetchAgeGroups(subject, yearsAgo),
-      fetchModality(subject, yearsAgo),
-      fetchRetention(subject, yearsAgo),
-      fetchHighSchools(subject, yearsAgo, 20),
-      fetchFTES(subject, yearsAgo),
-      fetchCourseList(subject, yearsAgo, true),
-      fetchCourseList(subject, yearsAgo, false),
-      fetchLocation(subject, yearsAgo),
-    ]);
+  const [
+    enrollment,
+    successFall,
+    successSpring,
+    successSummerWinter,
+    successByEthnicity,
+    demographics,
+    gender,
+    ageGroups,
+    modality,
+    retention,
+    highSchools,
+    ftes,
+    degreeApplicableCourses,
+    notDegreeApplicableCourses,
+    location,
+  ] = await Promise.all([
+    fetchEnrollment(subject, yearsAgo),
+    fetchSuccessRates(subject, yearsAgo, 'Fall'),
+    fetchSuccessRates(subject, yearsAgo, 'Spring'),
+    fetchSuccessRates(subject, yearsAgo, 'Summer/Winter'),
+    fetchSuccessByEthnicity(subject, yearsAgo),
+    fetchDemographics(subject, yearsAgo),
+    fetchGender(subject, yearsAgo),
+    fetchAgeGroups(subject, yearsAgo),
+    fetchModality(subject, yearsAgo),
+    fetchRetention(subject, yearsAgo),
+    fetchHighSchools(subject, yearsAgo, 20),
+    fetchFTES(subject, yearsAgo),
+    fetchCourseList(subject, yearsAgo, true),
+    fetchCourseList(subject, yearsAgo, false),
+    fetchLocation(subject, yearsAgo),
+  ]);
 
-    return {
-      subject,
-      fetchedAt: new Date().toISOString(),
-      enrollment,
-      successFall,
-      successSpring,
-      successSummerWinter,
-      successByEthnicity,
-      demographics,
-      gender,
-      ageGroups,
-      modality,
-      retention,
-      highSchools,
-      ftes,
-      degreeApplicableCourses,
-      notDegreeApplicableCourses,
-      location,
-    };
-  } catch (error) {
-    console.error('Failed to fetch program data:', error);
-    throw error;
-  }
+  return {
+    subject,
+    fetchedAt: new Date().toISOString(),
+    enrollment,
+    successFall,
+    successSpring,
+    successSummerWinter,
+    successByEthnicity,
+    demographics,
+    gender,
+    ageGroups,
+    modality,
+    retention,
+    highSchools,
+    ftes,
+    degreeApplicableCourses,
+    notDegreeApplicableCourses,
+    location,
+  };
 }
