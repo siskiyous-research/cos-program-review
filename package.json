@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "@types/cheerio": "^0.22.35",
-    "@types/mssql": "^2.3.1",
+    "@types/mssql": "^9.1.0",
     "@types/node": "^20.0.0",
     "@types/pdf-parse": "^1.1.5",
     "@types/react": "^18.2.0",
