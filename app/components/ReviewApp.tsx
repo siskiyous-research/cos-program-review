@@ -6,12 +6,13 @@ import { ProgramReviewForm } from './ProgramReviewForm';
 import { SummaryModal } from './SummaryModal';
 import { DirectorySidebar } from './DirectorySidebar';
 import { AuthHeader } from './AuthHeader';
-import { ChatMessage, ProgramData, HistoricalData, HistoricalReview, Citation } from '@/lib/types';
+import { ChatMessage, ProgramData, HistoricalData, HistoricalReview, Citation, AggregatedProgramData } from '@/lib/types';
 import {
   ANNUAL_PROGRAM_REVIEW_TEMPLATE,
   COMPREHENSIVE_PROGRAM_REVIEW_TEMPLATE,
   NON_INSTRUCTIONAL_COMPREHENSIVE_TEMPLATE,
   PROGRAM_LIST,
+  SUBJECT_CODE_MAP,
 } from '@/lib/constants';
 import { AccjcFeedback } from './AccjcFeedback';
 import { useAutoSave } from '@/app/hooks/useAutoSave';
@@ -47,6 +48,10 @@ export default function ReviewApp({ user }: ReviewAppProps) {
   const [sectionCitations, setSectionCitations] = useState<Record<string, Citation[]>>({});
   const [sectionGuidance, setSectionGuidance] = useState<Record<string, string>>({});
   const [isGeneratingGuidance, setIsGeneratingGuidance] = useState<string | null>(null);
+
+  // Institutional data dashboard state
+  const [aggregatedData, setAggregatedData] = useState<AggregatedProgramData | null>(null);
+  const [isDashboardLoading, setIsDashboardLoading] = useState(false);
 
   // Review persistence state
   const [reviewId, setReviewId] = useState<string | null>(null);
@@ -175,6 +180,22 @@ export default function ReviewApp({ user }: ReviewAppProps) {
 
       // Load/create review
       await loadReview(programName, reviewType);
+
+      // Fetch aggregated institutional data (non-blocking)
+      const subjectCode = SUBJECT_CODE_MAP[programName];
+      if (subjectCode) {
+        setIsDashboardLoading(true);
+        fetch(`/api/program-data?subject=${subjectCode}`)
+          .then(res => res.json())
+          .then(result => {
+            if (result.ok) setAggregatedData(result.data);
+            else setAggregatedData(null);
+          })
+          .catch(() => setAggregatedData(null))
+          .finally(() => setIsDashboardLoading(false));
+      } else {
+        setAggregatedData(null);
+      }
     } catch (e) {
       console.error('Failed to initialize:', e);
       setError('An error occurred while loading. Please try again.');
@@ -781,6 +802,8 @@ export default function ReviewApp({ user }: ReviewAppProps) {
             isLoadingData={isLoadingData}
             isChatting={isChatting}
             onChatSubmit={handleChatSubmit}
+            aggregatedData={aggregatedData}
+            isDashboardLoading={isDashboardLoading}
           />
         </aside>
       </div>
