@@ -8,6 +8,9 @@ const ENV_FALLBACKS: Record<string, string | undefined> = {
   ai_mode: process.env.AI_MODE || "local",
   local_ai_url: process.env.LOCAL_AI_URL,
   local_ai_model: process.env.LOCAL_AI_MODEL,
+  zogotech_db_password: process.env.ZOGOTECH_DB_PASSWORD,
+  zogotech_db_server: process.env.ZOGOTECH_DB_SERVER || "zogotech.siskiyous.edu",
+  zogotech_db_user: process.env.ZOGOTECH_DB_USER || "jtarantino",
 };
 
 export async function getSetting(key: string): Promise<string | null> {
