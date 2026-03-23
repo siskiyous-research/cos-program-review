@@ -503,7 +503,7 @@ export default function SettingsPage() {
                   const res = await fetch('/api/admin/program-data-scrape', { method: 'POST' });
                   const result = await res.json();
                   if (result.ok) {
-                    setScrapeMessage(`Scraped ${result.scraped} programs successfully.`);
+                    setScrapeMessage(result.message || 'Scrape completed successfully.');
                   } else {
                     setScrapeMessage(`Error: ${result.error || 'Scrape failed'}`);
                   }
