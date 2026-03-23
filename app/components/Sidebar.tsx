@@ -56,8 +56,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onChatSubmit(actionPrompt);
   };
 
-  // Only show quick actions when chat has just the initial greeting
-  const showQuickActions = chatHistory.length <= 1 && !isChatting;
+  // Show quick actions when not currently chatting
+  const showQuickActions = !isChatting;
 
   return (
     <div className="flex flex-col h-full bg-white">
