@@ -213,7 +213,8 @@ export async function retrieveContext(opts: RetrievalOptions): Promise<RAGContex
     try {
       queryEmbedding = await generateEmbedding(opts.query);
     } catch (err) {
-      console.warn('[RAG] Failed to generate query embedding, falling back to keyword search:', err);
+      console.warn('[RAG] Failed to generate query embedding, falling back to keyword search:', err instanceof Error ? err.message : err);
+      // Continue without embeddings - keyword search will still work
     }
   }
 

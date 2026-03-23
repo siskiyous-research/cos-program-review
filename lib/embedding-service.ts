@@ -12,34 +12,40 @@ const EMBEDDING_MODEL = 'openai/text-embedding-3-small';
  * Generate embedding for a text string via OpenRouter
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
-  const apiKey = await getSetting('openrouter_api_key');
-  if (!apiKey) {
-    throw new Error('OpenRouter API key not configured');
+  try {
+    const apiKey = await getSetting('openrouter_api_key');
+    if (!apiKey) {
+      throw new Error('OpenRouter API key not configured - embeddings unavailable');
+    }
+
+    const response = await fetch('https://openrouter.ai/api/v1/embeddings', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: EMBEDDING_MODEL,
+        input: text,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[Embeddings] OpenRouter error response:', errorText);
+      throw new Error(`OpenRouter embedding failed: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    if (!data.data || data.data.length === 0) {
+      throw new Error('No embedding returned from OpenRouter');
+    }
+
+    return data.data[0].embedding;
+  } catch (err) {
+    console.error('[Embeddings] Error generating embedding:', err);
+    throw err;
   }
-
-  const response = await fetch('https://openrouter.ai/api/v1/embeddings', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: EMBEDDING_MODEL,
-      input: text,
-    }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(`OpenRouter embedding error: ${error.message}`);
-  }
-
-  const data = await response.json();
-  if (!data.data || data.data.length === 0) {
-    throw new Error('No embedding returned from OpenRouter');
-  }
-
-  return data.data[0].embedding;
 }
 
 /**
