@@ -140,20 +140,6 @@ export default function ReviewApp({ user }: ReviewAppProps) {
   }, [markClean]);
 
   /**
-   * Build combined KB data (uploaded file texts + manual notes) for AI prompts
-   */
-  const getKnowledgeBaseData = useCallback((program: string): string => {
-    const files = kbFiles[program] || [];
-    const notes = knowledgeBaseNotes[program] || '';
-    const parts: string[] = [];
-    for (const file of files) {
-      parts.push(`--- ${file.name} ---\n${file.textContent}`);
-    }
-    if (notes.trim()) parts.push(`--- Notes ---\n${notes}`);
-    return parts.join('\n\n');
-  }, [kbFiles, knowledgeBaseNotes]);
-
-  /**
    * Initialize review for selected program
    */
   const initializeData = useCallback(async () => {
@@ -240,7 +226,6 @@ export default function ReviewApp({ user }: ReviewAppProps) {
             sectionDescription: section.description,
             programData,
             userNotes,
-            knowledgeBaseData: getKnowledgeBaseData(programName),
             programCategory,
           }),
         });
@@ -322,7 +307,6 @@ export default function ReviewApp({ user }: ReviewAppProps) {
           message: prompt,
           chatHistory: updatedHistory.slice(-6),
           programData,
-          knowledgeBaseData: getKnowledgeBaseData(programName),
           programCategory: getProgramCategory(programName),
         }),
       });
@@ -610,7 +594,6 @@ export default function ReviewApp({ user }: ReviewAppProps) {
         body: JSON.stringify({
           fullReviewText: fullText,
           historicalData: programHistory,
-          knowledgeBaseData: getKnowledgeBaseData(programName),
           programName,
           programCategory: getProgramCategory(programName),
         }),
