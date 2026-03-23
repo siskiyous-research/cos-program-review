@@ -5,9 +5,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
-import { fetchProgramData } from '@/lib/program-data-queries';
+import { fetchProgramData, fetchFilterDimensions } from '@/lib/program-data-queries';
 import { saveProgramDataCache, getAllCachedSubjects, clearExpiredCache } from '@/lib/program-data-cache';
 import { ALL_SUBJECT_CODES } from '@/lib/constants';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export async function POST(req: NextRequest) {
   const { error: authError } = await requireAuth();
@@ -17,6 +18,24 @@ export async function POST(req: NextRequest) {
     const subjects = ALL_SUBJECT_CODES;
     const results: Array<{ subject: string; success: boolean; error?: string }> = [];
 
+    // Scrape filter dimensions first
+    try {
+      const dimensions = await fetchFilterDimensions();
+      const supabase = createAdminClient();
+      await supabase
+        .from('program_data_cache')
+        .upsert({
+          subject_code: '_dimensions',
+          data: dimensions,
+          cached_at: new Date().toISOString(),
+          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        }, { onConflict: 'subject_code' });
+      console.log('✓ Cached filter dimensions (academic years, terms, depts, majors, course numbers)');
+    } catch (error) {
+      console.error('✗ Failed to cache filter dimensions:', error);
+    }
+
+    // Scrape each subject
     for (const subject of subjects) {
       try {
         const data = await fetchProgramData({ subject, yearsAgo: 4 });
@@ -34,7 +53,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       ok: true,
-      message: `Scrape completed: ${results.filter(r => r.success).length}/${results.length} successful`,
+      message: `Scrape completed: ${results.filter(r => r.success).length}/${results.length} subjects + filter dimensions`,
       results,
     });
   } catch (error) {

@@ -311,6 +311,52 @@ async function fetchLocation(subject: string, yearsAgo: number): Promise<Locatio
 }
 
 /**
+ * Fetch distinct values for filter dimensions
+ */
+export async function fetchFilterDimensions(): Promise<Record<string, string[]>> {
+  const [academicYears, terms, departments, majors, courseNumbers] = await Promise.all([
+    runQuery(`
+      SELECT DISTINCT [Academic Year] AS val
+      FROM pvc_StudentClasses
+      WHERE ${baseWhere()}
+      ORDER BY [Academic Year]
+    `),
+    runQuery(`
+      SELECT DISTINCT [Term] AS val
+      FROM pvc_StudentClasses
+      WHERE ${baseWhere()} AND [Term] IS NOT NULL
+      ORDER BY [Term]
+    `),
+    runQuery(`
+      SELECT DISTINCT [Department] AS val
+      FROM pvc_StudentClasses
+      WHERE ${baseWhere()} AND [Department] IS NOT NULL
+      ORDER BY [Department]
+    `),
+    runQuery(`
+      SELECT DISTINCT [Major] AS val
+      FROM pvc_StudentClasses
+      WHERE ${baseWhere()} AND [Major] IS NOT NULL
+      ORDER BY [Major]
+    `),
+    runQuery(`
+      SELECT DISTINCT [Subject and Course Number] AS val
+      FROM pvc_StudentClasses
+      WHERE ${baseWhere()} AND [Subject and Course Number] IS NOT NULL
+      ORDER BY [Subject and Course Number]
+    `),
+  ]);
+
+  return {
+    academicYears: academicYears.map((r: any) => r.val),
+    terms: terms.map((r: any) => r.val),
+    departments: departments.map((r: any) => r.val),
+    majors: majors.map((r: any) => r.val),
+    courseNumbers: courseNumbers.map((r: any) => r.val),
+  };
+}
+
+/**
  * Fetch all program data in parallel
  */
 export async function fetchProgramData(params: QueryParams): Promise<AggregatedProgramData> {
