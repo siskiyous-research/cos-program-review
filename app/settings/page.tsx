@@ -46,6 +46,10 @@ export default function SettingsPage() {
   const [savingNotify, setSavingNotify] = useState(false);
   const [notifyMessage, setNotifyMessage] = useState('');
 
+  // Data scraping state
+  const [isScraping, setIsScraping] = useState(false);
+  const [scrapeMessage, setScrapeMessage] = useState('');
+
 
 
   const loadSettings = useCallback(async () => {
@@ -479,6 +483,52 @@ export default function SettingsPage() {
                 : 'bg-red-50 border border-red-200 text-red-800'
             }`}>
               {saveMessage}
+            </div>
+          )}
+        </div>
+
+        {/* Program Data Scraping */}
+        <div className="bg-white rounded-lg border border-slate-200 p-6 mt-6">
+          <h2 className="text-lg font-semibold text-slate-800 mb-2">Institutional Data</h2>
+          <p className="text-sm text-slate-500 mb-4">
+            Scrape enrollment, success rates, demographics, and other data from Zogotech.
+            Requires network access to zogotech.siskiyous.edu (on-premise or VPN).
+          </p>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={async () => {
+                setIsScraping(true);
+                setScrapeMessage('');
+                try {
+                  const res = await fetch('/api/admin/program-data-scrape', { method: 'POST' });
+                  const result = await res.json();
+                  if (result.ok) {
+                    setScrapeMessage(`Scraped ${result.scraped} programs successfully.`);
+                  } else {
+                    setScrapeMessage(`Error: ${result.error || 'Scrape failed'}`);
+                  }
+                } catch {
+                  setScrapeMessage('Failed to connect. Are you on the school network?');
+                } finally {
+                  setIsScraping(false);
+                }
+              }}
+              disabled={isScraping}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-2"
+            >
+              <svg className={`w-4 h-4 ${isScraping ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              {isScraping ? 'Scraping all programs...' : 'Scrape All Programs'}
+            </button>
+          </div>
+          {scrapeMessage && (
+            <div className={`mt-3 p-3 rounded-md text-sm ${
+              scrapeMessage.includes('successfully')
+                ? 'bg-green-50 border border-green-200 text-green-800'
+                : 'bg-red-50 border border-red-200 text-red-800'
+            }`}>
+              {scrapeMessage}
             </div>
           )}
         </div>
