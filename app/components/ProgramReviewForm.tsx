@@ -23,6 +23,8 @@ interface ProgramReviewFormProps {
   onSaveSection: (sectionId: string) => void;
   onSaveToSharePoint: () => void;
   sharePointStatus?: 'idle' | 'saving' | 'saved' | 'error';
+  onViewData?: (sectionId: string) => void;
+  hasData?: boolean;
 }
 
 export const ProgramReviewForm: React.FC<ProgramReviewFormProps> = ({
@@ -44,6 +46,8 @@ export const ProgramReviewForm: React.FC<ProgramReviewFormProps> = ({
   onSaveSection,
   onSaveToSharePoint,
   sharePointStatus,
+  onViewData,
+  hasData,
 }) => {
   return (
     <div className="space-y-8">
@@ -74,6 +78,8 @@ export const ProgramReviewForm: React.FC<ProgramReviewFormProps> = ({
           isGeneratingGuidance={isGeneratingGuidance === section.id}
           saveStatus={saveStatus}
           onSave={() => onSaveSection(section.id)}
+          onViewData={onViewData ? () => onViewData(section.id) : undefined}
+          hasData={hasData}
         />
       ))}
 
