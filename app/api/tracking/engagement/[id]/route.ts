@@ -3,8 +3,9 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const supabase = await createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
 
@@ -15,7 +16,7 @@ export async function DELETE(
   const { error } = await supabase
     .from('pr_engagement_log')
     .delete()
-    .eq('id', params.id);
+    .eq('id', id);
 
   if (error) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
