@@ -116,11 +116,12 @@ export async function getSectionAssistance(
   const accjcContext = buildAccjcContext(sectionId);
   const hasNotes = userNotes.trim().length > 0;
 
-  // Retrieve RAG context with numbered citations
-  const ragContext = retrieveContext({
+  // Retrieve RAG context with numbered citations (with semantic search using section title)
+  const ragContext = await retrieveContext({
     programName: programData.programName,
     programCategory,
     sectionId,
+    query: sectionTitle, // Use section title for semantic search
   });
   const { promptText: ragText, citations } = formatRAGContextWithCitations(ragContext);
 
@@ -280,10 +281,11 @@ export async function getChatResponse(
   knowledgeBaseData?: string,
   programCategory?: string
 ): Promise<{ text: string; citations: Citation[] }> {
-  // Retrieve RAG context for chat with citations
-  const ragContext = retrieveContext({
+  // Retrieve RAG context for chat with citations (with semantic search using user message)
+  const ragContext = await retrieveContext({
     programName: programData.programName,
     programCategory,
+    query: userMessage, // Use user message for semantic search
   });
   const { promptText: ragText, citations } = formatRAGContextWithCitations(ragContext);
 
@@ -341,10 +343,11 @@ export async function getExecutiveSummary(
   programName?: string,
   programCategory?: string
 ): Promise<string> {
-  // Retrieve RAG context for summary
-  const ragContext = retrieveContext({
+  // Retrieve RAG context for summary (with semantic search using program name and text)
+  const ragContext = await retrieveContext({
     programName,
     programCategory,
+    query: `${programName} review summary executive`,
   });
   const ragText = formatRAGContext(ragContext);
 

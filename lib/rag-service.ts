@@ -9,10 +9,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { DataChunk, SearchIndex, SearchIndexEntry, RAGContext, Citation, RAGContextWithCitations } from './types';
 import { getMappedStandards } from './accjc-standards';
+import { generateEmbedding, cosineSimilarity } from './embedding-service';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const MAX_RAG_TOKENS = 2000;
-const MIN_RELEVANCE_SCORE = 10;
+const MIN_RELEVANCE_SCORE = 0.3; // Lowered for semantic search (0-1 scale)
+const MIN_KEYWORD_SCORE = 10; // Keep keyword score threshold
 
 // Cached search index (loaded once per server lifecycle)
 let cachedIndex: SearchIndex | null = null;
@@ -99,6 +101,7 @@ interface RetrievalOptions {
   programCategory?: string;
   sectionId?: string;
   maxTokens?: number;
+  query?: string; // For semantic search
 }
 
 /**
@@ -153,9 +156,50 @@ function scoreEntry(entry: SearchIndexEntry, opts: RetrievalOptions): number {
 }
 
 /**
- * Retrieve relevant chunks for a given context
+ * Score an entry using semantic similarity (if embedding available)
  */
-export function retrieveContext(opts: RetrievalOptions): RAGContext {
+async function scoreEntryBySemantic(
+  entry: SearchIndexEntry,
+  queryEmbedding: number[],
+  opts: RetrievalOptions
+): Promise<number> {
+  // Apply same program/category filters as keyword search
+  if (entry.source === 'review') {
+    if (opts.programName && entry.metadata.program) {
+      if (entry.metadata.program !== opts.programName) return 0;
+    } else {
+      return 0;
+    }
+  }
+
+  if (entry.source === 'policy') return 0;
+
+  // For accreditation, check if section matches
+  if (entry.source === 'accreditation') {
+    if (opts.sectionId) {
+      const mappedStandards = getMappedStandards(opts.sectionId);
+      const hasMatch = mappedStandards.some((std) => {
+        const stdTag = `accjc-${std.toLowerCase().replace('.', '')}`;
+        return entry.tags.includes(stdTag);
+      });
+      if (!hasMatch) return 0;
+    } else {
+      return 0;
+    }
+  }
+
+  // Calculate semantic similarity if entry has embedding
+  if (entry.embedding && Array.isArray(entry.embedding)) {
+    return cosineSimilarity(queryEmbedding, entry.embedding);
+  }
+
+  return 0;
+}
+
+/**
+ * Retrieve relevant chunks for a given context (with semantic search)
+ */
+export async function retrieveContext(opts: RetrievalOptions): Promise<RAGContext> {
   const index = getSearchIndex();
   if (!index || index.totalChunks === 0) {
     return { chunks: [], totalTokens: 0, sources: [] };
@@ -163,18 +207,50 @@ export function retrieveContext(opts: RetrievalOptions): RAGContext {
 
   const maxTokens = opts.maxTokens || MAX_RAG_TOKENS;
 
-  // Score all entries — filter out low-relevance chunks
-  const scored = index.entries
-    .map((entry) => ({ entry, score: scoreEntry(entry, opts) }))
-    .filter((item) => item.score >= MIN_RELEVANCE_SCORE)
-    .sort((a, b) => b.score - a.score);
+  // Generate query embedding for semantic search if query is provided
+  let queryEmbedding: number[] | null = null;
+  if (opts.query) {
+    try {
+      queryEmbedding = await generateEmbedding(opts.query);
+    } catch (err) {
+      console.warn('[RAG] Failed to generate query embedding, falling back to keyword search:', err);
+    }
+  }
+
+  // Score all entries using combined keyword + semantic scoring
+  const scored = await Promise.all(
+    index.entries.map(async (entry) => {
+      const keywordScore = scoreEntry(entry, opts);
+
+      // If we have a query embedding, also score semantically
+      let semanticScore = 0;
+      if (queryEmbedding) {
+        semanticScore = await scoreEntryBySemantic(entry, queryEmbedding, opts);
+      }
+
+      // Combine scores: keyword score (0-100) + semantic score (0-1, scaled to 0-100)
+      const combinedScore = keywordScore > 0 ? keywordScore : semanticScore * 100;
+
+      return { entry, score: combinedScore, keywordScore, semanticScore };
+    })
+  );
+
+  // Filter out low-relevance chunks
+  const filtered = scored.filter(
+    (item) =>
+      item.keywordScore >= MIN_KEYWORD_SCORE ||
+      (queryEmbedding && item.semanticScore >= MIN_RELEVANCE_SCORE)
+  );
+
+  // Sort by combined score
+  filtered.sort((a, b) => b.score - a.score);
 
   // Load chunks up to token budget
   const selectedChunks: DataChunk[] = [];
   const sources = new Set<string>();
   let totalTokens = 0;
 
-  for (const { entry } of scored) {
+  for (const { entry } of filtered) {
     if (totalTokens >= maxTokens) break;
 
     const chunks = loadChunks(entry.filePath);
