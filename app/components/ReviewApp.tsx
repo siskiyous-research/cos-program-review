@@ -182,7 +182,8 @@ export default function ReviewApp({ user }: ReviewAppProps) {
       await loadReview(programName, reviewType);
 
       // Fetch aggregated institutional data (non-blocking)
-      const subjectCode = SUBJECT_CODE_MAP[programName];
+      const subjectCodes = SUBJECT_CODE_MAP[programName];
+      const subjectCode = subjectCodes?.[0];
       if (subjectCode) {
         setIsDashboardLoading(true);
         fetch(`/api/program-data?subject=${subjectCode}`)

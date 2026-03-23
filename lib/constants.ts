@@ -157,23 +157,46 @@ export const NON_INSTRUCTIONAL_COMPREHENSIVE_TEMPLATE: ReviewTemplateItem[] = [
 
 /**
  * Subject code mapping for Zogotech database queries
+ * Programs that span multiple subjects use arrays
  */
-export const SUBJECT_CODE_MAP: Record<string, string> = {
-  'Administration of Justice': 'ADJ',
-  'Alcohol & Drug Studies (ADHS)': 'ADHS',
-  'Business and Computer Sciences': 'BUS',
-  'Early Childhood Education': 'ECE',
-  'Emergency Medical Services (EMS)': 'EMS',
-  'Fine and Performing Arts': 'FA',
-  'Fire': 'FIRE',
-  'Health, Physical Education and Recreation': 'HPER',
-  'Humanities and Social Sciences': 'HUSS',
-  'Math': 'MATH',
-  'Modern Languages': 'LANGS',
-  'Nursing': 'NURS',
-  'Sciences': 'SCI',
-  'Welding': 'WELD',
+export const SUBJECT_CODE_MAP: Record<string, string[]> = {
+  'Administration of Justice': ['ADJ'],
+  'Alcohol & Drug Studies (ADHS)': ['ADHS'],
+  'Business and Computer Sciences': ['BA', 'CSCI'],
+  'Early Childhood Education': ['ECE'],
+  'Emergency Medical Services (EMS)': ['EMS'],
+  'Fine and Performing Arts': ['ART', 'MUS', 'THEA'],
+  'Fire': ['FIRE'],
+  'Health, Physical Education and Recreation': ['HEA', 'KINE', 'PEFI', 'PEMA'],
+  'Humanities and Social Sciences': ['ENGL', 'HIST', 'PSY', 'SOC', 'POLS', 'ECON', 'PHIL', 'HUM', 'ANTH', 'ETHN', 'COMS', 'GEOG'],
+  'Math': ['MATH'],
+  'Modern Languages': ['SPAN', 'ASL'],
+  'Non-Credit': ['GUID', 'WEE'],
+  'Nursing': ['NURS'],
+  'Sciences': ['BIO', 'CHEM', 'PHYS', 'ASTR', 'GEOL', 'ENVS'],
+  'Welding': ['WELD'],
 };
+
+/**
+ * All unique subject codes for scraping (includes non-credit and other departments)
+ */
+export const ALL_SUBJECT_CODES: string[] = [
+  'ADHS', 'ADJ', 'AG', 'ANTH', 'ART', 'ASL', 'ASTR',
+  'BA', 'BIO', 'CHEM', 'COLL', 'COMM', 'COMS', 'CSCI',
+  'ECE', 'ECON', 'EDUC', 'EMS', 'ENGL', 'ENVS', 'ESCI', 'ESL', 'ETHN',
+  'FCS', 'FIRE',
+  'GEOG', 'GEOL', 'GUID',
+  'HEA', 'HIST', 'HUM',
+  'KINE',
+  'LIBR',
+  'MATH', 'MFG', 'MUS',
+  'NURS',
+  'OLAD',
+  'PEFI', 'PEMA', 'PHIL', 'PHYS', 'POLS', 'PSY', 'PSYC',
+  'SOC', 'SPAN', 'STAT',
+  'THEA',
+  'WEE', 'WELD', 'WORK',
+];
 
 /**
  * Program directory organized by category

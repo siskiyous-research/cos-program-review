@@ -7,14 +7,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { fetchProgramData } from '@/lib/program-data-queries';
 import { saveProgramDataCache, getAllCachedSubjects, clearExpiredCache } from '@/lib/program-data-cache';
-import { SUBJECT_CODE_MAP } from '@/lib/constants';
+import { ALL_SUBJECT_CODES } from '@/lib/constants';
 
 export async function POST(req: NextRequest) {
   const { error: authError } = await requireAuth();
   if (authError) return authError;
 
   try {
-    const subjects = Object.values(SUBJECT_CODE_MAP);
+    const subjects = ALL_SUBJECT_CODES;
     const results: Array<{ subject: string; success: boolean; error?: string }> = [];
 
     for (const subject of subjects) {
