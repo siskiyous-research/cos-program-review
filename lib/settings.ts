@@ -28,11 +28,18 @@ export async function getSetting(key: string): Promise<string | null> {
       cache.set(key, { value: data.value, expiry: Date.now() + CACHE_TTL });
       return data.value;
     }
-  } catch {
+  } catch (err) {
+    console.warn(`[getSetting] Failed to get ${key} from database:`, err);
     // DB not available, fall through to env var
   }
 
-  return ENV_FALLBACKS[key] || null;
+  const envValue = ENV_FALLBACKS[key];
+  if (envValue) {
+    cache.set(key, { value: envValue, expiry: Date.now() + CACHE_TTL });
+    return envValue;
+  }
+
+  return null;
 }
 
 export async function setSetting(key: string, value: string): Promise<void> {

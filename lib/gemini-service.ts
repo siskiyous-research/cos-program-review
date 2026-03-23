@@ -14,7 +14,8 @@ import { getSetting } from './settings';
 const CLOUD_DEFAULT_MODEL = 'xiaomi/mimo-v2-flash';
 
 async function getClientAndModel(): Promise<{ client: OpenAI; model: string }> {
-  const aiMode = await getSetting('ai_mode') || 'local';
+  const aiMode = await getSetting('ai_mode');
+  console.log('[getClientAndModel] AI mode:', aiMode);
 
   if (aiMode === 'local') {
     const localUrl = await getSetting('local_ai_url');
@@ -35,10 +36,12 @@ async function getClientAndModel(): Promise<{ client: OpenAI; model: string }> {
     };
   }
 
-  // Cloud mode
-  const apiKey = await getSetting('openrouter_api_key') || process.env.OPENROUTER_API_KEY;
+  // Cloud mode (default if not local)
+  const apiKey = await getSetting('openrouter_api_key');
+  console.log('[getClientAndModel] OpenRouter API key present:', !!apiKey);
+
   if (!apiKey) {
-    throw new Error('OpenRouter API key is not configured. Go to Settings or set OPENROUTER_API_KEY.');
+    throw new Error('OpenRouter API key is not configured. Go to Settings or set OPENROUTER_API_KEY environment variable.');
   }
 
   return {
