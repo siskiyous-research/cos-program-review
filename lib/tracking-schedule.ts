@@ -4,550 +4,131 @@ export type ScheduleEntry = {
   years: Record<string, 'PR' | 'AU'>;
 };
 
-// Non-instructional programs: Years 2023-2024 through 2030-2031
+// Non-instructional programs
 export const NON_INSTRUCTIONAL_SCHEDULE: ScheduleEntry[] = [
-  {
-    name: "President's Office",
+  // Group 1: PR cycle 2024-2025 → next 2028-2029
+  ...[
+    "President's Office",
+    'Institutional Research',
+    'Bookstore',
+    'Student Services Division',
+    'Library',
+  ].map((name): ScheduleEntry => ({
+    name,
     type: 'non_instructional',
     years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'PR',
       '2025-2026': 'AU',
       '2026-2027': 'AU',
       '2027-2028': 'AU',
-      '2028-2029': 'AU',
+      '2028-2029': 'PR',
       '2029-2030': 'AU',
-      '2030-2031': 'AU',
     },
-  },
-  {
-    name: 'Institutional Research',
+  })),
+  // Group 2: PR cycle 2025-2026 → next 2029-2030
+  ...[
+    'Basecamp',
+    'Counseling & Advising',
+    'Academic Affairs Division',
+    'Academic Success Center',
+    'Distance Learning',
+    'FIELD Program',
+    'Dual Enrollment',
+    'Public Information Office',
+    'Administrative Services Division',
+    'Maintenance/Operations/Transportation',
+    'Technology Services',
+    'Student Equity & Achievement',
+    'Student Housing & Student Life',
+    'Student Access Services',
+    'Special Populations (EOPS/CARE/CalWORKs/NextUP/TRiO)',
+  ].map((name): ScheduleEntry => ({
+    name,
     type: 'non_instructional',
     years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'PR',
-      '2025-2026': 'AU',
-      '2026-2027': 'AU',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'Bookstore',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'PR',
-      '2025-2026': 'AU',
-      '2026-2027': 'AU',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'Student Services Division',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'PR',
-      '2025-2026': 'AU',
-      '2026-2027': 'AU',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'Basecamp',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'PR',
       '2025-2026': 'PR',
       '2026-2027': 'AU',
       '2027-2028': 'AU',
       '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
+      '2029-2030': 'PR',
     },
-  },
-  {
-    name: 'Counseling & Advising',
+  })),
+  // Group 3: PR cycle 2026-2027 → next 2030-2031
+  ...[
+    'Human Resources',
+    'Fiscal Services',
+    'Food Services',
+    'Admissions & Records',
+    'Financial Aid/Veterans/AB540',
+    'Outreach & Retention',
+    'Student Services-AB19/Health/Mental Health',
+    'International Students',
+    'Faculty Diversity Internship Program (FDIP)',
+  ].map((name): ScheduleEntry => ({
+    name,
     type: 'non_instructional',
     years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'PR',
-      '2025-2026': 'PR',
-      '2026-2027': 'AU',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'Academic Affairs Division',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'PR',
-      '2025-2026': 'PR',
-      '2026-2027': 'AU',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'Academic Success Center',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'PR',
-      '2025-2026': 'PR',
-      '2026-2027': 'AU',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'Distance Learning',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'PR',
-      '2025-2026': 'PR',
-      '2026-2027': 'AU',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'FIELD Program',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'PR',
-      '2025-2026': 'PR',
-      '2026-2027': 'AU',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'Dual Enrollment',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'PR',
-      '2025-2026': 'PR',
-      '2026-2027': 'AU',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'Library',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'PR',
-      '2025-2026': 'AU',
-      '2026-2027': 'AU',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'Public Information Office',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'PR',
-      '2026-2027': 'AU',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'Administrative Services Division',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'PR',
-      '2026-2027': 'AU',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'Maintenance/Operations/Transportation',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'PR',
-      '2026-2027': 'AU',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'Technology Services',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'PR',
-      '2026-2027': 'AU',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'Student Equity & Achievement',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'PR',
-      '2026-2027': 'AU',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'Student Housing & Student Life',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'PR',
-      '2026-2027': 'AU',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'Student Access Services',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'PR',
-      '2026-2027': 'AU',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'Special Populations (EOPS/CARE/CalWORKs/NextUP/TRiO)',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'PR',
-      '2026-2027': 'AU',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'Human Resources',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
       '2025-2026': 'AU',
       '2026-2027': 'PR',
       '2027-2028': 'AU',
       '2028-2029': 'AU',
       '2029-2030': 'AU',
-      '2030-2031': 'AU',
     },
-  },
-  {
-    name: 'Fiscal Services',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'AU',
-      '2026-2027': 'PR',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'Food Services',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'AU',
-      '2026-2027': 'PR',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'Admissions & Records',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'AU',
-      '2026-2027': 'PR',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'Financial Aid/Veterans/AB540',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'AU',
-      '2026-2027': 'PR',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'Outreach & Retention',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'AU',
-      '2026-2027': 'PR',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'Student Services-AB19/Health/Mental Health',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'AU',
-      '2026-2027': 'PR',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'International Students',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'AU',
-      '2026-2027': 'PR',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
-  {
-    name: 'Faculty Diversity Internship Program (FDIP)',
-    type: 'non_instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'AU',
-      '2026-2027': 'PR',
-      '2027-2028': 'AU',
-      '2028-2029': 'AU',
-      '2029-2030': 'AU',
-      '2030-2031': 'AU',
-    },
-  },
+  })),
 ];
 
-// Instructional programs: Years 2023-2024 through 2027-2028
+// Instructional programs
 export const INSTRUCTIONAL_SCHEDULE: ScheduleEntry[] = [
-  {
-    name: 'Alcohol & Drug Studies',
+  // CTE programs: 2-year PR cycle, PR in 2026-2027 → next 2028-2029
+  ...[
+    'Alcohol & Drug Studies',
+    'Administration of Justice',
+    'Business & Computer Sciences',
+    'Early Childhood Education',
+    'EMS',
+    'Fire',
+    'Nursing',
+    'Welding',
+  ].map((name): ScheduleEntry => ({
+    name,
     type: 'instructional',
     years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
       '2025-2026': 'AU',
       '2026-2027': 'PR',
       '2027-2028': 'AU',
+      '2028-2029': 'PR',
+      '2029-2030': 'AU',
     },
-  },
-  {
-    name: 'Administration of Justice',
+  })),
+  // Non-CTE instructional: 4-year PR cycle
+  ...[
+    'Health/PE/Recreation',
+    'Humanities & Social Sciences',
+  ].map((name): ScheduleEntry => ({
+    name,
     type: 'instructional',
     years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
       '2025-2026': 'AU',
       '2026-2027': 'PR',
       '2027-2028': 'AU',
+      '2028-2029': 'AU',
+      '2029-2030': 'AU',
     },
-  },
-  {
-    name: 'Business & Computer Sciences',
+  })),
+  // Non-CTE instructional: 4-year PR cycle, offset
+  ...[
+    'Fine & Performing Arts',
+    'Math',
+  ].map((name): ScheduleEntry => ({
+    name,
     type: 'instructional',
     years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'AU',
-      '2026-2027': 'PR',
-      '2027-2028': 'AU',
-    },
-  },
-  {
-    name: 'Early Childhood Education',
-    type: 'instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'AU',
-      '2026-2027': 'PR',
-      '2027-2028': 'AU',
-    },
-  },
-  {
-    name: 'EMS',
-    type: 'instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'AU',
-      '2026-2027': 'PR',
-      '2027-2028': 'AU',
-    },
-  },
-  {
-    name: 'Fire',
-    type: 'instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'AU',
-      '2026-2027': 'PR',
-      '2027-2028': 'AU',
-    },
-  },
-  {
-    name: 'Health/PE/Recreation',
-    type: 'instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'AU',
-      '2026-2027': 'PR',
-      '2027-2028': 'AU',
-    },
-  },
-  {
-    name: 'Humanities & Social Sciences',
-    type: 'instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'AU',
-      '2026-2027': 'PR',
-      '2027-2028': 'AU',
-    },
-  },
-  {
-    name: 'Nursing',
-    type: 'instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'AU',
-      '2026-2027': 'PR',
-      '2027-2028': 'AU',
-    },
-  },
-  {
-    name: 'Welding',
-    type: 'instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'AU',
-      '2026-2027': 'PR',
-      '2027-2028': 'AU',
-    },
-  },
-  {
-    name: 'Fine & Performing Arts',
-    type: 'instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
       '2025-2026': 'AU',
       '2026-2027': 'AU',
       '2027-2028': 'PR',
+      '2028-2029': 'AU',
+      '2029-2030': 'AU',
     },
-  },
-  {
-    name: 'Math',
-    type: 'instructional',
-    years: {
-      '2023-2024': 'AU',
-      '2024-2025': 'AU',
-      '2025-2026': 'AU',
-      '2026-2027': 'AU',
-      '2027-2028': 'PR',
-    },
-  },
+  })),
 ];
 
 // Helper function to get all programs for a given year
@@ -556,15 +137,12 @@ export function getProgramsForYear(year: string): ScheduleEntry[] {
   return allPrograms.filter((program) => program.years[year]);
 }
 
-// Helper function to get all unique years (capped at 2027-2028)
+// Helper function to get all unique years
 export function getAllYears(): string[] {
-  const maxYear = '2027-2028';
   const allPrograms = [...INSTRUCTIONAL_SCHEDULE, ...NON_INSTRUCTIONAL_SCHEDULE];
   const yearsSet = new Set<string>();
   allPrograms.forEach((program) => {
-    Object.keys(program.years).forEach((year) => {
-      if (year <= maxYear) yearsSet.add(year);
-    });
+    Object.keys(program.years).forEach((year) => yearsSet.add(year));
   });
   return Array.from(yearsSet).sort();
 }
