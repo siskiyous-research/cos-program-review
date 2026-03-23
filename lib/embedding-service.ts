@@ -1,45 +1,45 @@
 /**
  * Embedding Service
- * Generates embeddings using OpenAI's text-embedding-3-small model
+ * Generates embeddings using OpenRouter's models
  * and performs semantic search/similarity matching
  */
 
-import OpenAI from 'openai';
+import { getSetting } from './settings';
 
-const EMBEDDING_MODEL = 'text-embedding-3-small';
-const EMBEDDING_DIMENSION = 1536; // For text-embedding-3-small
-
-let cachedClient: OpenAI | null = null;
-
-function getOpenAIClient(): OpenAI {
-  if (cachedClient) return cachedClient;
-
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error('OPENAI_API_KEY environment variable is not set');
-  }
-
-  cachedClient = new OpenAI({ apiKey });
-  return cachedClient;
-}
+const EMBEDDING_MODEL = 'openai/text-embedding-3-small';
 
 /**
- * Generate embedding for a text string
+ * Generate embedding for a text string via OpenRouter
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
-  const client = getOpenAIClient();
-
-  const response = await client.embeddings.create({
-    model: EMBEDDING_MODEL,
-    input: text,
-    encoding_format: 'float',
-  });
-
-  if (response.data.length === 0) {
-    throw new Error('No embedding returned from OpenAI');
+  const apiKey = await getSetting('openrouter_api_key');
+  if (!apiKey) {
+    throw new Error('OpenRouter API key not configured');
   }
 
-  return response.data[0].embedding;
+  const response = await fetch('https://openrouter.ai/api/v1/embeddings', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: EMBEDDING_MODEL,
+      input: text,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(`OpenRouter embedding error: ${error.message}`);
+  }
+
+  const data = await response.json();
+  if (!data.data || data.data.length === 0) {
+    throw new Error('No embedding returned from OpenRouter');
+  }
+
+  return data.data[0].embedding;
 }
 
 /**
@@ -67,7 +67,7 @@ export function cosineSimilarity(vecA: number[], vecB: number[]): number {
 }
 
 /**
- * Batch generate embeddings (up to 2048 texts per request)
+ * Batch generate embeddings via OpenRouter
  */
 export async function generateBatchEmbeddings(texts: string[]): Promise<number[][]> {
   if (texts.length === 0) return [];
@@ -75,16 +75,35 @@ export async function generateBatchEmbeddings(texts: string[]): Promise<number[]
     throw new Error('Batch size exceeds 2048 - please split into smaller batches');
   }
 
-  const client = getOpenAIClient();
+  const apiKey = await getSetting('openrouter_api_key');
+  if (!apiKey) {
+    throw new Error('OpenRouter API key not configured');
+  }
 
-  const response = await client.embeddings.create({
-    model: EMBEDDING_MODEL,
-    input: texts,
-    encoding_format: 'float',
+  const response = await fetch('https://openrouter.ai/api/v1/embeddings', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: EMBEDDING_MODEL,
+      input: texts,
+    }),
   });
 
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(`OpenRouter embedding error: ${error.message}`);
+  }
+
+  const data = await response.json();
+  if (!data.data) {
+    throw new Error('No embeddings returned from OpenRouter');
+  }
+
   // Sort by index to maintain order
-  return response.data
-    .sort((a, b) => a.index - b.index)
-    .map((item) => item.embedding);
+  return data.data
+    .sort((a: { index: number }, b: { index: number }) => a.index - b.index)
+    .map((item: { embedding: number[] }) => item.embedding);
 }
