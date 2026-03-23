@@ -9,7 +9,6 @@ type FilterType = 'all' | 'instructional' | 'non_instructional' | 'needs_followu
 interface ProgramStatus {
   draftSubmitted: boolean;
   finalSubmitted: boolean;
-  presented: boolean;
   engagementCount: number;
 }
 
@@ -31,7 +30,6 @@ export default function TrackingDashboard() {
         map[p.name] = {
           draftSubmitted: p.draftSubmitted,
           finalSubmitted: p.finalSubmitted,
-          presented: p.presented,
           engagementCount: p.engagementCount,
         };
       }
@@ -45,14 +43,11 @@ export default function TrackingDashboard() {
     fetchStatuses();
   }, [fetchStatuses]);
 
-  type Status = 'red' | 'yellow' | 'submitted' | 'presented';
-
-  const getStatus = (name: string): Status => {
+  const getStatus = (name: string): 'green' | 'yellow' | 'red' => {
     const s = statuses[name];
     if (!s) return 'red';
-    if (s.presented) return 'presented';
-    if (s.finalSubmitted) return 'submitted';
-    if (s.engagementCount > 0) return 'yellow';
+    if (s.finalSubmitted) return 'green';
+    if (s.draftSubmitted || s.engagementCount > 0) return 'yellow';
     return 'red';
   };
 
@@ -61,24 +56,21 @@ export default function TrackingDashboard() {
     if (filterType === 'non_instructional') return p.type === 'non_instructional';
     if (filterType === 'needs_followup') return getStatus(p.name) === 'red';
     if (filterType === 'engaged') return getStatus(p.name) === 'yellow';
-    if (filterType === 'complete') return getStatus(p.name) === 'submitted' || getStatus(p.name) === 'presented';
+    if (filterType === 'complete') return getStatus(p.name) === 'green';
     return true;
   });
 
   const stats = {
     red: allPrograms.filter((p) => getStatus(p.name) === 'red').length,
     yellow: allPrograms.filter((p) => getStatus(p.name) === 'yellow').length,
-    complete: allPrograms.filter((p) => {
-      const s = getStatus(p.name);
-      return s === 'submitted' || s === 'presented';
-    }).length,
+    green: allPrograms.filter((p) => getStatus(p.name) === 'green').length,
   };
 
   const filters: { key: FilterType; label: string }[] = [
     { key: 'all', label: `All (${allPrograms.length})` },
     { key: 'needs_followup', label: `Needs Follow-up (${stats.red})` },
     { key: 'engaged', label: `Engaged (${stats.yellow})` },
-    { key: 'complete', label: `Complete (${stats.complete})` },
+    { key: 'complete', label: `Complete (${stats.green})` },
     { key: 'instructional', label: 'Instructional' },
     { key: 'non_instructional', label: 'Non-Instructional' },
   ];
@@ -153,14 +145,14 @@ export default function TrackingDashboard() {
                       </div>
                       <button
                         onClick={() => setEngagementPanel({ program: program.name, type: program.type })}
-                        className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-[11px] font-medium text-blue-700 hover:bg-blue-100 transition-colors flex-shrink-0"
+                        className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors flex-shrink-0"
                       >
                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                         </svg>
                         Log
                         {s && s.engagementCount > 0 && (
-                          <span className="rounded-full bg-blue-600 text-white px-1.5 py-0 text-[10px]">
+                          <span className="ml-0.5 rounded-full bg-blue-600 text-white px-1.5 py-0 text-[10px]">
                             {s.engagementCount}
                           </span>
                         )}
@@ -171,13 +163,9 @@ export default function TrackingDashboard() {
                     <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
                       status === 'red' ? 'bg-red-100 text-red-700' :
                       status === 'yellow' ? 'bg-yellow-100 text-yellow-700' :
-                      status === 'submitted' ? 'bg-green-100 text-green-700' :
-                      'bg-green-200 text-green-800'
+                      'bg-green-100 text-green-700'
                     }`}>
-                      {status === 'red' ? 'Follow-up' :
-                       status === 'yellow' ? 'Engaged' :
-                       status === 'submitted' ? 'Submitted' :
-                       'Presented'}
+                      {status === 'red' ? 'Follow-up' : status === 'yellow' ? 'Engaged' : 'Complete'}
                     </span>
                   </td>
                   {years.map((year) => {
