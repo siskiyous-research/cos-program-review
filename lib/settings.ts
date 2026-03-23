@@ -11,6 +11,7 @@ const ENV_FALLBACKS: Record<string, string | undefined> = {
   zogotech_db_password: process.env.ZOGOTECH_DB_PASSWORD,
   zogotech_db_server: process.env.ZOGOTECH_DB_SERVER || "zogotech.siskiyous.edu",
   zogotech_db_user: process.env.ZOGOTECH_DB_USER || "jtarantino",
+  supabase_access_token: process.env.SUPABASE_ACCESS_TOKEN,
 };
 
 export async function getSetting(key: string): Promise<string | null> {
