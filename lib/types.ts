@@ -142,3 +142,103 @@ export interface KBFile {
   textContent: string;
   processingTime?: number;
 }
+
+/**
+ * Zogotech Institutional Data Types
+ */
+
+export interface EnrollmentRecord {
+  term: string;
+  termOrder: number;
+  academicYear: string;
+  count: number;
+}
+
+export interface SuccessRecord {
+  term: string;
+  count: number;
+  successRate: number;
+  completionRate: number;
+}
+
+export interface EthnicitySuccessRecord {
+  academicYear: string;
+  ethnicity: string;
+  count: number;
+  successRate: number;
+}
+
+export interface DemographicRecord {
+  ethnicity: string;
+  count: number;
+  pct: number;
+}
+
+export interface GenderRecord {
+  academicYear: string;
+  gender: string;
+  count: number;
+}
+
+export interface AgeGroupRecord {
+  academicYear: string;
+  ageGroup: string;
+  count: number;
+}
+
+export interface ModalityRecord {
+  academicYear: string;
+  modeGroup: string;
+  count: number;
+  successRate: number;
+}
+
+export interface RetentionRecord {
+  cohortTerm: string;
+  termIndex: number;
+  count: number;
+}
+
+export interface HighSchoolRecord {
+  school: string;
+  count: number;
+  pct: number;
+}
+
+export interface FTESRecord {
+  academicYear: string;
+  ftes: number;
+}
+
+export interface CourseRecord {
+  courseNumber: string;
+  title: string;
+  count: number;
+  withdrawalRate: number;
+}
+
+export interface LocationRecord {
+  location: string;
+  count: number;
+  pct: number;
+}
+
+export interface AggregatedProgramData {
+  subject: string;
+  fetchedAt: string;
+  enrollment: EnrollmentRecord[];
+  successFall: SuccessRecord[];
+  successSpring: SuccessRecord[];
+  successSummerWinter: SuccessRecord[];
+  successByEthnicity: EthnicitySuccessRecord[];
+  demographics: DemographicRecord[];
+  gender: GenderRecord[];
+  ageGroups: AgeGroupRecord[];
+  modality: ModalityRecord[];
+  retention: RetentionRecord[];
+  highSchools: HighSchoolRecord[];
+  ftes: FTESRecord[];
+  degreeApplicableCourses: CourseRecord[];
+  notDegreeApplicableCourses: CourseRecord[];
+  location: LocationRecord[];
+}

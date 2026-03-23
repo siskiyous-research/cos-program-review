@@ -275,3 +275,32 @@ create trigger update_pr_program_data_cache_updated_at
 create trigger update_pr_kb_notes_updated_at
   before update on public.pr_kb_notes
   for each row execute procedure public.pr_update_updated_at();
+
+-- 8. Program Data Cache (Zogotech scraping)
+create table public.program_data_cache (
+  id uuid default gen_random_uuid() primary key,
+  subject_code text not null unique,
+  data jsonb not null,
+  cached_at timestamptz default now(),
+  expires_at timestamptz default now() + interval '30 days',
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+alter table public.program_data_cache enable row level security;
+
+create policy "Anyone can read program data cache"
+  on public.program_data_cache for select
+  using (true);
+
+create policy "Service role can manage program data cache"
+  on public.program_data_cache for insert
+  with check (true);
+
+create policy "Service role can update program data cache"
+  on public.program_data_cache for update
+  using (true);
+
+create trigger update_program_data_cache_updated_at
+  before update on public.program_data_cache
+  for each row execute procedure public.pr_update_updated_at();

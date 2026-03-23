@@ -156,6 +156,26 @@ export const NON_INSTRUCTIONAL_COMPREHENSIVE_TEMPLATE: ReviewTemplateItem[] = [
 ];
 
 /**
+ * Subject code mapping for Zogotech database queries
+ */
+export const SUBJECT_CODE_MAP: Record<string, string> = {
+  'Administration of Justice': 'ADJ',
+  'Alcohol & Drug Studies (ADHS)': 'ADHS',
+  'Business and Computer Sciences': 'BUS',
+  'Early Childhood Education': 'ECE',
+  'Emergency Medical Services (EMS)': 'EMS',
+  'Fine and Performing Arts': 'FA',
+  'Fire': 'FIRE',
+  'Health, Physical Education and Recreation': 'HPER',
+  'Humanities and Social Sciences': 'HUSS',
+  'Math': 'MATH',
+  'Modern Languages': 'LANGS',
+  'Nursing': 'NURS',
+  'Sciences': 'SCI',
+  'Welding': 'WELD',
+};
+
+/**
  * Program directory organized by category
  */
 export const PROGRAM_LIST = {
