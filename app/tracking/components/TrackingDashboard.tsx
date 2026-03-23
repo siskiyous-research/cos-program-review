@@ -9,6 +9,7 @@ type FilterType = 'all' | 'instructional' | 'non_instructional' | 'needs_followu
 interface ProgramStatus {
   draftSubmitted: boolean;
   finalSubmitted: boolean;
+  presented: boolean;
   engagementCount: number;
 }
 
@@ -30,6 +31,7 @@ export default function TrackingDashboard() {
         map[p.name] = {
           draftSubmitted: p.draftSubmitted,
           finalSubmitted: p.finalSubmitted,
+          presented: p.presented,
           engagementCount: p.engagementCount,
         };
       }
@@ -43,11 +45,14 @@ export default function TrackingDashboard() {
     fetchStatuses();
   }, [fetchStatuses]);
 
-  const getStatus = (name: string): 'green' | 'yellow' | 'red' => {
+  type Status = 'red' | 'yellow' | 'submitted' | 'presented';
+
+  const getStatus = (name: string): Status => {
     const s = statuses[name];
     if (!s) return 'red';
-    if (s.finalSubmitted) return 'green';
-    if (s.draftSubmitted || s.engagementCount > 0) return 'yellow';
+    if (s.presented) return 'presented';
+    if (s.finalSubmitted) return 'submitted';
+    if (s.engagementCount > 0) return 'yellow';
     return 'red';
   };
 
@@ -56,21 +61,24 @@ export default function TrackingDashboard() {
     if (filterType === 'non_instructional') return p.type === 'non_instructional';
     if (filterType === 'needs_followup') return getStatus(p.name) === 'red';
     if (filterType === 'engaged') return getStatus(p.name) === 'yellow';
-    if (filterType === 'complete') return getStatus(p.name) === 'green';
+    if (filterType === 'complete') return getStatus(p.name) === 'submitted' || getStatus(p.name) === 'presented';
     return true;
   });
 
   const stats = {
     red: allPrograms.filter((p) => getStatus(p.name) === 'red').length,
     yellow: allPrograms.filter((p) => getStatus(p.name) === 'yellow').length,
-    green: allPrograms.filter((p) => getStatus(p.name) === 'green').length,
+    complete: allPrograms.filter((p) => {
+      const s = getStatus(p.name);
+      return s === 'submitted' || s === 'presented';
+    }).length,
   };
 
   const filters: { key: FilterType; label: string }[] = [
     { key: 'all', label: `All (${allPrograms.length})` },
     { key: 'needs_followup', label: `Needs Follow-up (${stats.red})` },
     { key: 'engaged', label: `Engaged (${stats.yellow})` },
-    { key: 'complete', label: `Complete (${stats.green})` },
+    { key: 'complete', label: `Complete (${stats.complete})` },
     { key: 'instructional', label: 'Instructional' },
     { key: 'non_instructional', label: 'Non-Instructional' },
   ];
@@ -113,22 +121,19 @@ export default function TrackingDashboard() {
               <th className="sticky left-0 z-10 bg-gray-50 border-b border-r border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">
                 Program
               </th>
-              <th className="border-b border-r border-gray-200 px-3 py-3 text-center text-xs font-semibold text-gray-500 w-20">
+              <th className="border-b border-r border-gray-200 px-3 py-3 text-center text-xs font-semibold text-gray-500 w-28">
                 Status
               </th>
               {years.map((year) => (
                 <th
                   key={year}
                   className={`border-b border-r border-gray-200 px-3 py-3 text-center text-xs font-semibold whitespace-nowrap ${
-                    year === currentYear ? 'bg-green-50 text-green-800' : 'text-gray-500'
+                    year === currentYear ? 'bg-emerald-50/70 text-emerald-800' : 'text-gray-500'
                   }`}
                 >
                   {year}
                 </th>
               ))}
-              <th className="border-b border-gray-200 px-3 py-3 text-center text-xs font-semibold text-gray-500 w-24">
-                Activity
-              </th>
             </tr>
           </thead>
           <tbody>
@@ -139,18 +144,40 @@ export default function TrackingDashboard() {
               return (
                 <tr key={program.name} className="hover:bg-gray-50/50">
                   <td className="sticky left-0 z-10 bg-white border-b border-r border-gray-200 px-4 py-2.5">
-                    <p className="font-medium text-gray-900 text-sm">{program.name}</p>
-                    <p className="text-[10px] text-gray-400">
-                      {program.type === 'instructional' ? 'Instructional' : 'Non-Instructional'}
-                    </p>
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
+                        <p className="font-medium text-gray-900 text-sm">{program.name}</p>
+                        <p className="text-[10px] text-gray-400">
+                          {program.type === 'instructional' ? 'Instructional' : 'Non-Instructional'}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setEngagementPanel({ program: program.name, type: program.type })}
+                        className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-[11px] font-medium text-blue-700 hover:bg-blue-100 transition-colors flex-shrink-0"
+                      >
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Log
+                        {s && s.engagementCount > 0 && (
+                          <span className="rounded-full bg-blue-600 text-white px-1.5 py-0 text-[10px]">
+                            {s.engagementCount}
+                          </span>
+                        )}
+                      </button>
+                    </div>
                   </td>
                   <td className="border-b border-r border-gray-200 px-2 py-2.5 text-center">
-                    <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                    <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
                       status === 'red' ? 'bg-red-100 text-red-700' :
                       status === 'yellow' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-green-100 text-green-700'
+                      status === 'submitted' ? 'bg-green-100 text-green-700' :
+                      'bg-green-200 text-green-800'
                     }`}>
-                      {status === 'red' ? 'Follow-up' : status === 'yellow' ? 'Engaged' : 'Complete'}
+                      {status === 'red' ? 'Follow-up' :
+                       status === 'yellow' ? 'Engaged' :
+                       status === 'submitted' ? 'Submitted' :
+                       'Presented'}
                     </span>
                   </td>
                   {years.map((year) => {
@@ -161,7 +188,7 @@ export default function TrackingDashboard() {
                       <td
                         key={`${program.name}-${year}`}
                         className={`border-b border-r border-gray-200 px-2 py-2.5 text-center ${
-                          isCurrentYear ? 'bg-green-50/50' : ''
+                          isCurrentYear ? 'bg-emerald-50/70' : ''
                         }`}
                       >
                         {reviewType ? (
@@ -178,22 +205,6 @@ export default function TrackingDashboard() {
                       </td>
                     );
                   })}
-                  <td className="border-b border-gray-200 px-2 py-2.5 text-center">
-                    <button
-                      onClick={() => setEngagementPanel({ program: program.name, type: program.type })}
-                      className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors"
-                    >
-                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                      </svg>
-                      Log
-                      {s && s.engagementCount > 0 && (
-                        <span className="ml-0.5 rounded-full bg-blue-600 text-white px-1.5 py-0 text-[10px]">
-                          {s.engagementCount}
-                        </span>
-                      )}
-                    </button>
-                  </td>
                 </tr>
               );
             })}
