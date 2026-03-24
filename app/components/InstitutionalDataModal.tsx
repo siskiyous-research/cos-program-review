@@ -232,13 +232,12 @@ export const InstitutionalDataModal: React.FC<InstitutionalDataModalProps> = ({
     };
   }, [isOpen, position]);
 
-  const handleCopy = useCallback(async (refKey: string) => {
+  const handleCopy = useCallback(async (refKey: string, chartTitle?: string) => {
     const el = chartRefs.current[refKey];
     if (!el) return;
     setCopying(refKey);
     try {
       if (tableMode[refKey]) {
-        // Table mode: copy as rich HTML
         const table = el.querySelector('table');
         if (table) {
           const html = table.outerHTML;
@@ -249,12 +248,12 @@ export const InstitutionalDataModal: React.FC<InstitutionalDataModalProps> = ({
           ]);
         }
       } else {
-        // Chart mode: copy as PNG image
         const dataUrl = await captureChartAsImage(el);
         const res = await fetch(dataUrl);
         const blob = await res.blob();
+        const titleBlob = new Blob([chartTitle ? `Chart:${chartTitle}` : ''], { type: 'text/plain' });
         await navigator.clipboard.write([
-          new ClipboardItem({ 'image/png': blob })
+          new ClipboardItem({ 'image/png': blob, 'text/plain': titleBlob })
         ]);
       }
       setTimeout(() => setCopying(null), 1500);
@@ -352,7 +351,7 @@ export const InstitutionalDataModal: React.FC<InstitutionalDataModalProps> = ({
                       )}
                     </button>
                     <button
-                      onClick={() => handleCopy(key)}
+                      onClick={() => handleCopy(key, `All College — ${DATA_VIEW_LABELS[key]}`)}
                       disabled={copying === key}
                       className="text-[10px] px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 disabled:opacity-50 transition-colors flex items-center gap-1"
                     >

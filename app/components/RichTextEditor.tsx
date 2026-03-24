@@ -4,8 +4,8 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
-import Image from '@tiptap/extension-image';
 import Underline from '@tiptap/extension-underline';
+import { ResizableImage } from './ResizableImage';
 import { useEffect, useCallback, useRef } from 'react';
 
 interface RichTextEditorProps {
@@ -41,13 +41,7 @@ export function RichTextEditor({ content, onChange, placeholder, variant = 'comp
       }),
       ...(isFull
         ? [
-            Image.configure({
-              inline: false,
-              allowBase64: true,
-              HTMLAttributes: {
-                class: 'max-w-full rounded-md my-2',
-              },
-            }),
+            ResizableImage,
           ]
         : []),
     ],
@@ -58,6 +52,37 @@ export function RichTextEditor({ content, onChange, placeholder, variant = 'comp
           ? 'prose prose-sm max-w-none focus:outline-none min-h-[12rem] p-3 text-sm'
           : 'prose prose-sm max-w-none focus:outline-none min-h-[4rem] p-2 text-xs',
       },
+      handlePaste: isFull ? (view, event) => {
+        const items = event.clipboardData?.items;
+        if (!items) return false;
+
+        for (const item of Array.from(items)) {
+          if (item.type.startsWith('image/')) {
+            event.preventDefault();
+            const file = item.getAsFile();
+            if (!file) return true;
+
+            // Read title from text/plain clipboard data (set by our copy function)
+            const titleText = event.clipboardData?.getData('text/plain') || '';
+            const title = titleText.startsWith('Chart:') ? titleText.slice(6).trim() : '';
+
+            const reader = new FileReader();
+            reader.onload = () => {
+              const src = reader.result as string;
+              view.dispatch(view.state.tr.replaceSelectionWith(
+                view.state.schema.nodes.resizableImage.create({
+                  src,
+                  title: title || null,
+                  alt: title || 'Chart',
+                })
+              ));
+            };
+            reader.readAsDataURL(file);
+            return true;
+          }
+        }
+        return false;
+      } : undefined,
     },
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
@@ -93,7 +118,7 @@ export function RichTextEditor({ content, onChange, placeholder, variant = 'comp
       const reader = new FileReader();
       reader.onload = () => {
         const base64 = reader.result as string;
-        editor.chain().focus().setImage({ src: base64 }).run();
+        (editor.chain().focus() as any).setResizableImage({ src: base64, alt: file.name }).run();
       };
       reader.readAsDataURL(file);
       e.target.value = '';

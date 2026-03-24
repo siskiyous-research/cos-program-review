@@ -161,7 +161,7 @@ export function DataViewPanel({ isOpen, onClose, sectionTitle, sectionId, data, 
       .finally(() => setLoadingSubject(false));
   }, [selectedSubject, isOpen]);
 
-  const handleCopy = async (key: string) => {
+  const handleCopy = async (key: string, chartTitle?: string) => {
     const el = chartRefs.current[key];
     if (!el) return;
     setCopying(key);
@@ -181,12 +181,16 @@ export function DataViewPanel({ isOpen, onClose, sectionTitle, sectionId, data, 
           ]);
         }
       } else {
-        // Chart mode: copy as PNG image
+        // Chart mode: copy as PNG image with title as text metadata
         const dataUrl = await captureChartAsImage(el);
         const res = await fetch(dataUrl);
         const blob = await res.blob();
+        const titleBlob = new Blob([chartTitle ? `Chart:${chartTitle}` : ''], { type: 'text/plain' });
         await navigator.clipboard.write([
-          new ClipboardItem({ 'image/png': blob })
+          new ClipboardItem({
+            'image/png': blob,
+            'text/plain': titleBlob,
+          })
         ]);
       }
       setTimeout(() => setCopying(null), 1500);
@@ -326,7 +330,7 @@ export function DataViewPanel({ isOpen, onClose, sectionTitle, sectionId, data, 
                       )}
                     </button>
                     <button
-                      onClick={() => handleCopy(key)}
+                      onClick={() => handleCopy(key, `${activeData.subject} — ${DATA_VIEW_LABELS[key]}`)}
                       disabled={copying === key}
                       className="text-xs px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 disabled:opacity-50 transition-colors flex items-center gap-1"
                     >
