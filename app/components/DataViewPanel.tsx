@@ -130,80 +130,46 @@ export function DataViewPanel({ isOpen, onClose, sectionTitle, sectionId, data, 
   const sectionViews = SECTION_DATA_MAP[sectionId] || [];
   const [showAll, setShowAll] = useState(false);
   const [showLabels, setShowLabels] = useState(false);
-  const [panelWidth, setPanelWidth] = useState(600);
-  const [inserting, setInserting] = useState<string | null>(null);
+  const [copying, setCopying] = useState<string | null>(null);
   const [tableMode, setTableMode] = useState<Record<string, boolean>>({});
-  const isResizing = useRef(false);
   const chartRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const views = showAll ? ALL_VIEWS : sectionViews;
 
-  const handleInsertChart = async (key: string) => {
+  const handleCopyChart = async (key: string) => {
     const el = chartRefs.current[key];
-    if (!el || !onInsertChart) return;
-    setInserting(key);
+    if (!el) return;
+    setCopying(key);
     try {
       const dataUrl = await captureChartAsImage(el);
-      onInsertChart(dataUrl);
+      // Copy as image to clipboard
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]);
+      // Brief success state
+      setTimeout(() => setCopying(null), 1500);
     } catch (err) {
-      console.error('Failed to capture chart:', err);
-    } finally {
-      setInserting(null);
+      console.error('Failed to copy chart:', err);
+      setCopying(null);
     }
   };
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isResizing.current) return;
-    const newWidth = window.innerWidth - e.clientX;
-    setPanelWidth(Math.max(400, Math.min(newWidth, window.innerWidth - 200)));
-  }, []);
-
-  const handleMouseUp = useCallback(() => {
-    isResizing.current = false;
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [handleMouseMove, handleMouseUp]);
-
-  const startResizing = () => {
-    isResizing.current = true;
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
-  };
+  if (!isOpen) return null;
 
   return (
     <>
       {/* Backdrop */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/20 z-40 transition-opacity"
-          onClick={onClose}
-        />
-      )}
-
-      {/* Panel */}
       <div
-        className={`fixed top-0 right-0 h-full bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
-        style={{ width: panelWidth }}
-      >
-        {/* Resize handle */}
-        <div
-          onMouseDown={startResizing}
-          className="absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-blue-400 active:bg-blue-500 transition-colors z-10"
-        />
+        className="fixed inset-0 bg-black/40 z-40"
+        onClick={onClose}
+      />
 
+      {/* Modal */}
+      <div className="fixed inset-4 md:inset-8 lg:inset-12 bg-white rounded-xl shadow-2xl z-50 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-white border-b border-slate-200 px-6 py-4">
+        <div className="bg-white border-b border-slate-200 px-6 py-4 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-slate-800">Institutional Data</h2>
@@ -238,11 +204,12 @@ export function DataViewPanel({ isOpen, onClose, sectionTitle, sectionId, data, 
               />
               Data labels
             </label>
+            <span className="text-xs text-slate-400 ml-auto">Copy a chart or table, then paste (Ctrl+V) into any section</span>
           </div>
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto h-[calc(100%-120px)] p-6 space-y-4">
+        <div className="overflow-y-auto flex-1 p-6 space-y-4">
           {!data ? (
             <div className="text-center py-12">
               <div className="text-4xl mb-3">📊</div>
@@ -260,41 +227,47 @@ export function DataViewPanel({ isOpen, onClose, sectionTitle, sectionId, data, 
                     {/* Chart / Table toggle */}
                     <button
                       onClick={() => setTableMode(prev => ({ ...prev, [key]: !prev[key] }))}
-                      className="text-xs px-2 py-1 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded transition-colors"
+                      className="text-xs px-2 py-1 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded transition-colors flex items-center gap-1"
                       title={tableMode[key] ? 'Show chart' : 'Show table'}
                     >
                       {tableMode[key] ? (
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
+                        <>
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                          </svg>
+                          Chart
+                        </>
                       ) : (
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
+                        <>
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                          Table
+                        </>
                       )}
                     </button>
-                    {/* Insert button */}
-                    {onInsertChart && (
-                      <button
-                        onClick={() => handleInsertChart(key)}
-                        disabled={inserting === key}
-                        className="text-xs px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 disabled:opacity-50 transition-colors flex items-center gap-1"
-                      >
-                        {inserting === key ? (
-                          <>
-                            <span className="w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin inline-block"></span>
-                            Inserting...
-                          </>
-                        ) : (
-                          <>
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                            </svg>
-                            Insert
-                          </>
-                        )}
-                      </button>
-                    )}
+                    {/* Copy button */}
+                    <button
+                      onClick={() => handleCopyChart(key)}
+                      disabled={copying === key}
+                      className="text-xs px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 disabled:opacity-50 transition-colors flex items-center gap-1"
+                    >
+                      {copying === key ? (
+                        <>
+                          <svg className="w-3.5 h-3.5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                          Copy
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
                 <div className="p-4" ref={el => { chartRefs.current[key] = el; }}>
