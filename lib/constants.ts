@@ -176,7 +176,7 @@ export const SUBJECT_CODE_MAP: Record<string, string[]> = {
   'Modern Languages': ['ASL', 'COMM', 'COMS', 'ENGL', 'OLAD', 'SPAN'],
   'Non-Credit': ['GUID', 'WEE'],
   'Nursing': ['NURS'],
-  'Sciences': ['BIO', 'CHEM', 'ENVR', 'ENVS', 'ESCI', 'GEOG', 'PHYS'],
+  'Sciences': ['ASTR', 'BIO', 'CHEM', 'ENVR', 'ENVS', 'ESCI', 'GEOG', 'PHYS'],
   'Welding': ['WELD'],
 };
 
