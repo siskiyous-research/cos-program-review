@@ -132,7 +132,7 @@ export const ResizableImage = Node.create({
     return {
       setResizableImage:
         (options: { src: string; alt?: string; title?: string; width?: number }) =>
-        ({ commands }) => {
+        ({ commands }: { commands: any }) => {
           return commands.insertContent({
             type: this.name,
             attrs: options,
