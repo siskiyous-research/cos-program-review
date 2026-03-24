@@ -14,7 +14,7 @@ export function EnrollmentChart({ data, showLabels = false }: { data: Enrollment
       <BarChart data={data}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="term" fontSize={11} angle={-35} textAnchor="end" height={60} />
-        <YAxis />
+        <YAxis domain={showLabels ? [0, (max: number) => Math.ceil(max * 1.15)] : undefined} />
         <Tooltip />
         <Bar dataKey="count">
           {showLabels && <LabelList dataKey="count" position="top" fontSize={10} fontWeight="bold" />}

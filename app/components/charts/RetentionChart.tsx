@@ -21,7 +21,7 @@ export function RetentionChart({ data, showLabels = false }: { data: RetentionRe
       <BarChart data={pivoted}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="cohort" fontSize={11} />
-        <YAxis />
+        <YAxis domain={showLabels ? [0, (max: number) => Math.ceil(max * 1.15)] : undefined} />
         <Tooltip />
         <Legend />
         {indices.map(idx => {

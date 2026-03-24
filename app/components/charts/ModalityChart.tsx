@@ -22,7 +22,7 @@ export function ModalityChart({ data, showLabels = false }: { data: ModalityReco
       <ComposedChart data={pivoted}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="year" fontSize={11} />
-        <YAxis yAxisId="left" />
+        <YAxis yAxisId="left" domain={showLabels ? [0, (max: number) => Math.ceil(max * 1.15)] : undefined} />
         <YAxis yAxisId="right" orientation="right" domain={[0, 100]} />
         <Tooltip />
         <Legend wrapperStyle={{ fontSize: 10 }} />

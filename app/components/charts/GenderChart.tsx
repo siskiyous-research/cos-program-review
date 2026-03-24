@@ -20,7 +20,7 @@ export function GenderChart({ data, showLabels = false }: { data: GenderRecord[]
       <BarChart data={pivoted}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="year" fontSize={11} />
-        <YAxis />
+        <YAxis domain={showLabels ? [0, (max: number) => Math.ceil(max * 1.15)] : undefined} />
         <Tooltip />
         <Legend />
         {genders.map(g => (

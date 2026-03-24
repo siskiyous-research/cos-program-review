@@ -120,15 +120,11 @@ function renderTable(key: DataViewKey, data: AggregatedProgramData) {
 interface InstitutionalDataModalProps {
   isOpen: boolean;
   onClose: () => void;
-  data: AggregatedProgramData | null;
-  isLoading: boolean;
 }
 
 export const InstitutionalDataModal: React.FC<InstitutionalDataModalProps> = ({
   isOpen,
   onClose,
-  data,
-  isLoading,
 }) => {
   const [size, setSize] = useState({ width: 750, height: 560 });
   const [position, setPosition] = useState({ x: -1, y: -1 });
@@ -140,6 +136,33 @@ export const InstitutionalDataModal: React.FC<InstitutionalDataModalProps> = ({
   const isDragging = useRef(false);
   const isResizing = useRef<string | null>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
+
+  // All-college data: fetch all cached subjects on open
+  const [allData, setAllData] = useState<Array<{ subject: string; data: AggregatedProgramData }>>([]);
+  const [loadingAll, setLoadingAll] = useState(false);
+  const hasFetched = useRef(false);
+
+  useEffect(() => {
+    if (!isOpen || hasFetched.current) return;
+    hasFetched.current = true;
+    setLoadingAll(true);
+    fetch('/api/admin/ftes-upload') // just to test auth — real fetch below
+      .catch(() => {});
+    // Fetch all cached subjects via the program-data-cache
+    (async () => {
+      try {
+        const res = await fetch('/api/program-data/all');
+        const result = await res.json();
+        if (result.ok) {
+          setAllData(result.subjects);
+        }
+      } catch {
+        // fallback: not available
+      } finally {
+        setLoadingAll(false);
+      }
+    })();
+  }, [isOpen]);
 
   // Center on first open
   useEffect(() => {
@@ -212,10 +235,10 @@ export const InstitutionalDataModal: React.FC<InstitutionalDataModalProps> = ({
     };
   }, [isOpen, position]);
 
-  const handleCopyChart = async (key: string) => {
-    const el = chartRefs.current[key];
+  const handleCopyChart = useCallback(async (refKey: string) => {
+    const el = chartRefs.current[refKey];
     if (!el) return;
-    setCopying(key);
+    setCopying(refKey);
     try {
       const dataUrl = await captureChartAsImage(el);
       const res = await fetch(dataUrl);
@@ -228,7 +251,7 @@ export const InstitutionalDataModal: React.FC<InstitutionalDataModalProps> = ({
       console.error('Failed to copy chart:', err);
       setCopying(null);
     }
-  };
+  }, []);
 
   if (!isOpen) return null;
 
@@ -253,7 +276,7 @@ export const InstitutionalDataModal: React.FC<InstitutionalDataModalProps> = ({
       <div onMouseDown={(e) => handleResizeStart('se', e)} className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize" />
       <div onMouseDown={(e) => handleResizeStart('sw', e)} className="absolute bottom-0 left-0 w-3 h-3 cursor-sw-resize" />
 
-      {/* Title bar - draggable */}
+      {/* Title bar */}
       <div
         onMouseDown={handleMouseDown}
         className="px-4 py-3 border-b border-slate-200 cursor-move bg-slate-50 rounded-t-lg shrink-0"
@@ -263,7 +286,7 @@ export const InstitutionalDataModal: React.FC<InstitutionalDataModalProps> = ({
             <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
-            <h3 className="text-sm font-semibold text-slate-800">Institutional Data</h3>
+            <h3 className="text-sm font-semibold text-slate-800">Institutional Data — All College</h3>
           </div>
           <button
             onClick={onClose}
@@ -290,55 +313,62 @@ export const InstitutionalDataModal: React.FC<InstitutionalDataModalProps> = ({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3" data-no-drag>
-        {isLoading ? (
-          <div className="text-center py-12 text-slate-500 text-sm">Loading data...</div>
-        ) : !data ? (
+      <div className="flex-1 overflow-y-auto p-4 space-y-4" data-no-drag>
+        {loadingAll ? (
+          <div className="text-center py-12 text-slate-500 text-sm">Loading all college data...</div>
+        ) : allData.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-4xl mb-3">📊</div>
             <p className="text-slate-500">No cached data available.</p>
             <p className="text-sm text-slate-400 mt-1">Run a scrape from Settings to load data.</p>
           </div>
         ) : (
-          <>
-            {ALL_VIEWS.map(key => (
-              <div key={key} className="border border-slate-200 rounded-lg overflow-hidden">
-                <div className="px-4 py-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-2">
-                  <h3 className="text-xs font-semibold text-slate-700">{data.subject} — {DATA_VIEW_LABELS[key]}</h3>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <button
-                      onClick={() => setTableMode(prev => ({ ...prev, [key]: !prev[key] }))}
-                      className="text-[10px] px-2 py-0.5 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded transition-colors flex items-center gap-1"
-                      title={tableMode[key] ? 'Show chart' : 'Show table'}
-                    >
-                      {tableMode[key] ? (
-                        <><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg> Chart</>
-                      ) : (
-                        <><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Table</>
-                      )}
-                    </button>
-                    <button
-                      onClick={() => handleCopyChart(key)}
-                      disabled={copying === key}
-                      className="text-[10px] px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 disabled:opacity-50 transition-colors flex items-center gap-1"
-                    >
-                      {copying === key ? (
-                        <><svg className="w-3 h-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Copied!</>
-                      ) : (
-                        <><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</>
-                      )}
-                    </button>
-                  </div>
-                </div>
-                <div className="p-3" ref={el => { chartRefs.current[key] = el; }}>
-                  {tableMode[key] ? renderTable(key, data) : renderChart(key, data, showLabels)}
-                </div>
+          allData.map(({ subject, data }) => (
+            <div key={subject}>
+              <h3 className="text-sm font-bold text-slate-800 mb-2 sticky top-0 bg-white py-1 z-10 border-b border-slate-200">
+                {subject}
+              </h3>
+              <div className="space-y-3">
+                {ALL_VIEWS.map(key => {
+                  const refKey = `${subject}-${key}`;
+                  return (
+                    <div key={refKey} className="border border-slate-200 rounded-lg overflow-hidden">
+                      <div className="px-4 py-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-2">
+                        <h4 className="text-xs font-semibold text-slate-700">{DATA_VIEW_LABELS[key]}</h4>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <button
+                            onClick={() => setTableMode(prev => ({ ...prev, [refKey]: !prev[refKey] }))}
+                            className="text-[10px] px-2 py-0.5 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded transition-colors flex items-center gap-1"
+                            title={tableMode[refKey] ? 'Show chart' : 'Show table'}
+                          >
+                            {tableMode[refKey] ? (
+                              <><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg> Chart</>
+                            ) : (
+                              <><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Table</>
+                            )}
+                          </button>
+                          <button
+                            onClick={() => handleCopyChart(refKey)}
+                            disabled={copying === refKey}
+                            className="text-[10px] px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 disabled:opacity-50 transition-colors flex items-center gap-1"
+                          >
+                            {copying === refKey ? (
+                              <><svg className="w-3 h-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Copied!</>
+                            ) : (
+                              <><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                      <div className="p-3" ref={el => { chartRefs.current[refKey] = el; }}>
+                        {tableMode[refKey] ? renderTable(key, data) : renderChart(key, data, showLabels)}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            ))}
-            <div className="text-xs text-slate-400 text-center pt-1">
-              Data cached: {new Date(data.fetchedAt).toLocaleString()}
             </div>
-          </>
+          ))
         )}
       </div>
     </div>

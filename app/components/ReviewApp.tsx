@@ -15,7 +15,6 @@ import {
   SUBJECT_CODE_MAP,
 } from '@/lib/constants';
 import { AccjcFeedback } from './AccjcFeedback';
-import { DataViewPanel } from './DataViewPanel';
 import { InstitutionalDataModal } from './InstitutionalDataModal';
 import { useAutoSave } from '@/app/hooks/useAutoSave';
 
@@ -54,7 +53,7 @@ export default function ReviewApp({ user }: ReviewAppProps) {
   // Institutional data dashboard state
   const [aggregatedData, setAggregatedData] = useState<AggregatedProgramData | null>(null);
   const [isDashboardLoading, setIsDashboardLoading] = useState(false);
-  const [dataViewSection, setDataViewSection] = useState<string | null>(null);
+  const [showSidebarDataView, setShowSidebarDataView] = useState(false);
   const [isInstitutionalModalOpen, setIsInstitutionalModalOpen] = useState(false);
 
   // Review persistence state
@@ -616,18 +615,9 @@ export default function ReviewApp({ user }: ReviewAppProps) {
 
   return (
     <>
-      <DataViewPanel
-        isOpen={dataViewSection !== null}
-        onClose={() => setDataViewSection(null)}
-        sectionId={dataViewSection || ''}
-        sectionTitle={currentTemplate.find(s => s.id === dataViewSection)?.title || ''}
-        data={aggregatedData}
-      />
       <InstitutionalDataModal
         isOpen={isInstitutionalModalOpen}
         onClose={() => setIsInstitutionalModalOpen(false)}
-        data={aggregatedData}
-        isLoading={isDashboardLoading}
       />
       <SummaryModal
         isOpen={isSummaryModalOpen}
@@ -817,7 +807,7 @@ export default function ReviewApp({ user }: ReviewAppProps) {
                 onGetGuidance={handleGetGuidance}
                 isGeneratingGuidance={isGeneratingGuidance}
                 saveStatus={saveStatus}
-                onViewData={(sectionId) => setDataViewSection(sectionId)}
+                onViewData={() => setShowSidebarDataView(true)}
                 hasData={!!aggregatedData}
               />
             </>
@@ -836,6 +826,10 @@ export default function ReviewApp({ user }: ReviewAppProps) {
             isLoadingData={isLoadingData}
             isChatting={isChatting}
             onChatSubmit={handleChatSubmit}
+            aggregatedData={aggregatedData}
+            isDashboardLoading={isDashboardLoading}
+            showDataView={showSidebarDataView}
+            onCloseDataView={() => setShowSidebarDataView(false)}
           />
         </aside>
       </div>
