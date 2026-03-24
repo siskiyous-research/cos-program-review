@@ -1,8 +1,8 @@
 'use client';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts';
 import { HighSchoolRecord } from '@/lib/types';
 
-export function HighSchoolsChart({ data }: { data: HighSchoolRecord[] }) {
+export function HighSchoolsChart({ data, showLabels = false }: { data: HighSchoolRecord[]; showLabels?: boolean }) {
   if (!data?.length) return <p className="text-sm text-slate-400 p-4">No high school data</p>;
   const reversed = [...data].reverse();
   return (
@@ -11,8 +11,10 @@ export function HighSchoolsChart({ data }: { data: HighSchoolRecord[] }) {
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis type="number" />
         <YAxis dataKey="school" type="category" width={135} fontSize={10} />
-        <Tooltip formatter={(v: number, name: string) => name === 'pct' ? `${v}%` : v} />
-        <Bar dataKey="count" fill="#d94f4f" name="Students" />
+        <Tooltip />
+        <Bar dataKey="count" fill="#d94f4f" name="Students">
+          {showLabels && <LabelList dataKey="pct" position="right" fontSize={9} formatter={(v: number) => `${v}%`} />}
+        </Bar>
       </BarChart>
     </ResponsiveContainer>
   );

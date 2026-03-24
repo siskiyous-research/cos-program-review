@@ -1,8 +1,8 @@
 'use client';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts';
 import { LocationRecord } from '@/lib/types';
 
-export function LocationChart({ data }: { data: LocationRecord[] }) {
+export function LocationChart({ data, showLabels = false }: { data: LocationRecord[]; showLabels?: boolean }) {
   if (!data?.length) return <p className="text-sm text-slate-400 p-4">No location data</p>;
   const reversed = [...data].reverse();
   return (
@@ -11,8 +11,10 @@ export function LocationChart({ data }: { data: LocationRecord[] }) {
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis type="number" />
         <YAxis dataKey="location" type="category" width={95} fontSize={11} />
-        <Tooltip formatter={(v: number, name: string) => name === 'pct' ? `${v}%` : v} />
-        <Bar dataKey="count" fill="#2a6496" name="Students" />
+        <Tooltip />
+        <Bar dataKey="count" fill="#2a6496" name="Students">
+          {showLabels && <LabelList dataKey="pct" position="right" fontSize={9} formatter={(v: number) => `${v}%`} />}
+        </Bar>
       </BarChart>
     </ResponsiveContainer>
   );
