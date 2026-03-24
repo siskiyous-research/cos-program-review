@@ -15,7 +15,7 @@ import {
   SUBJECT_CODE_MAP,
 } from '@/lib/constants';
 import { AccjcFeedback } from './AccjcFeedback';
-import { DataViewPanel } from './DataViewPanel';
+import { InstitutionalDataModal } from './InstitutionalDataModal';
 import { useAutoSave } from '@/app/hooks/useAutoSave';
 
 type ReviewType = 'annual' | 'comprehensive_instructional' | 'comprehensive_non_instructional';
@@ -53,7 +53,10 @@ export default function ReviewApp({ user }: ReviewAppProps) {
   // Institutional data dashboard state
   const [aggregatedData, setAggregatedData] = useState<AggregatedProgramData | null>(null);
   const [isDashboardLoading, setIsDashboardLoading] = useState(false);
-  const [dataViewSection, setDataViewSection] = useState<string | null>(null);
+  const [showSidebarDataView, setShowSidebarDataView] = useState(false);
+  const [isInstitutionalModalOpen, setIsInstitutionalModalOpen] = useState(false);
+  const [allSubjectsData, setAllSubjectsData] = useState<Array<{ subject: string; data: AggregatedProgramData }>>([]);
+  const [isLoadingAllSubjects, setIsLoadingAllSubjects] = useState(false);
 
   // Review persistence state
   const [reviewId, setReviewId] = useState<string | null>(null);
@@ -210,6 +213,33 @@ export default function ReviewApp({ user }: ReviewAppProps) {
   useEffect(() => {
     initializeData();
   }, [reviewType, programName, initializeData]);
+
+  // Fetch all subjects for institutional data modal (lazy, on first open)
+  const fetchAllSubjectsData = useCallback(async () => {
+    if (allSubjectsData.length > 0) return;
+    setIsLoadingAllSubjects(true);
+    try {
+      const subjects = [...new Set(Object.values(SUBJECT_CODE_MAP).flat())];
+      const results: Array<{ subject: string; data: AggregatedProgramData }> = [];
+      await Promise.all(
+        subjects.map(async (subject) => {
+          try {
+            const res = await fetch(`/api/program-data?subject=${subject}`);
+            const result = await res.json();
+            if (result.ok) results.push({ subject, data: result.data });
+          } catch { /* skip failed */ }
+        })
+      );
+      setAllSubjectsData(results.sort((a, b) => a.subject.localeCompare(b.subject)));
+    } finally {
+      setIsLoadingAllSubjects(false);
+    }
+  }, [allSubjectsData.length]);
+
+  const handleOpenInstitutionalModal = useCallback(() => {
+    setIsInstitutionalModalOpen(true);
+    fetchAllSubjectsData();
+  }, [fetchAllSubjectsData]);
 
   const handleSectionTextChange = (sectionId: string, text: string) => {
     setReviewSections((prev) => ({ ...prev, [sectionId]: text }));
@@ -610,12 +640,13 @@ export default function ReviewApp({ user }: ReviewAppProps) {
 
   return (
     <>
-      <DataViewPanel
-        isOpen={dataViewSection !== null}
-        onClose={() => setDataViewSection(null)}
-        sectionId={dataViewSection || ''}
-        sectionTitle={currentTemplate.find(s => s.id === dataViewSection)?.title || ''}
+      <InstitutionalDataModal
+        isOpen={isInstitutionalModalOpen}
+        onClose={() => setIsInstitutionalModalOpen(false)}
         data={aggregatedData}
+        isLoading={isDashboardLoading}
+        allSubjects={allSubjectsData}
+        isLoadingAll={isLoadingAllSubjects}
       />
       <SummaryModal
         isOpen={isSummaryModalOpen}
@@ -660,6 +691,15 @@ export default function ReviewApp({ user }: ReviewAppProps) {
                   <span className="text-2xl">🎓</span>
                   <span>ACCJC Accreditation Ready</span>
                 </p>
+                <button
+                  onClick={handleOpenInstitutionalModal}
+                  className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  Institutional Data
+                </button>
               </div>
               <div className="flex flex-col items-end gap-3">
                 <AuthHeader userEmail={user.email || ''} />
@@ -796,7 +836,7 @@ export default function ReviewApp({ user }: ReviewAppProps) {
                 onGetGuidance={handleGetGuidance}
                 isGeneratingGuidance={isGeneratingGuidance}
                 saveStatus={saveStatus}
-                onViewData={(sectionId) => setDataViewSection(sectionId)}
+                onViewData={() => setShowSidebarDataView(true)}
                 hasData={!!aggregatedData}
               />
             </>
@@ -817,6 +857,8 @@ export default function ReviewApp({ user }: ReviewAppProps) {
             onChatSubmit={handleChatSubmit}
             aggregatedData={aggregatedData}
             isDashboardLoading={isDashboardLoading}
+            showDataView={showSidebarDataView}
+            onCloseDataView={() => setShowSidebarDataView(false)}
           />
         </aside>
       </div>

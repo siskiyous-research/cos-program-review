@@ -52,6 +52,12 @@ export default function SettingsPage() {
 
 
 
+  // FTES upload state
+  const [ftesFile, setFtesFile] = useState<File | null>(null);
+  const [uploadingFtes, setUploadingFtes] = useState(false);
+  const [ftesMessage, setFtesMessage] = useState('');
+  const [ftesOverrides, setFtesOverrides] = useState<Array<{ subject_code: string; academic_year: string; ftes: number }>>([]);
+
   const loadSettings = useCallback(async () => {
     try {
       const res = await fetch('/api/settings');
@@ -81,9 +87,21 @@ export default function SettingsPage() {
     }
   }, []);
 
+  const loadFtesOverrides = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/ftes-upload');
+      if (!res.ok) return;
+      const json = await res.json();
+      if (json.ok) setFtesOverrides(json.data || []);
+    } catch {
+      // Not critical
+    }
+  }, []);
+
   useEffect(() => {
     loadSettings();
-  }, [loadSettings]);
+    loadFtesOverrides();
+  }, [loadSettings, loadFtesOverrides]);
 
   const fetchModels = async () => {
     if (!localUrl) return;
@@ -279,6 +297,29 @@ export default function SettingsPage() {
     setReminderEmails(prev => ({ ...prev, [role]: value }));
   };
 
+
+  const handleFtesUpload = async () => {
+    if (!ftesFile) return;
+    setUploadingFtes(true);
+    setFtesMessage('');
+    try {
+      const formData = new FormData();
+      formData.append('file', ftesFile);
+      const res = await fetch('/api/admin/ftes-upload', { method: 'POST', body: formData });
+      const json = await res.json();
+      if (!res.ok || !json.ok) throw new Error(json.error || 'Upload failed');
+      setFtesMessage(`Imported ${json.imported} rows for ${json.subjects.length} subjects`);
+      setFtesFile(null);
+      // Reset file input
+      const input = document.getElementById('ftes-file-input') as HTMLInputElement;
+      if (input) input.value = '';
+      await loadFtesOverrides();
+    } catch (err) {
+      setFtesMessage(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setUploadingFtes(false);
+    }
+  };
 
   const formatSize = (bytes?: number) => {
     if (!bytes) return '';
@@ -531,6 +572,80 @@ export default function SettingsPage() {
               {scrapeMessage}
             </div>
           )}
+        </div>
+
+        {/* FTES Data (Banner) */}
+        <div className="bg-white rounded-lg border border-slate-200 p-6 mt-6">
+          <h2 className="text-lg font-semibold text-slate-800 mb-2">FTES Data (Banner)</h2>
+          <p className="text-sm text-slate-500 mb-4">
+            Upload exact FTES from Banner to replace Zogotech estimates. CSV should have Subject as the first column and academic years as column headers (e.g., 2021-22, 2022-23).
+          </p>
+
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <input
+                id="ftes-file-input"
+                type="file"
+                accept=".csv,.tsv,.txt"
+                onChange={(e) => setFtesFile(e.target.files?.[0] || null)}
+                className="text-sm text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border file:border-slate-300 file:text-sm file:font-medium file:bg-white file:text-slate-700 hover:file:bg-slate-50"
+              />
+              <button
+                onClick={handleFtesUpload}
+                disabled={!ftesFile || uploadingFtes}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+              >
+                {uploadingFtes ? 'Uploading...' : 'Upload'}
+              </button>
+            </div>
+
+            {ftesMessage && (
+              <div className={`p-3 rounded-md text-sm ${
+                ftesMessage.includes('Imported')
+                  ? 'bg-green-50 border border-green-200 text-green-800'
+                  : 'bg-red-50 border border-red-200 text-red-800'
+              }`}>
+                {ftesMessage}
+              </div>
+            )}
+
+            {ftesOverrides.length > 0 && (() => {
+              const subjects = [...new Set(ftesOverrides.map(r => r.subject_code))].sort();
+              const years = [...new Set(ftesOverrides.map(r => r.academic_year))].sort();
+              const lookup = new Map(ftesOverrides.map(r => [`${r.subject_code}|${r.academic_year}`, r.ftes]));
+              return (
+                <div>
+                  <h3 className="text-sm font-medium text-slate-700 mb-2">
+                    Current Overrides ({ftesOverrides.length} records, {subjects.length} subjects)
+                  </h3>
+                  <div className="overflow-x-auto max-h-64 overflow-y-auto border border-slate-200 rounded-md">
+                    <table className="text-xs w-full">
+                      <thead className="bg-slate-50 sticky top-0">
+                        <tr>
+                          <th className="text-left px-2 py-1.5 font-medium text-slate-600 border-b">Subject</th>
+                          {years.map(y => (
+                            <th key={y} className="text-right px-2 py-1.5 font-medium text-slate-600 border-b">{y}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {subjects.map(sub => (
+                          <tr key={sub} className="border-b border-slate-100 hover:bg-slate-50">
+                            <td className="px-2 py-1 font-medium text-slate-700">{sub}</td>
+                            {years.map(y => (
+                              <td key={y} className="text-right px-2 py-1 text-slate-600 tabular-nums">
+                                {lookup.get(`${sub}|${y}`)?.toFixed(2) ?? '—'}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
         </div>
 
         {/* Notification Settings */}

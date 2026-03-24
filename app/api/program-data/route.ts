@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
-import { getCachedProgramData } from '@/lib/program-data-cache';
+import { getCachedProgramData, getFTESOverrides } from '@/lib/program-data-cache';
 import { AggregatedProgramData } from '@/lib/types';
 
 export async function GET(req: NextRequest) {
@@ -35,6 +35,12 @@ export async function GET(req: NextRequest) {
         },
         { status: 404 }
       );
+    }
+
+    // Apply Banner FTES overrides if available
+    const ftesOverrides = await getFTESOverrides(subject.toUpperCase());
+    if (ftesOverrides.length > 0) {
+      data.ftes = ftesOverrides;
     }
 
     return NextResponse.json({ ok: true, data });

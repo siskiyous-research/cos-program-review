@@ -5,7 +5,7 @@
  */
 
 import { createAdminClient } from '@/lib/supabase/admin';
-import { AggregatedProgramData } from './types';
+import { AggregatedProgramData, FTESRecord } from './types';
 
 /**
  * Save aggregated program data to cache
@@ -74,4 +74,26 @@ export async function getAllCachedSubjects(): Promise<
       cachedAt: row.cached_at,
     })) || []
   );
+}
+
+/**
+ * Get Banner FTES overrides for a subject
+ */
+export async function getFTESOverrides(subject: string): Promise<FTESRecord[]> {
+  const supabase = createAdminClient();
+
+  const { data, error } = await supabase
+    .from('ftes_override')
+    .select('academic_year, ftes')
+    .eq('subject_code', subject.toUpperCase())
+    .order('academic_year');
+
+  if (error || !data || data.length === 0) {
+    return [];
+  }
+
+  return data.map(row => ({
+    academicYear: row.academic_year,
+    ftes: row.ftes,
+  }));
 }
