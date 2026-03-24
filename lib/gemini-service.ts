@@ -12,6 +12,7 @@ import { retrieveContext, formatRAGContext, formatRAGContextWithCitations } from
 import { getSetting } from './settings';
 
 const CLOUD_DEFAULT_MODEL = 'xiaomi/mimo-v2-flash';
+const CLOUD_VISION_MODEL = 'google/gemini-2.0-flash-001';
 
 async function getClientAndModel(): Promise<{ client: OpenAI; model: string }> {
   const aiMode = await getSetting('ai_mode') || 'cloud';
@@ -215,9 +216,23 @@ Generate a well-written, professional response. Reference specific COS policies,
 }
 
 /**
+ * Extract image URLs from HTML content
+ */
+function extractImageUrls(html: string): string[] {
+  const urls: string[] = [];
+  const imgRegex = /<img[^>]+src=["']([^"']+)["']/gi;
+  let match;
+  while ((match = imgRegex.exec(html)) !== null) {
+    urls.push(match[1]);
+  }
+  return urls;
+}
+
+/**
  * Get ACCJC guidance for a section draft
  * Reviews the user's current draft and provides coaching tips
  * based on applicable ACCJC standards
+ * Uses vision model when images are detected in the content
  */
 export async function getSectionGuidance(
   sectionId: string,
@@ -246,28 +261,55 @@ ${questions.map(q => `- ${q}`).join('\n')}`;
     .filter(Boolean)
     .join('\n\n');
 
-  const prompt = `You are an ACCJC accreditation coach helping a faculty member strengthen their program review for the ${programData.programName} program at College of the Siskiyous.
+  const imageUrls = extractImageUrls(sectionContent);
+  const hasImages = imageUrls.length > 0;
+
+  const promptText = `You are an ACCJC accreditation coach helping a faculty member strengthen their program review for the ${programData.programName} program at College of the Siskiyous.
 
 The user has written the following draft for the "${sectionTitle}" section:
 
 ---
 ${sectionContent}
 ---
-
+${hasImages ? `\nThe section includes ${imageUrls.length} embedded image(s)/chart(s). Analyze each image — describe what data it shows and whether it effectively supports the narrative. Suggest how the user should reference or interpret the data in their written content.\n` : ''}
 The following ACCJC standards apply to this section:
 
 ${standardDetails}
 
 Review this draft and provide constructive guidance. For each ACCJC standard that applies, give 1-2 specific suggestions for how the user could strengthen their response. Frame suggestions as questions or prompts (e.g., "Consider discussing...", "You might strengthen this by...", "Have you addressed...?").
+${hasImages ? '\nFor any charts/images, evaluate whether they are properly contextualized in the text and whether the data supports the claims made.' : ''}
 
 Do NOT rewrite the content — coach the user. Be specific about what's missing or could be improved. If the draft already addresses a standard well, briefly acknowledge that.
 
 Format your response with clear headings for each standard.`;
 
   const { client, model } = await getClientAndModel();
+
+  if (hasImages) {
+    // Use vision model with image content blocks
+    const aiMode = await getSetting('ai_mode') || 'cloud';
+    const visionModel = aiMode === 'cloud' ? CLOUD_VISION_MODEL : model;
+
+    const content: OpenAI.Chat.ChatCompletionContentPart[] = [
+      { type: 'text', text: promptText },
+      ...imageUrls.map((url): OpenAI.Chat.ChatCompletionContentPart => ({
+        type: 'image_url',
+        image_url: { url },
+      })),
+    ];
+
+    const response = await client.chat.completions.create({
+      model: visionModel,
+      messages: [{ role: 'user', content }],
+    });
+
+    return response.choices[0]?.message?.content ?? '';
+  }
+
+  // Text-only: use default model
   const response = await client.chat.completions.create({
     model,
-    messages: [{ role: 'user', content: prompt }],
+    messages: [{ role: 'user', content: promptText }],
   });
 
   return response.choices[0]?.message?.content ?? '';
