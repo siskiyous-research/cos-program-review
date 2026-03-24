@@ -624,6 +624,7 @@ export default function ReviewApp({ user }: ReviewAppProps) {
         sectionId={dataViewSection || ''}
         sectionTitle={currentTemplate.find(s => s.id === dataViewSection)?.title || ''}
         data={aggregatedData}
+        subjectCodes={SUBJECT_CODE_MAP[programName]}
       />
       <InstitutionalDataModal
         isOpen={isInstitutionalModalOpen}

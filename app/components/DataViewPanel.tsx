@@ -31,6 +31,7 @@ interface DataViewPanelProps {
   sectionTitle: string;
   sectionId: string;
   data: AggregatedProgramData | null;
+  subjectCodes?: string[];
 }
 
 function renderChart(key: DataViewKey, data: AggregatedProgramData, showLabels: boolean) {
@@ -117,26 +118,48 @@ function renderTable(key: DataViewKey, data: AggregatedProgramData) {
   }
 }
 
-export function DataViewPanel({ isOpen, onClose, sectionTitle, sectionId, data }: DataViewPanelProps) {
+export function DataViewPanel({ isOpen, onClose, sectionTitle, sectionId, data, subjectCodes }: DataViewPanelProps) {
   const sectionViews = SECTION_DATA_MAP[sectionId] || [];
   const [showLabels, setShowLabels] = useState(false);
   const [panelWidth, setPanelWidth] = useState(600);
   const [copying, setCopying] = useState<string | null>(null);
   const [tableMode, setTableMode] = useState<Record<string, boolean>>({});
   const [page, setPage] = useState(0);
+  const [selectedSubject, setSelectedSubject] = useState('combined');
+  const [subjectData, setSubjectData] = useState<AggregatedProgramData | null>(null);
+  const [loadingSubject, setLoadingSubject] = useState(false);
   const isResizing = useRef(false);
   const chartRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+  const isMultiSubject = (subjectCodes?.length || 0) > 1;
+  const activeData = selectedSubject === 'combined' ? data : (subjectData ?? data);
+
   const VIEWS_PER_PAGE = sectionViews.length || 4;
-  // Page 0 = section-relevant views, page 1+ = remaining views paginated
   const remainingViews = ALL_VIEWS.filter(v => !sectionViews.includes(v));
   const totalPages = 1 + Math.ceil(remainingViews.length / VIEWS_PER_PAGE);
   const views = page === 0
     ? sectionViews
     : remainingViews.slice((page - 1) * VIEWS_PER_PAGE, page * VIEWS_PER_PAGE);
 
-  // Reset page when section changes
-  useEffect(() => { setPage(0); }, [sectionId]);
+  // Reset page and subject when section changes
+  useEffect(() => { setPage(0); setSelectedSubject('combined'); }, [sectionId]);
+
+  // Fetch individual subject data when dropdown changes
+  useEffect(() => {
+    if (selectedSubject === 'combined' || !isOpen) {
+      setSubjectData(null);
+      return;
+    }
+    setLoadingSubject(true);
+    fetch(`/api/program-data?subject=${selectedSubject}`)
+      .then(res => res.json())
+      .then(result => {
+        if (result.ok) setSubjectData(result.data);
+        else setSubjectData(null);
+      })
+      .catch(() => setSubjectData(null))
+      .finally(() => setLoadingSubject(false));
+  }, [selectedSubject, isOpen]);
 
   const handleCopyChart = async (key: string) => {
     const el = chartRefs.current[key];
@@ -212,12 +235,24 @@ export function DataViewPanel({ isOpen, onClose, sectionTitle, sectionId, data }
               </svg>
             </button>
           </div>
-          <div className="flex items-center gap-4 mt-3">
+          <div className="flex items-center gap-4 mt-3 flex-wrap">
             <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
               <input type="checkbox" checked={showLabels} onChange={(e) => setShowLabels(e.target.checked)}
                 className="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
               Data labels
             </label>
+            {isMultiSubject && subjectCodes && (
+              <select
+                value={selectedSubject}
+                onChange={(e) => setSelectedSubject(e.target.value)}
+                className="text-sm border border-slate-300 rounded-md px-2 py-1 bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="combined">All Subjects (Combined)</option>
+                {subjectCodes.map(code => (
+                  <option key={code} value={code}>{code}</option>
+                ))}
+              </select>
+            )}
             {totalPages > 1 && (
               <div className="flex items-center gap-1.5 ml-auto">
                 <button
@@ -245,8 +280,10 @@ export function DataViewPanel({ isOpen, onClose, sectionTitle, sectionId, data }
           </div>
         </div>
 
-        <div className="overflow-y-auto h-[calc(100%-130px)] p-6 space-y-4">
-          {!data ? (
+        <div className="overflow-y-auto h-[calc(100%-150px)] p-6 space-y-4">
+          {loadingSubject ? (
+            <div className="text-center py-12 text-slate-500 text-sm">Loading subject data...</div>
+          ) : !activeData ? (
             <div className="text-center py-12">
               <div className="text-4xl mb-3">📊</div>
               <p className="text-slate-500">No cached data available for this program.</p>
@@ -258,7 +295,7 @@ export function DataViewPanel({ isOpen, onClose, sectionTitle, sectionId, data }
             views.map(key => (
               <div key={key} className="border border-slate-200 rounded-lg overflow-hidden">
                 <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-2">
-                  <h3 className="text-sm font-semibold text-slate-700">Subject: {data.subject} — {DATA_VIEW_LABELS[key]}</h3>
+                  <h3 className="text-sm font-semibold text-slate-700">Subject: {activeData.subject} — {DATA_VIEW_LABELS[key]}</h3>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <button
                       onClick={() => setTableMode(prev => ({ ...prev, [key]: !prev[key] }))}
@@ -285,14 +322,14 @@ export function DataViewPanel({ isOpen, onClose, sectionTitle, sectionId, data }
                   </div>
                 </div>
                 <div className="p-4" ref={el => { chartRefs.current[key] = el; }}>
-                  {tableMode[key] ? renderTable(key, data) : renderChart(key, data, showLabels)}
+                  {tableMode[key] ? renderTable(key, activeData) : renderChart(key, activeData, showLabels)}
                 </div>
               </div>
             ))
           )}
-          {data && (
+          {activeData && (
             <div className="text-xs text-slate-400 text-center pt-2">
-              Data cached: {new Date(data.fetchedAt).toLocaleString()}
+              Data cached: {new Date(activeData.fetchedAt).toLocaleString()}
             </div>
           )}
         </div>
