@@ -15,6 +15,7 @@ import {
   SUBJECT_CODE_MAP,
 } from '@/lib/constants';
 import { AccjcFeedback } from './AccjcFeedback';
+import { DataViewPanel } from './DataViewPanel';
 import { InstitutionalDataModal } from './InstitutionalDataModal';
 import { useAutoSave } from '@/app/hooks/useAutoSave';
 
@@ -53,10 +54,8 @@ export default function ReviewApp({ user }: ReviewAppProps) {
   // Institutional data dashboard state
   const [aggregatedData, setAggregatedData] = useState<AggregatedProgramData | null>(null);
   const [isDashboardLoading, setIsDashboardLoading] = useState(false);
-  const [showSidebarDataView, setShowSidebarDataView] = useState(false);
+  const [dataViewSection, setDataViewSection] = useState<string | null>(null);
   const [isInstitutionalModalOpen, setIsInstitutionalModalOpen] = useState(false);
-  const [allSubjectsData, setAllSubjectsData] = useState<Array<{ subject: string; data: AggregatedProgramData }>>([]);
-  const [isLoadingAllSubjects, setIsLoadingAllSubjects] = useState(false);
 
   // Review persistence state
   const [reviewId, setReviewId] = useState<string | null>(null);
@@ -214,32 +213,9 @@ export default function ReviewApp({ user }: ReviewAppProps) {
     initializeData();
   }, [reviewType, programName, initializeData]);
 
-  // Fetch all subjects for institutional data modal (lazy, on first open)
-  const fetchAllSubjectsData = useCallback(async () => {
-    if (allSubjectsData.length > 0) return;
-    setIsLoadingAllSubjects(true);
-    try {
-      const subjects = [...new Set(Object.values(SUBJECT_CODE_MAP).flat())];
-      const results: Array<{ subject: string; data: AggregatedProgramData }> = [];
-      await Promise.all(
-        subjects.map(async (subject) => {
-          try {
-            const res = await fetch(`/api/program-data?subject=${subject}`);
-            const result = await res.json();
-            if (result.ok) results.push({ subject, data: result.data });
-          } catch { /* skip failed */ }
-        })
-      );
-      setAllSubjectsData(results.sort((a, b) => a.subject.localeCompare(b.subject)));
-    } finally {
-      setIsLoadingAllSubjects(false);
-    }
-  }, [allSubjectsData.length]);
-
   const handleOpenInstitutionalModal = useCallback(() => {
     setIsInstitutionalModalOpen(true);
-    fetchAllSubjectsData();
-  }, [fetchAllSubjectsData]);
+  }, []);
 
   const handleSectionTextChange = (sectionId: string, text: string) => {
     setReviewSections((prev) => ({ ...prev, [sectionId]: text }));
@@ -640,13 +616,18 @@ export default function ReviewApp({ user }: ReviewAppProps) {
 
   return (
     <>
+      <DataViewPanel
+        isOpen={dataViewSection !== null}
+        onClose={() => setDataViewSection(null)}
+        sectionId={dataViewSection || ''}
+        sectionTitle={currentTemplate.find(s => s.id === dataViewSection)?.title || ''}
+        data={aggregatedData}
+      />
       <InstitutionalDataModal
         isOpen={isInstitutionalModalOpen}
         onClose={() => setIsInstitutionalModalOpen(false)}
         data={aggregatedData}
         isLoading={isDashboardLoading}
-        allSubjects={allSubjectsData}
-        isLoadingAll={isLoadingAllSubjects}
       />
       <SummaryModal
         isOpen={isSummaryModalOpen}
@@ -836,7 +817,7 @@ export default function ReviewApp({ user }: ReviewAppProps) {
                 onGetGuidance={handleGetGuidance}
                 isGeneratingGuidance={isGeneratingGuidance}
                 saveStatus={saveStatus}
-                onViewData={() => setShowSidebarDataView(true)}
+                onViewData={(sectionId) => setDataViewSection(sectionId)}
                 hasData={!!aggregatedData}
               />
             </>
@@ -855,10 +836,6 @@ export default function ReviewApp({ user }: ReviewAppProps) {
             isLoadingData={isLoadingData}
             isChatting={isChatting}
             onChatSubmit={handleChatSubmit}
-            aggregatedData={aggregatedData}
-            isDashboardLoading={isDashboardLoading}
-            showDataView={showSidebarDataView}
-            onCloseDataView={() => setShowSidebarDataView(false)}
           />
         </aside>
       </div>

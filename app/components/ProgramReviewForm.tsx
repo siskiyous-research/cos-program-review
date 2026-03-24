@@ -23,7 +23,7 @@ interface ProgramReviewFormProps {
   onSaveSection: (sectionId: string) => void;
   onSaveToSharePoint: () => void;
   sharePointStatus?: 'idle' | 'saving' | 'saved' | 'error';
-  onViewData?: () => void;
+  onViewData?: (sectionId: string) => void;
   hasData?: boolean;
 }
 
@@ -78,7 +78,7 @@ export const ProgramReviewForm: React.FC<ProgramReviewFormProps> = ({
           isGeneratingGuidance={isGeneratingGuidance === section.id}
           saveStatus={saveStatus}
           onSave={() => onSaveSection(section.id)}
-          onViewData={onViewData}
+          onViewData={onViewData ? () => onViewData(section.id) : undefined}
           hasData={hasData}
         />
       ))}
