@@ -834,8 +834,6 @@ export default function ReviewApp({ user }: ReviewAppProps) {
             isLoadingData={isLoadingData}
             isChatting={isChatting}
             onChatSubmit={handleChatSubmit}
-            aggregatedData={aggregatedData}
-            isDashboardLoading={isDashboardLoading}
           />
         </aside>
       </div>

@@ -3,9 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { ChatMessage, ProgramData, Citation, AggregatedProgramData } from '@/lib/types';
+import { ChatMessage, ProgramData, Citation } from '@/lib/types';
 import { PaperAirplaneIcon } from './icons/PaperAirplaneIcon';
-import { DataDashboard } from './DataDashboard';
 
 interface SidebarProps {
   chatHistory: ChatMessage[];
@@ -13,8 +12,6 @@ interface SidebarProps {
   isLoadingData: boolean;
   isChatting: boolean;
   onChatSubmit: (prompt: string) => void;
-  aggregatedData?: AggregatedProgramData | null;
-  isDashboardLoading?: boolean;
 }
 
 const QUICK_ACTIONS = [
@@ -31,11 +28,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isLoadingData,
   isChatting,
   onChatSubmit,
-  aggregatedData,
-  isDashboardLoading,
 }) => {
   const [prompt, setPrompt] = useState('');
-  const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -64,34 +58,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <header className="p-4 border-b border-slate-200">
         <h3 className="text-lg font-semibold text-slate-800">Data Chat Assistant</h3>
       </header>
-
-      {/* Data Dashboard (collapsible) */}
-      {(aggregatedData || isDashboardLoading) && (
-        <div className="border-b border-slate-200">
-          <button
-            onClick={() => setIsDashboardOpen(!isDashboardOpen)}
-            className="w-full px-4 py-2.5 flex items-center justify-between bg-blue-50 hover:bg-blue-100 transition-colors"
-          >
-            <span className="text-sm font-medium text-blue-700 flex items-center gap-2">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-              Institutional Data
-            </span>
-            <svg className={`w-4 h-4 text-blue-600 transition-transform ${isDashboardOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-          {isDashboardOpen && (
-            <div className="max-h-[400px] overflow-y-auto">
-              <DataDashboard
-                data={aggregatedData || null}
-                isLoading={isDashboardLoading || false}
-              />
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Chat messages */}
       <div ref={chatContainerRef} className="flex-1 p-4 space-y-4 overflow-y-auto">
