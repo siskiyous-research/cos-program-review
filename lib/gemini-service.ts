@@ -356,6 +356,51 @@ function buildInstitutionalDataSummary(data: AggregatedProgramData): string {
 }
 
 /**
+ * Build a condensed summary of college-wide data for comparison purposes
+ */
+function buildCollegeWideSummary(data: AggregatedProgramData): string {
+  const lines: string[] = ['\nCollege-Wide Data (All Programs Combined — for comparison):'];
+
+  if (data.enrollment?.length) {
+    const recent = data.enrollment.slice(-6);
+    lines.push(`\nCollege-Wide Enrollment (recent terms):`);
+    recent.forEach(e => lines.push(`  ${e.term}: ${e.count} students`));
+  }
+
+  if (data.successFall?.length) {
+    const recent = data.successFall.slice(-3);
+    lines.push(`\nCollege-Wide Fall Success Rates:`);
+    recent.forEach(s => lines.push(`  ${s.term}: ${s.successRate}% success, ${s.completionRate}% completion (n=${s.count})`));
+  }
+
+  if (data.demographics?.length) {
+    const total = data.demographics.reduce((s, d) => s + d.count, 0);
+    lines.push(`\nCollege-Wide Demographics (${total} total students):`);
+    data.demographics.forEach(d => lines.push(`  ${d.ethnicity}: ${d.pct}%`));
+  }
+
+  if (data.gender?.length) {
+    // Get most recent year
+    const years = [...new Set(data.gender.map(g => g.academicYear))].sort();
+    const latestYear = years[years.length - 1];
+    const latestGender = data.gender.filter(g => g.academicYear === latestYear);
+    const gTotal = latestGender.reduce((s, g) => s + g.count, 0);
+    if (gTotal > 0) {
+      lines.push(`\nCollege-Wide Gender (${latestYear}):`);
+      latestGender.forEach(g => lines.push(`  ${g.gender}: ${g.count} (${((g.count / gTotal) * 100).toFixed(1)}%)`));
+    }
+  }
+
+  if (data.ftes?.length) {
+    lines.push(`\nCollege-Wide FTES:`);
+    data.ftes.forEach(f => lines.push(`  ${f.academicYear}: ${f.ftes.toFixed(2)} FTES`));
+  }
+
+  lines.push('\nUse this college-wide data to compare against the program data when the user asks about comparisons, equity, or institutional context.');
+  return lines.join('\n');
+}
+
+/**
  * Get chat response for user queries about their program
  */
 export async function getChatResponse(
@@ -364,7 +409,8 @@ export async function getChatResponse(
   chatHistory: ChatMessage[],
   knowledgeBaseData?: string,
   programCategory?: string,
-  aggregatedData?: AggregatedProgramData | null
+  aggregatedData?: AggregatedProgramData | null,
+  collegeWideData?: AggregatedProgramData | null
 ): Promise<{ text: string; citations: Citation[] }> {
   // Retrieve RAG context for chat with citations (with semantic search using user message)
   const ragContext = await retrieveContext({
@@ -386,6 +432,7 @@ Program Context:
 
 ${knowledgeBaseData ? `\nAdditional Program Context:\n${knowledgeBaseData}` : ''}
 ${aggregatedData ? buildInstitutionalDataSummary(aggregatedData) : ''}
+${collegeWideData ? buildCollegeWideSummary(collegeWideData) : ''}
 ${ragText}
 
 Response rules:
