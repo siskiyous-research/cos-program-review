@@ -187,10 +187,12 @@ export default function ReviewApp({ user }: ReviewAppProps) {
 
       // Fetch aggregated institutional data (non-blocking)
       const subjectCodes = SUBJECT_CODE_MAP[programName];
-      const subjectCode = subjectCodes?.[0];
-      if (subjectCode) {
+      if (subjectCodes && subjectCodes.length > 0) {
         setIsDashboardLoading(true);
-        fetch(`/api/program-data?subject=${subjectCode}`)
+        const url = subjectCodes.length === 1
+          ? `/api/program-data?subject=${subjectCodes[0]}`
+          : `/api/program-data/combined?subjects=${subjectCodes.join(',')}`;
+        fetch(url)
           .then(res => res.json())
           .then(result => {
             if (result.ok) setAggregatedData(result.data);
