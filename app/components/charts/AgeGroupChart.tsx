@@ -1,5 +1,5 @@
 'use client';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
 import { AgeGroupRecord } from '@/lib/types';
 
 const AGE_COLORS: Record<string, string> = {
@@ -8,7 +8,7 @@ const AGE_COLORS: Record<string, string> = {
   '50 +': '#8e6fbf', 'Unknown': '#ffb6c1',
 };
 
-export function AgeGroupChart({ data }: { data: AgeGroupRecord[] }) {
+export function AgeGroupChart({ data, showLabels = false }: { data: AgeGroupRecord[]; showLabels?: boolean }) {
   if (!data?.length) return <p className="text-sm text-slate-400 p-4">No age group data</p>;
   const years = [...new Set(data.map(d => d.academicYear))].sort();
   const groups = [...new Set(data.map(d => d.ageGroup))];
@@ -27,7 +27,11 @@ export function AgeGroupChart({ data }: { data: AgeGroupRecord[] }) {
         <YAxis dataKey="year" type="category" fontSize={11} />
         <Tooltip />
         <Legend wrapperStyle={{ fontSize: 10 }} />
-        {groups.map(g => <Bar key={g} dataKey={g} stackId="a" fill={AGE_COLORS[g] || '#888'} />)}
+        {groups.map(g => (
+          <Bar key={g} dataKey={g} stackId="a" fill={AGE_COLORS[g] || '#888'}>
+            {showLabels && <LabelList dataKey={g} position="center" fontSize={8} fill="#fff" />}
+          </Bar>
+        ))}
       </BarChart>
     </ResponsiveContainer>
   );

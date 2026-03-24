@@ -40,13 +40,13 @@ function renderChart(key: DataViewKey, data: AggregatedProgramData, showLabels: 
     case 'successFall': return <SuccessRateChart data={data.successFall} label="Fall" showLabels={showLabels} />;
     case 'successSpring': return <SuccessRateChart data={data.successSpring} label="Spring" showLabels={showLabels} />;
     case 'successSummerWinter': return <SuccessRateChart data={data.successSummerWinter} label="Summer/Winter" showLabels={showLabels} />;
-    case 'successByEthnicity': return <SuccessByEthnicityChart data={data.successByEthnicity} />;
+    case 'successByEthnicity': return <SuccessByEthnicityChart data={data.successByEthnicity} showLabels={showLabels} />;
     case 'demographics': return <DemographicsChart data={data.demographics} showLabels={showLabels} />;
-    case 'gender': return <GenderChart data={data.gender} />;
-    case 'ageGroups': return <AgeGroupChart data={data.ageGroups} />;
+    case 'gender': return <GenderChart data={data.gender} showLabels={showLabels} />;
+    case 'ageGroups': return <AgeGroupChart data={data.ageGroups} showLabels={showLabels} />;
     case 'highSchools': return <HighSchoolsChart data={data.highSchools} showLabels={showLabels} />;
-    case 'modality': return <ModalityChart data={data.modality} />;
-    case 'retention': return <RetentionChart data={data.retention} />;
+    case 'modality': return <ModalityChart data={data.modality} showLabels={showLabels} />;
+    case 'retention': return <RetentionChart data={data.retention} showLabels={showLabels} />;
     case 'location': return <LocationChart data={data.location} showLabels={showLabels} />;
     case 'ftes': return <FTESChart data={data.ftes} showLabels={showLabels} />;
     case 'degreeApplicableCourses': return <DegreeApplicableTable data={data.degreeApplicableCourses} title="Degree Applicable Courses" />;

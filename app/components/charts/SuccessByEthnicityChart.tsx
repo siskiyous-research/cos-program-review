@@ -8,7 +8,7 @@ const ETH_COLORS: Record<string, string> = {
   'Filipino': '#5bc0be', 'American Indian/Alaskan Native': '#e8943a', 'Pacific Islander': '#f0c75e',
 };
 
-export function SuccessByEthnicityChart({ data }: { data: EthnicitySuccessRecord[] }) {
+export function SuccessByEthnicityChart({ data, showLabels = false }: { data: EthnicitySuccessRecord[]; showLabels?: boolean }) {
   if (!data?.length) return <p className="text-sm text-slate-400 p-4">No ethnicity success data</p>;
   const years = [...new Set(data.map(d => d.academicYear))].sort();
   const ethnicities = [...new Set(data.map(d => d.ethnicity))];
@@ -30,7 +30,8 @@ export function SuccessByEthnicityChart({ data }: { data: EthnicitySuccessRecord
         <Legend wrapperStyle={{ fontSize: 10 }} />
         {ethnicities.map(e => (
           <Line key={e} type="monotone" dataKey={e} stroke={ETH_COLORS[e] || '#888'}
-                strokeWidth={2} dot={{ r: 3 }} connectNulls name={e} />
+                strokeWidth={2} dot={{ r: 3 }} connectNulls name={e}
+                label={showLabels ? { position: 'top', fontSize: 7, formatter: (v: number) => `${v.toFixed(0)}%` } : false} />
         ))}
       </LineChart>
     </ResponsiveContainer>

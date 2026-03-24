@@ -1,10 +1,10 @@
 'use client';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, ComposedChart } from 'recharts';
+import { Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, ComposedChart, LabelList } from 'recharts';
 import { ModalityRecord } from '@/lib/types';
 
 const MODE_COLORS: Record<string, string> = { 'Distance Ed': '#2a6496', 'In-Person': '#e8943a' };
 
-export function ModalityChart({ data }: { data: ModalityRecord[] }) {
+export function ModalityChart({ data, showLabels = false }: { data: ModalityRecord[]; showLabels?: boolean }) {
   if (!data?.length) return <p className="text-sm text-slate-400 p-4">No modality data</p>;
   const years = [...new Set(data.map(d => d.academicYear))].sort();
   const modes = [...new Set(data.map(d => d.modeGroup))];
@@ -27,12 +27,15 @@ export function ModalityChart({ data }: { data: ModalityRecord[] }) {
         <Tooltip />
         <Legend wrapperStyle={{ fontSize: 10 }} />
         {modes.map(m => (
-          <Bar key={m} yAxisId="left" dataKey={`${m}_count`} fill={MODE_COLORS[m] || '#888'} name={`${m} (count)`} />
+          <Bar key={m} yAxisId="left" dataKey={`${m}_count`} fill={MODE_COLORS[m] || '#888'} name={`${m} (count)`}>
+            {showLabels && <LabelList dataKey={`${m}_count`} position="top" fontSize={8} />}
+          </Bar>
         ))}
         {modes.map(m => (
           <Line key={`${m}_line`} yAxisId="right" type="monotone" dataKey={`${m}_rate`}
                 stroke={MODE_COLORS[m] || '#888'} strokeWidth={2} dot={{ r: 3 }}
-                name={`${m} (success %)`} strokeDasharray="5 5" />
+                name={`${m} (success %)`} strokeDasharray="5 5"
+                label={showLabels ? { position: 'top', fontSize: 8, formatter: (v: number) => `${v.toFixed(0)}%` } : false} />
         ))}
       </ComposedChart>
     </ResponsiveContainer>

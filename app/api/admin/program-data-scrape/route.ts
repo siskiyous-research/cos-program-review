@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
-import { fetchProgramData, fetchFilterDimensions } from '@/lib/program-data-queries';
+import { fetchProgramData, fetchFilterDimensions, fetchInstitutionalData } from '@/lib/program-data-queries';
 import { saveProgramDataCache, getAllCachedSubjects } from '@/lib/program-data-cache';
 import { ALL_SUBJECT_CODES } from '@/lib/constants';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -32,6 +32,15 @@ export async function POST(req: NextRequest) {
       console.log('✓ Cached filter dimensions (academic years, terms, depts, majors, course numbers)');
     } catch (error) {
       console.error('✗ Failed to cache filter dimensions:', error);
+    }
+
+    // Scrape college-wide institutional data
+    try {
+      const instData = await fetchInstitutionalData(4);
+      await saveProgramDataCache('_all', instData);
+      console.log('✓ Cached college-wide institutional data');
+    } catch (error) {
+      console.error('✗ Failed to cache institutional data:', error);
     }
 
     // Scrape each subject

@@ -357,6 +357,71 @@ export async function fetchFilterDimensions(): Promise<Record<string, string[]>>
 }
 
 /**
+ * Fetch college-wide institutional data (no subject filter)
+ */
+export async function fetchInstitutionalData(yearsAgo: number = 4): Promise<AggregatedProgramData> {
+  const subject = '_all';
+  // Run same queries but without Subject filter
+  const baseAll = (creditOnly = false) =>
+    creditOnly
+      ? "[Academic Level] = 'Credit' AND Enrolled = 'Yes'"
+      : "[Academic Level] IN ('Credit', 'Non Credit') AND Enrolled = 'Yes'";
+
+  const [enrollment, successFall, successSpring, demographics, gender, ageGroups, ftes, highSchools, location] = await Promise.all([
+    runQuery(`SELECT [Term] AS term, [Term Order] AS termOrder, [Academic Year] AS academicYear, COUNT(*) AS count
+      FROM pvc_StudentClasses WHERE ${baseAll()} AND [Academic Years Ago] <= @yearsAgo
+      GROUP BY [Term], [Term Order], [Academic Year] ORDER BY [Term Order]`, { yearsAgo }),
+    runQuery(`SELECT [Term] AS term, COUNT(*) AS count,
+      CAST(ROUND(SUM(CAST([Total Successes] AS FLOAT)) * 100.0 / COUNT(*), 1) AS FLOAT) AS successRate,
+      CAST(ROUND(SUM(CAST([Total Completions] AS FLOAT)) * 100.0 / COUNT(*), 1) AS FLOAT) AS completionRate
+      FROM pvc_StudentClasses WHERE ${baseAll(true)} AND [Academic Years Ago] <= @yearsAgo AND [Semester] = 'Fall'
+      GROUP BY [Term], [Term Order] ORDER BY [Term Order]`, { yearsAgo }),
+    runQuery(`SELECT [Term] AS term, COUNT(*) AS count,
+      CAST(ROUND(SUM(CAST([Total Successes] AS FLOAT)) * 100.0 / COUNT(*), 1) AS FLOAT) AS successRate,
+      CAST(ROUND(SUM(CAST([Total Completions] AS FLOAT)) * 100.0 / COUNT(*), 1) AS FLOAT) AS completionRate
+      FROM pvc_StudentClasses WHERE ${baseAll(true)} AND [Academic Years Ago] <= @yearsAgo AND [Semester] = 'Spring'
+      GROUP BY [Term], [Term Order] ORDER BY [Term Order]`, { yearsAgo }),
+    runQuery(`SELECT [Ethnicity] AS ethnicity, COUNT(DISTINCT [Student Surrogate Key]) AS count,
+      CAST(ROUND(COUNT(DISTINCT [Student Surrogate Key]) * 100.0 /
+        (SELECT COUNT(DISTINCT [Student Surrogate Key]) FROM pvc_StudentClasses WHERE ${baseAll()} AND [Academic Years Ago] <= @yearsAgo), 1) AS FLOAT) AS pct
+      FROM pvc_StudentClasses WHERE ${baseAll()} AND [Academic Years Ago] <= @yearsAgo
+      GROUP BY [Ethnicity] ORDER BY count DESC`, { yearsAgo }),
+    runQuery(`SELECT [Academic Year] AS academicYear, [Gender] AS gender, COUNT(DISTINCT [Student Surrogate Key]) AS count
+      FROM pvc_StudentClasses WHERE ${baseAll()} AND [Academic Years Ago] <= @yearsAgo
+      GROUP BY [Academic Year], [Gender] ORDER BY [Academic Year], [Gender]`, { yearsAgo }),
+    runQuery(`SELECT [Academic Year] AS academicYear, [Age Group] AS ageGroup, COUNT(*) AS count
+      FROM pvc_StudentClasses WHERE ${baseAll()} AND [Academic Years Ago] <= @yearsAgo
+      GROUP BY [Academic Year], [Age Group] ORDER BY [Academic Year]`, { yearsAgo }),
+    runQuery(`SELECT [Academic Year] AS academicYear, CAST(ROUND(SUM([FTE EST]), 2) AS FLOAT) AS ftes
+      FROM pvc_StudentClasses WHERE ${baseAll()} AND [Academic Years Ago] <= @yearsAgo
+      GROUP BY [Academic Year] ORDER BY [Academic Year]`, { yearsAgo }),
+    runQuery(`SELECT TOP 20 [High School Name] AS school, COUNT(DISTINCT [Student Surrogate Key]) AS count,
+      CAST(ROUND(COUNT(DISTINCT [Student Surrogate Key]) * 100.0 /
+        (SELECT COUNT(DISTINCT [Student Surrogate Key]) FROM pvc_StudentClasses WHERE ${baseAll()} AND [Academic Years Ago] <= @yearsAgo), 1) AS FLOAT) AS pct
+      FROM pvc_StudentClasses WHERE ${baseAll()} AND [Academic Years Ago] <= @yearsAgo
+        AND [High School Name] IS NOT NULL AND [High School Name] != '' AND [High School Name] != '(Blank)'
+      GROUP BY [High School Name] ORDER BY count DESC`, { yearsAgo }),
+    runQuery(`SELECT [Location] AS location, COUNT(DISTINCT [Student Surrogate Key]) AS count,
+      CAST(ROUND(COUNT(DISTINCT [Student Surrogate Key]) * 100.0 /
+        (SELECT COUNT(DISTINCT [Student Surrogate Key]) FROM pvc_StudentClasses WHERE ${baseAll()} AND [Academic Years Ago] <= @yearsAgo), 1) AS FLOAT) AS pct
+      FROM pvc_StudentClasses WHERE ${baseAll()} AND [Academic Years Ago] <= @yearsAgo
+      GROUP BY [Location] ORDER BY count DESC`, { yearsAgo }),
+  ]);
+
+  return {
+    subject,
+    fetchedAt: new Date().toISOString(),
+    enrollment, successFall, successSpring,
+    successSummerWinter: [], successByEthnicity: [],
+    demographics, gender, ageGroups,
+    modality: [], retention: [],
+    highSchools, ftes,
+    degreeApplicableCourses: [], notDegreeApplicableCourses: [],
+    location,
+  };
+}
+
+/**
  * Fetch all program data in parallel
  */
 export async function fetchProgramData(params: QueryParams): Promise<AggregatedProgramData> {
