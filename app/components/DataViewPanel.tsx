@@ -161,20 +161,37 @@ export function DataViewPanel({ isOpen, onClose, sectionTitle, sectionId, data, 
       .finally(() => setLoadingSubject(false));
   }, [selectedSubject, isOpen]);
 
-  const handleCopyChart = async (key: string) => {
+  const handleCopy = async (key: string) => {
     const el = chartRefs.current[key];
     if (!el) return;
     setCopying(key);
     try {
-      const dataUrl = await captureChartAsImage(el);
-      const res = await fetch(dataUrl);
-      const blob = await res.blob();
-      await navigator.clipboard.write([
-        new ClipboardItem({ 'image/png': blob })
-      ]);
+      if (tableMode[key]) {
+        // Table mode: copy as rich HTML so it pastes as a formatted table
+        const table = el.querySelector('table');
+        if (table) {
+          const html = table.outerHTML;
+          const blob = new Blob([html], { type: 'text/html' });
+          const textBlob = new Blob([table.innerText], { type: 'text/plain' });
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              'text/html': blob,
+              'text/plain': textBlob,
+            })
+          ]);
+        }
+      } else {
+        // Chart mode: copy as PNG image
+        const dataUrl = await captureChartAsImage(el);
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ]);
+      }
       setTimeout(() => setCopying(null), 1500);
     } catch (err) {
-      console.error('Failed to copy chart:', err);
+      console.error('Failed to copy:', err);
       setCopying(null);
     }
   };
@@ -309,7 +326,7 @@ export function DataViewPanel({ isOpen, onClose, sectionTitle, sectionId, data, 
                       )}
                     </button>
                     <button
-                      onClick={() => handleCopyChart(key)}
+                      onClick={() => handleCopy(key)}
                       disabled={copying === key}
                       className="text-xs px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 disabled:opacity-50 transition-colors flex items-center gap-1"
                     >

@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { SparklesIcon } from './icons/SparklesIcon';
 import { AccjcBadge } from './AccjcBadge';
 import { RichTextEditor } from './RichTextEditor';
@@ -142,8 +144,10 @@ export const ReviewSection: React.FC<ReviewSectionProps> = ({
             </svg>
           </button>
           {isGuidanceOpen && (
-            <div className="px-4 py-3 bg-amber-50/50 text-sm text-amber-900 whitespace-pre-wrap leading-relaxed">
-              {guidance}
+            <div className="px-4 py-3 bg-amber-50/50 text-sm text-amber-900 leading-relaxed prose prose-sm max-w-none prose-headings:text-amber-900 prose-strong:text-amber-900 prose-a:text-amber-700 prose-li:my-0.5">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {guidance}
+              </ReactMarkdown>
             </div>
           )}
         </div>

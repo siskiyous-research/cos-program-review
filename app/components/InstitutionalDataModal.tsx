@@ -232,23 +232,37 @@ export const InstitutionalDataModal: React.FC<InstitutionalDataModalProps> = ({
     };
   }, [isOpen, position]);
 
-  const handleCopyChart = useCallback(async (refKey: string) => {
+  const handleCopy = useCallback(async (refKey: string) => {
     const el = chartRefs.current[refKey];
     if (!el) return;
     setCopying(refKey);
     try {
-      const dataUrl = await captureChartAsImage(el);
-      const res = await fetch(dataUrl);
-      const blob = await res.blob();
-      await navigator.clipboard.write([
-        new ClipboardItem({ 'image/png': blob })
-      ]);
+      if (tableMode[refKey]) {
+        // Table mode: copy as rich HTML
+        const table = el.querySelector('table');
+        if (table) {
+          const html = table.outerHTML;
+          const blob = new Blob([html], { type: 'text/html' });
+          const textBlob = new Blob([table.innerText], { type: 'text/plain' });
+          await navigator.clipboard.write([
+            new ClipboardItem({ 'text/html': blob, 'text/plain': textBlob })
+          ]);
+        }
+      } else {
+        // Chart mode: copy as PNG image
+        const dataUrl = await captureChartAsImage(el);
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ]);
+      }
       setTimeout(() => setCopying(null), 1500);
     } catch (err) {
-      console.error('Failed to copy chart:', err);
+      console.error('Failed to copy:', err);
       setCopying(null);
     }
-  }, []);
+  }, [tableMode]);
 
   if (!isOpen) return null;
 
@@ -338,7 +352,7 @@ export const InstitutionalDataModal: React.FC<InstitutionalDataModalProps> = ({
                       )}
                     </button>
                     <button
-                      onClick={() => handleCopyChart(key)}
+                      onClick={() => handleCopy(key)}
                       disabled={copying === key}
                       className="text-[10px] px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 disabled:opacity-50 transition-colors flex items-center gap-1"
                     >

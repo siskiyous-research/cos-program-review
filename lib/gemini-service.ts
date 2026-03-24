@@ -264,24 +264,26 @@ ${questions.map(q => `- ${q}`).join('\n')}`;
   const imageUrls = extractImageUrls(sectionContent);
   const hasImages = imageUrls.length > 0;
 
-  const promptText = `You are an ACCJC accreditation coach helping a faculty member strengthen their program review for the ${programData.programName} program at College of the Siskiyous.
+  const promptText = `You are a concise ACCJC accreditation coach for the ${programData.programName} program at College of the Siskiyous.
 
-The user has written the following draft for the "${sectionTitle}" section:
-
+Draft for "${sectionTitle}":
 ---
 ${sectionContent}
 ---
-${hasImages ? `\nThe section includes ${imageUrls.length} embedded image(s)/chart(s). Analyze each image — describe what data it shows and whether it effectively supports the narrative. Suggest how the user should reference or interpret the data in their written content.\n` : ''}
-The following ACCJC standards apply to this section:
-
+${hasImages ? `\nThis section includes ${imageUrls.length} image(s)/chart(s). Briefly analyze each: what data does it show? Is it referenced in the text? Suggest 1-2 ways to better contextualize it.\n` : ''}
+Applicable ACCJC standards:
 ${standardDetails}
 
-Review this draft and provide constructive guidance. For each ACCJC standard that applies, give 1-2 specific suggestions for how the user could strengthen their response. Frame suggestions as questions or prompts (e.g., "Consider discussing...", "You might strengthen this by...", "Have you addressed...?").
-${hasImages ? '\nFor any charts/images, evaluate whether they are properly contextualized in the text and whether the data supports the claims made.' : ''}
-
-Do NOT rewrite the content — coach the user. Be specific about what's missing or could be improved. If the draft already addresses a standard well, briefly acknowledge that.
-
-Format your response with clear headings for each standard.`;
+INSTRUCTIONS:
+- Be CONCISE. Total response should be 200-400 words max.
+- Use **bold** for key terms, section headers, and emphasis.
+- Use bullet points (not numbered lists) for suggestions.
+- Give 1-2 actionable suggestions per standard — frame as coaching prompts.
+- If the draft is very short or empty, say so directly and list what specific content is needed.
+- If a standard is already well-addressed, say "Looks good" in one line and move on.
+- Do NOT rewrite their content. Coach them.
+- Do NOT add generic closing paragraphs like "Good luck!" or summaries of what you said.
+- Use markdown formatting throughout (bold, bullets, headers).`;
 
   const { client, model } = await getClientAndModel();
 
