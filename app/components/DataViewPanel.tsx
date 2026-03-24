@@ -119,15 +119,24 @@ function renderTable(key: DataViewKey, data: AggregatedProgramData) {
 
 export function DataViewPanel({ isOpen, onClose, sectionTitle, sectionId, data }: DataViewPanelProps) {
   const sectionViews = SECTION_DATA_MAP[sectionId] || [];
-  const [showAll, setShowAll] = useState(false);
   const [showLabels, setShowLabels] = useState(false);
   const [panelWidth, setPanelWidth] = useState(600);
   const [copying, setCopying] = useState<string | null>(null);
   const [tableMode, setTableMode] = useState<Record<string, boolean>>({});
+  const [page, setPage] = useState(0);
   const isResizing = useRef(false);
   const chartRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  const views = showAll ? ALL_VIEWS : sectionViews;
+  const VIEWS_PER_PAGE = sectionViews.length || 4;
+  // Page 0 = section-relevant views, page 1+ = remaining views paginated
+  const remainingViews = ALL_VIEWS.filter(v => !sectionViews.includes(v));
+  const totalPages = 1 + Math.ceil(remainingViews.length / VIEWS_PER_PAGE);
+  const views = page === 0
+    ? sectionViews
+    : remainingViews.slice((page - 1) * VIEWS_PER_PAGE, page * VIEWS_PER_PAGE);
+
+  // Reset page when section changes
+  useEffect(() => { setPage(0); }, [sectionId]);
 
   const handleCopyChart = async (key: string) => {
     const el = chartRefs.current[key];
@@ -205,16 +214,34 @@ export function DataViewPanel({ isOpen, onClose, sectionTitle, sectionId, data }
           </div>
           <div className="flex items-center gap-4 mt-3">
             <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
-              <input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)}
-                className="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-              Show all views
-            </label>
-            <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
               <input type="checkbox" checked={showLabels} onChange={(e) => setShowLabels(e.target.checked)}
                 className="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
               Data labels
             </label>
-            <span className="text-xs text-slate-400 ml-auto">Copy a chart, then paste (Ctrl+V) into any section</span>
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1.5 ml-auto">
+                <button
+                  onClick={() => setPage(p => Math.max(0, p - 1))}
+                  disabled={page === 0}
+                  className="px-2 py-0.5 text-xs rounded border border-slate-300 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  Prev
+                </button>
+                <span className="text-xs text-slate-500 tabular-nums">
+                  {page === 0 ? 'Section views' : `More ${page}/${totalPages - 1}`}
+                </span>
+                <button
+                  onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                  disabled={page === totalPages - 1}
+                  className="px-2 py-0.5 text-xs rounded border border-slate-300 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+            {totalPages <= 1 && (
+              <span className="text-xs text-slate-400 ml-auto">Copy a chart, then paste (Ctrl+V) into any section</span>
+            )}
           </div>
         </div>
 
