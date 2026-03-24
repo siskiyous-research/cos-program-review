@@ -21,6 +21,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Strip HTML tags to get plain text for length check
+    const plainText = sectionContent.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+
+    // Check if section is empty or mostly empty (< 50 chars of real text)
+    if (plainText.length < 50) {
+      return NextResponse.json({
+        ok: true,
+        guidance: 'This section is empty or has very little content. ACCJC guidance requires substantive written content to evaluate. Please draft your response first, then request guidance to strengthen it.',
+      });
+    }
+
+    // Check for images and note them
+    const hasImages = /<img\s/i.test(sectionContent);
+    const imageNote = hasImages
+      ? '\n\nNote: This section contains embedded images/charts. The guidance below evaluates the written text only — ensure your images are referenced and contextualized in the narrative.'
+      : '';
+
     const guidance = await getSectionGuidance(
       sectionId,
       sectionTitle,
@@ -29,7 +46,7 @@ export async function POST(req: NextRequest) {
       programCategory
     );
 
-    return NextResponse.json({ ok: true, guidance });
+    return NextResponse.json({ ok: true, guidance: guidance + imageNote });
   } catch (error) {
     console.error('Error generating section guidance:', error);
     const message = error instanceof Error ? error.message : 'Failed to generate guidance';
