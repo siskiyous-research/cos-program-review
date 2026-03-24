@@ -164,7 +164,7 @@ export function DataViewPanel({ isOpen, onClose, sectionTitle, sectionId, data }
             views.map(key => (
               <div key={key} className="border border-slate-200 rounded-lg overflow-hidden">
                 <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
-                  <h3 className="text-sm font-semibold text-slate-700">{DATA_VIEW_LABELS[key]}</h3>
+                  <h3 className="text-sm font-semibold text-slate-700">Subject: {data.subject} — {DATA_VIEW_LABELS[key]}</h3>
                 </div>
                 <div className="p-4">
                   {renderChart(key, data, showLabels)}
