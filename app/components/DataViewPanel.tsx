@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, createRef } from 'react';
 import { AggregatedProgramData } from '@/lib/types';
+import { captureChartAsImage } from '@/lib/chart-capture';
 import { SECTION_DATA_MAP, DATA_VIEW_LABELS, DataViewKey } from '@/lib/section-data-mapping';
 import { EnrollmentChart } from './charts/EnrollmentChart';
 import { SuccessRateChart } from './charts/SuccessRateChart';
@@ -29,6 +30,7 @@ interface DataViewPanelProps {
   sectionTitle: string;
   sectionId: string;
   data: AggregatedProgramData | null;
+  onInsertChart?: (imageDataUrl: string) => void;
 }
 
 function renderChart(key: DataViewKey, data: AggregatedProgramData, showLabels: boolean) {
@@ -52,14 +54,30 @@ function renderChart(key: DataViewKey, data: AggregatedProgramData, showLabels: 
   }
 }
 
-export function DataViewPanel({ isOpen, onClose, sectionTitle, sectionId, data }: DataViewPanelProps) {
+export function DataViewPanel({ isOpen, onClose, sectionTitle, sectionId, data, onInsertChart }: DataViewPanelProps) {
   const sectionViews = SECTION_DATA_MAP[sectionId] || [];
   const [showAll, setShowAll] = useState(false);
   const [showLabels, setShowLabels] = useState(false);
   const [panelWidth, setPanelWidth] = useState(600);
+  const [inserting, setInserting] = useState<string | null>(null);
   const isResizing = useRef(false);
+  const chartRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const views = showAll ? ALL_VIEWS : sectionViews;
+
+  const handleInsertChart = async (key: string) => {
+    const el = chartRefs.current[key];
+    if (!el || !onInsertChart) return;
+    setInserting(key);
+    try {
+      const dataUrl = await captureChartAsImage(el);
+      onInsertChart(dataUrl);
+    } catch (err) {
+      console.error('Failed to capture chart:', err);
+    } finally {
+      setInserting(null);
+    }
+  };
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isResizing.current) return;
@@ -163,10 +181,31 @@ export function DataViewPanel({ isOpen, onClose, sectionTitle, sectionId, data }
           ) : (
             views.map(key => (
               <div key={key} className="border border-slate-200 rounded-lg overflow-hidden">
-                <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
+                <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
                   <h3 className="text-sm font-semibold text-slate-700">Subject: {data.subject} — {DATA_VIEW_LABELS[key]}</h3>
+                  {onInsertChart && (
+                    <button
+                      onClick={() => handleInsertChart(key)}
+                      disabled={inserting === key}
+                      className="text-xs px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 disabled:opacity-50 transition-colors flex items-center gap-1"
+                    >
+                      {inserting === key ? (
+                        <>
+                          <span className="w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin inline-block"></span>
+                          Inserting...
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                          Insert
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
-                <div className="p-4">
+                <div className="p-4" ref={el => { chartRefs.current[key] = el; }}>
                   {renderChart(key, data, showLabels)}
                 </div>
               </div>

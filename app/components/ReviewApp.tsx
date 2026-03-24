@@ -616,6 +616,13 @@ export default function ReviewApp({ user }: ReviewAppProps) {
         sectionId={dataViewSection || ''}
         sectionTitle={currentTemplate.find(s => s.id === dataViewSection)?.title || ''}
         data={aggregatedData}
+        onInsertChart={(imageDataUrl) => {
+          if (!dataViewSection) return;
+          setReviewSections(prev => ({
+            ...prev,
+            [dataViewSection]: (prev[dataViewSection] || '') + `<p><img src="${imageDataUrl}" alt="Chart" style="max-width:100%;border-radius:0.5rem;margin:0.5rem 0;" /></p>`,
+          }));
+        }}
       />
       <SummaryModal
         isOpen={isSummaryModalOpen}
