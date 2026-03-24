@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
   if (authError) return authError;
 
   try {
-    const { message, chatHistory, programData, knowledgeBaseData, programCategory } = await req.json();
+    const { message, chatHistory, programData, knowledgeBaseData, programCategory, aggregatedData } = await req.json();
 
     // Validate required fields
     if (!message || !programData) {
@@ -26,7 +26,8 @@ export async function POST(req: NextRequest) {
       programData as ProgramData,
       (chatHistory || []) as ChatMessage[],
       knowledgeBaseData,
-      programCategory
+      programCategory,
+      aggregatedData || null
     );
 
     return NextResponse.json({ ok: true, response: result.text, citations: result.citations });

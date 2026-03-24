@@ -332,6 +332,7 @@ export default function ReviewApp({ user }: ReviewAppProps) {
           chatHistory: updatedHistory.slice(-6),
           programData,
           programCategory: getProgramCategory(programName),
+          aggregatedData,
         }),
       });
 

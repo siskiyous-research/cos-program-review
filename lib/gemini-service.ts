@@ -6,7 +6,7 @@
  */
 
 import OpenAI from 'openai';
-import { ProgramData, ChatMessage, HistoricalReview, Citation } from './types';
+import { ProgramData, ChatMessage, HistoricalReview, Citation, AggregatedProgramData } from './types';
 import { buildAccjcContext, getMappedStandards, getStandardById, getComplianceChecklist, getKeyQuestions } from './accjc-standards';
 import { retrieveContext, formatRAGContext, formatRAGContextWithCitations } from './rag-service';
 import { getSetting } from './settings';
@@ -274,6 +274,88 @@ Format your response with clear headings for each standard.`;
 }
 
 /**
+ * Build a text summary of aggregated institutional data for the AI prompt
+ */
+function buildInstitutionalDataSummary(data: AggregatedProgramData): string {
+  const lines: string[] = [`\nReal Institutional Data (Zogotech — ${data.subject}):`];
+
+  // Enrollment
+  if (data.enrollment?.length) {
+    const recent = data.enrollment.slice(-6);
+    lines.push(`\nEnrollment by Term:`);
+    recent.forEach(e => lines.push(`  ${e.term} (${e.academicYear}): ${e.count} students`));
+  }
+
+  // Success Rates Fall
+  if (data.successFall?.length) {
+    lines.push(`\nFall Success Rates:`);
+    data.successFall.forEach(s => lines.push(`  ${s.term}: ${s.successRate}% success, ${s.completionRate}% completion (n=${s.count})`));
+  }
+
+  // Success Rates Spring
+  if (data.successSpring?.length) {
+    lines.push(`\nSpring Success Rates:`);
+    data.successSpring.forEach(s => lines.push(`  ${s.term}: ${s.successRate}% success, ${s.completionRate}% completion (n=${s.count})`));
+  }
+
+  // Demographics
+  if (data.demographics?.length) {
+    lines.push(`\nDemographics (Ethnicity):`);
+    data.demographics.forEach(d => lines.push(`  ${d.ethnicity}: ${d.count} students (${d.pct}%)`));
+  }
+
+  // Gender
+  if (data.gender?.length) {
+    lines.push(`\nGender by Year:`);
+    data.gender.forEach(g => lines.push(`  ${g.academicYear} ${g.gender}: ${g.count}`));
+  }
+
+  // Age Groups
+  if (data.ageGroups?.length) {
+    lines.push(`\nAge Groups by Year:`);
+    data.ageGroups.forEach(a => lines.push(`  ${a.academicYear} ${a.ageGroup}: ${a.count}`));
+  }
+
+  // Success by Ethnicity
+  if (data.successByEthnicity?.length) {
+    lines.push(`\nSuccess Rates by Ethnicity:`);
+    data.successByEthnicity.forEach(s => lines.push(`  ${s.academicYear} ${s.ethnicity}: ${s.successRate}% (n=${s.count})`));
+  }
+
+  // Modality
+  if (data.modality?.length) {
+    lines.push(`\nModality (Distance Ed vs In-Person):`);
+    data.modality.forEach(m => lines.push(`  ${m.academicYear} ${m.modeGroup}: ${m.count} students, ${m.successRate}% success`));
+  }
+
+  // FTES
+  if (data.ftes?.length) {
+    lines.push(`\nFTES by Year:`);
+    data.ftes.forEach(f => lines.push(`  ${f.academicYear}: ${f.ftes.toFixed(2)} FTES`));
+  }
+
+  // Retention
+  if (data.retention?.length) {
+    lines.push(`\nRetention:`);
+    data.retention.forEach(r => lines.push(`  ${r.cohortTerm} ${r.termIndex}: ${r.count} students`));
+  }
+
+  // High Schools
+  if (data.highSchools?.length) {
+    lines.push(`\nTop Feeder High Schools:`);
+    data.highSchools.slice(0, 10).forEach(h => lines.push(`  ${h.school}: ${h.count} (${h.pct}%)`));
+  }
+
+  // Location
+  if (data.location?.length) {
+    lines.push(`\nCampus Locations:`);
+    data.location.forEach(l => lines.push(`  ${l.location}: ${l.count} (${l.pct}%)`));
+  }
+
+  return lines.join('\n');
+}
+
+/**
  * Get chat response for user queries about their program
  */
 export async function getChatResponse(
@@ -281,7 +363,8 @@ export async function getChatResponse(
   programData: ProgramData,
   chatHistory: ChatMessage[],
   knowledgeBaseData?: string,
-  programCategory?: string
+  programCategory?: string,
+  aggregatedData?: AggregatedProgramData | null
 ): Promise<{ text: string; citations: Citation[] }> {
   // Retrieve RAG context for chat with citations (with semantic search using user message)
   const ragContext = await retrieveContext({
@@ -302,6 +385,7 @@ Program Context:
 - Key Weaknesses: ${programData.summary.weaknesses.join(', ')}
 
 ${knowledgeBaseData ? `\nAdditional Program Context:\n${knowledgeBaseData}` : ''}
+${aggregatedData ? buildInstitutionalDataSummary(aggregatedData) : ''}
 ${ragText}
 
 Response rules:
