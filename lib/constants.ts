@@ -161,19 +161,22 @@ export const NON_INSTRUCTIONAL_COMPREHENSIVE_TEMPLATE: ReviewTemplateItem[] = [
  */
 export const SUBJECT_CODE_MAP: Record<string, string[]> = {
   'Administration of Justice': ['ADJ'],
+  'Agriculture': ['AG'],
   'Alcohol & Drug Studies (ADHS)': ['ADHS'],
   'Business and Computer Sciences': ['BA', 'CSCI'],
   'Early Childhood Education': ['ECE'],
+  'Economics': ['ECON'],
   'Emergency Medical Services (EMS)': ['EMS'],
-  'Fine and Performing Arts': ['ART', 'MUS', 'THEA'],
+  'Fine and Performing Arts': ['ART', 'ARTH', 'MUS', 'MUSI', 'THEA'],
   'Fire': ['FIRE'],
   'Health, Physical Education and Recreation': ['HEA', 'KINE', 'PEFI', 'PEMA'],
-  'Humanities and Social Sciences': ['ENGL', 'HIST', 'PSY', 'SOC', 'POLS', 'ECON', 'PHIL', 'HUM', 'ANTH', 'ETHN', 'COMS', 'GEOG'],
-  'Math': ['MATH'],
-  'Modern Languages': ['SPAN', 'ASL'],
+  'Humanities and Social Sciences': ['ETHN', 'HIST', 'HUM', 'PHIL', 'POLS', 'PSY', 'PSYC', 'SOC'],
+  'Manufacturing': ['MFG'],
+  'Math': ['MATH', 'STAT'],
+  'Modern Languages': ['ASL', 'COMM', 'COMS', 'ENGL', 'OLAD', 'SPAN'],
   'Non-Credit': ['GUID', 'WEE'],
   'Nursing': ['NURS'],
-  'Sciences': ['BIO', 'CHEM', 'PHYS', 'ASTR', 'GEOL', 'ENVS'],
+  'Sciences': ['BIO', 'CHEM', 'ENVR', 'ENVS', 'ESCI', 'GEOG', 'PHYS'],
   'Welding': ['WELD'],
 };
 
@@ -181,15 +184,15 @@ export const SUBJECT_CODE_MAP: Record<string, string[]> = {
  * All unique subject codes for scraping (includes non-credit and other departments)
  */
 export const ALL_SUBJECT_CODES: string[] = [
-  'ADHS', 'ADJ', 'AG', 'ANTH', 'ART', 'ASL', 'ASTR',
+  'ADHS', 'ADJ', 'AG', 'ANTH', 'ART', 'ARTH', 'ASL', 'ASTR',
   'BA', 'BIO', 'CHEM', 'COLL', 'COMM', 'COMS', 'CSCI',
-  'ECE', 'ECON', 'EDUC', 'EMS', 'ENGL', 'ENVS', 'ESCI', 'ESL', 'ETHN',
+  'ECE', 'ECON', 'EDUC', 'EMS', 'ENGL', 'ENVR', 'ENVS', 'ESCI', 'ESL', 'ETHN',
   'FCS', 'FIRE',
   'GEOG', 'GEOL', 'GUID',
   'HEA', 'HIST', 'HUM',
   'KINE',
   'LIBR',
-  'MATH', 'MFG', 'MUS',
+  'MATH', 'MFG', 'MUS', 'MUSI',
   'NURS',
   'OLAD',
   'PEFI', 'PEMA', 'PHIL', 'PHYS', 'POLS', 'PSY', 'PSYC',
@@ -203,15 +206,18 @@ export const ALL_SUBJECT_CODES: string[] = [
  */
 export const PROGRAM_LIST = {
   instructional: [
-    'Alcohol & Drug Studies (ADHS)',
     'Administration of Justice',
+    'Agriculture',
+    'Alcohol & Drug Studies (ADHS)',
     'Business and Computer Sciences',
     'Early Childhood Education',
+    'Economics',
     'Emergency Medical Services (EMS)',
     'Fine and Performing Arts',
     'Fire',
     'Health, Physical Education and Recreation',
     'Humanities and Social Sciences',
+    'Manufacturing',
     'Math',
     'Modern Languages',
     'Non-Credit',
