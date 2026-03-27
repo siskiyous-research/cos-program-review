@@ -28,6 +28,12 @@ export function AuthHeader({ userEmail }: AuthHeaderProps) {
         Dashboard
       </Link>
       <Link
+        href="/slo-tracking"
+        className="px-3 py-1 text-slate-600 hover:text-slate-800 hover:bg-slate-200 rounded-md transition-colors"
+      >
+        SLO Tracking
+      </Link>
+      <Link
         href="/settings"
         className="px-3 py-1 text-slate-600 hover:text-slate-800 hover:bg-slate-200 rounded-md transition-colors"
       >

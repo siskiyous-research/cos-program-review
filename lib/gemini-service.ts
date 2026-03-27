@@ -14,6 +14,9 @@ import { getSetting } from './settings';
 const CLOUD_DEFAULT_MODEL = 'xiaomi/mimo-v2-flash';
 const CLOUD_VISION_MODEL = 'google/gemini-2.0-flash-001';
 
+// Important context about current-term data that all AI tools should be aware of
+const CURRENT_TERM_DATA_NOTE = `IMPORTANT DATA CONTEXT: If the current academic term (e.g., Spring 2026) is still in progress, success rates and completion rates for that term will appear artificially low because final grades have not yet been entered. Do NOT flag current-term low success rates as a program concern — instead note that the term is still in progress and grades are pending. Only analyze success/completion trends using completed terms. Similarly, enrollment for the current term may still be changing as students add/drop.`;
+
 async function getClientAndModel(): Promise<{ client: OpenAI; model: string }> {
   const aiMode = await getSetting('ai_mode') || 'cloud';
   console.log('[getClientAndModel] AI mode:', aiMode);
@@ -159,10 +162,37 @@ IMPORTANT:
       modeInstruction = `User's notes: "${userNotes}"`;
     }
 
+    // program_info: only use template when section is empty
+    if (sectionId === 'program_info' && !hasNotes) {
+      return `Output ONLY the following HTML exactly as shown. Do not add any other text, paragraphs, analysis, or commentary before or after it.
+
+<p><strong>Program Name:</strong> ${programData.programName}</p>
+<p><strong>Academic Year:</strong> [fill in]</p>
+<p><strong>Person Completing Update:</strong> [fill in]</p>
+<p><strong>Staffing:</strong></p>
+<ul>
+<li>Full-time Faculty: [#]</li>
+<li>Part-time/Adjunct Faculty: [#]</li>
+<li>Classified Staff: [#]</li>
+</ul>
+<p><strong>Staffing Changes:</strong> [Note any changes from prior year, or "No changes"]</p>`;
+    }
+
+    const hasReviewData = ragContext.chunks.some(c => c.source === 'review');
+
     let specificInstruction = '';
     switch (sectionId) {
       case 'improvement_actions':
-        specificInstruction = `Focus on how the described improvement actions are addressing past challenges and how their success could be measured using the available data (e.g., improved completion rates).`;
+        if (hasReviewData) {
+          specificInstruction = `The Institutional Context below includes prior Comprehensive Program Review data for this program. Identify the specific improvement actions from that review and summarize them. Then address what strategies have been implemented or are currently in progress to address those actions. Use data from the program review to support your points.`;
+        } else {
+          specificInstruction = `No prior Comprehensive Program Review was found on file for this program. Start by noting that no previous comprehensive review is available for reference. Then prompt the user to:
+- Identify any known areas for improvement in their program
+- Describe current strategies or new initiatives they are implementing
+- Note any goals or action items they want to track going forward
+
+Frame this as a fresh starting point rather than a gap.`;
+        }
         break;
       case 'slo_assessment':
         specificInstruction = `Elaborate on progress assessing Student Learning Outcomes. Frame the content in a reflective tone, emphasizing the importance of continuous assessment for program quality.`;
@@ -200,6 +230,10 @@ ${ragText}
 
 ${accjcContext}
 
+IMPORTANT: Output your response as clean HTML (use <p>, <strong>, <ul>, <li>, <ol>, <h3> tags). Do NOT use markdown. Do NOT wrap in code blocks.
+
+${CURRENT_TERM_DATA_NOTE}
+
 Generate a well-written, professional response. Reference specific COS policies, historical data, or accreditation findings using [1], [2] bracket citations when relevant.`;
   };
 
@@ -213,6 +247,149 @@ Generate a well-written, professional response. Reference specific COS policies,
     text: response.choices[0]?.message?.content ?? '',
     citations,
   };
+}
+
+/**
+ * Stream section assistance - returns a ReadableStream of text chunks plus citations
+ */
+export async function streamSectionAssistance(
+  sectionId: string,
+  sectionTitle: string,
+  sectionDescription: string,
+  programData: ProgramData,
+  userNotes: string,
+  knowledgeBaseData?: string,
+  programCategory?: string
+): Promise<{ stream: AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>; citations: Citation[] }> {
+  const accjcContext = buildAccjcContext(sectionId);
+  const hasNotes = userNotes.trim().length > 0;
+
+  const ragContext = await retrieveContext({
+    programName: programData.programName,
+    programCategory,
+    sectionId,
+    query: sectionTitle,
+  });
+  const { promptText: ragText, citations } = formatRAGContextWithCitations(ragContext);
+
+  const citationRules = `You MUST cite sources using bracket notation [1], [2] etc. matching the numbered references in the Institutional Context below. Do NOT state any fact that is not supported by the provided data.`;
+
+  let baseIntro: string;
+  let modeInstruction: string;
+
+  if (!hasNotes) {
+    baseIntro = `You are an expert academic program review assistant for College of the Siskiyous. Generate a concise starter draft for the '${sectionTitle}' section of a program review for the ${programData.programName} program.
+
+${citationRules}
+
+IMPORTANT:
+- Write 2-3 SHORT paragraphs (3-5 sentences each). Be direct and specific.
+- ONLY cite sources that are directly about ${programData.programName}. Ignore sources about other programs.
+- If no relevant data exists, say so briefly. Do not pad with generic statements.
+- Do not fabricate facts not in the provided data.`;
+    modeInstruction = `Address: "${sectionDescription}"`;
+  } else {
+    baseIntro = `You are a writing partner for a faculty member at College of the Siskiyous. Expand their notes for the '${sectionTitle}' section of a ${programData.programName} program review into professional paragraphs.
+
+${citationRules}
+
+IMPORTANT:
+- Keep it concise — 2-3 short paragraphs max. Do not pad or repeat.
+- ONLY cite sources directly about ${programData.programName}. Ignore other programs' data.
+- Do NOT introduce topics not in the user's notes.`;
+    modeInstruction = `User's notes: "${userNotes}"`;
+  }
+
+  // program_info: only use template when section is empty
+  if (sectionId === 'program_info' && !hasNotes) {
+    const prompt = `Output ONLY the following HTML exactly as shown. Do not add any other text, paragraphs, analysis, or commentary before or after it.
+
+<p><strong>Program Name:</strong> ${programData.programName}</p>
+<p><strong>Academic Year:</strong> [fill in]</p>
+<p><strong>Person Completing Update:</strong> [fill in]</p>
+<p><strong>Staffing:</strong></p>
+<ul>
+<li>Full-time Faculty: [#]</li>
+<li>Part-time/Adjunct Faculty: [#]</li>
+<li>Classified Staff: [#]</li>
+</ul>
+<p><strong>Staffing Changes:</strong> [Note any changes from prior year, or "No changes"]</p>`;
+
+    const { client, model } = await getClientAndModel();
+    const stream = await client.chat.completions.create({
+      model,
+      messages: [{ role: 'user', content: prompt }],
+      stream: true,
+    });
+    return { stream, citations };
+  }
+
+  const hasReviewData = ragContext.chunks.some(c => c.source === 'review');
+
+  let specificInstruction = '';
+  switch (sectionId) {
+    case 'improvement_actions':
+      if (hasReviewData) {
+        specificInstruction = `The Institutional Context below includes prior Comprehensive Program Review data for this program. Identify the specific improvement actions from that review and summarize them. Then address what strategies have been implemented or are currently in progress to address those actions. Use data from the program review to support your points.`;
+      } else {
+        specificInstruction = `No prior Comprehensive Program Review was found on file for this program. Start by noting that no previous comprehensive review is available for reference. Then prompt the user to:
+- Identify any known areas for improvement in their program
+- Describe current strategies or new initiatives they are implementing
+- Note any goals or action items they want to track going forward
+
+Frame this as a fresh starting point rather than a gap.`;
+      }
+      break;
+    case 'slo_assessment':
+      specificInstruction = `Elaborate on progress assessing Student Learning Outcomes. Frame the content in a reflective tone, emphasizing the importance of continuous assessment for program quality.`;
+      break;
+    case 'budgetary_needs':
+      specificInstruction = `Write a clear and concise justification for budgetary needs. If possible, link the requested resources to specific data points (e.g., 'To support the 15% increase in enrollment, additional lab supplies are required.').`;
+      break;
+    case 'analysis':
+    case 'ni_evaluation':
+      specificInstruction = `Analyze what is going well and what isn't. Connect points to specific metrics in the program data.`;
+      break;
+    case 'outcomes_assessment':
+      specificInstruction = `Elaborate on assessment activities and evaluation methodologies. Emphasize systematic assessment and continuous improvement cycles.`;
+      break;
+    default:
+      specificInstruction = `Provide a professional, well-structured response that aligns with college program review standards.`;
+  }
+
+  const prompt = `${baseIntro}
+
+${specificInstruction}
+
+${modeInstruction}
+
+Program Data Summary:
+- Enrollment trend: ${programData?.enrollment?.map(e => `${e.year}: ${e.count}`).join(', ')}
+- Completion Rate: ${(programData?.completionRate || 0) * 100}%
+- Job Placement Rate: ${(programData?.jobPlacementRate || 0) * 100}%
+- Program Strengths: ${programData?.summary?.strengths?.join(', ')}
+- Program Weaknesses: ${programData?.summary?.weaknesses?.join(', ')}
+
+${knowledgeBaseData ? `\nAdditional Context from Knowledge Base:\n${knowledgeBaseData}` : ''}
+
+${ragText}
+
+${accjcContext}
+
+IMPORTANT: Output your response as clean HTML (use <p>, <strong>, <ul>, <li>, <ol>, <h3> tags). Do NOT use markdown. Do NOT wrap in code blocks.
+
+${CURRENT_TERM_DATA_NOTE}
+
+Generate a well-written, professional response. Reference specific COS policies, historical data, or accreditation findings using [1], [2] bracket citations when relevant.`;
+
+  const { client, model } = await getClientAndModel();
+  const stream = await client.chat.completions.create({
+    model,
+    messages: [{ role: 'user', content: prompt }],
+    stream: true,
+  });
+
+  return { stream, citations };
 }
 
 /**
@@ -270,7 +447,7 @@ Draft for "${sectionTitle}":
 ---
 ${sectionContent}
 ---
-${hasImages ? `\nThis section includes ${imageUrls.length} image(s)/chart(s). Briefly analyze each: what data does it show? Is it referenced in the text? Suggest 1-2 ways to better contextualize it.\n` : ''}
+${hasImages ? `\nThis section includes ${imageUrls.length} chart(s)/image(s). Do NOT describe what the images look like or contain. Instead, check whether the data shown in the charts is discussed in the written text. If not, suggest what specific data points or trends from the charts should be referenced in the narrative.\n` : ''}
 Applicable ACCJC standards:
 ${standardDetails}
 
@@ -282,8 +459,11 @@ INSTRUCTIONS:
 - If the draft is very short or empty, say so directly and list what specific content is needed.
 - If a standard is already well-addressed, say "Looks good" in one line and move on.
 - Do NOT rewrite their content. Coach them.
+- Do NOT describe images or charts — no "Image Analysis" sections. Only suggest how chart data should be referenced in the text.
 - Do NOT add generic closing paragraphs like "Good luck!" or summaries of what you said.
-- Use markdown formatting throughout (bold, bullets, headers).`;
+- Use markdown formatting throughout (bold, bullets, headers).
+
+${CURRENT_TERM_DATA_NOTE}`;
 
   const { client, model } = await getClientAndModel();
 
@@ -315,6 +495,90 @@ INSTRUCTIONS:
   });
 
   return response.choices[0]?.message?.content ?? '';
+}
+
+/**
+ * Stream ACCJC guidance for a section draft
+ */
+export async function streamSectionGuidance(
+  sectionId: string,
+  sectionTitle: string,
+  sectionContent: string,
+  programData: ProgramData,
+  programCategory?: string
+): Promise<AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>> {
+  const standards = getMappedStandards(sectionId);
+  const standardDetails = standards
+    .map(stdId => {
+      const std = getStandardById(stdId);
+      if (!std) return '';
+      const checklist = getComplianceChecklist(stdId);
+      const questions = getKeyQuestions(stdId);
+      return `### Standard ${std.id}: ${std.title}
+${std.description}
+
+Compliance checklist:
+${checklist.map(item => `- ${item}`).join('\n')}
+
+Key questions:
+${questions.map(q => `- ${q}`).join('\n')}`;
+    })
+    .filter(Boolean)
+    .join('\n\n');
+
+  const imageUrls = extractImageUrls(sectionContent);
+  const hasImages = imageUrls.length > 0;
+
+  const promptText = `You are a concise ACCJC accreditation coach for the ${programData.programName} program at College of the Siskiyous.
+
+Draft for "${sectionTitle}":
+---
+${sectionContent}
+---
+${hasImages ? `\nThis section includes ${imageUrls.length} chart(s)/image(s). Do NOT describe what the images look like or contain. Instead, check whether the data shown in the charts is discussed in the written text. If not, suggest what specific data points or trends from the charts should be referenced in the narrative.\n` : ''}
+Applicable ACCJC standards:
+${standardDetails}
+
+INSTRUCTIONS:
+- Be CONCISE. Total response should be 200-400 words max.
+- Use **bold** for key terms, section headers, and emphasis.
+- Use bullet points (not numbered lists) for suggestions.
+- Give 1-2 actionable suggestions per standard — frame as coaching prompts.
+- If the draft is very short or empty, say so directly and list what specific content is needed.
+- If a standard is already well-addressed, say "Looks good" in one line and move on.
+- Do NOT rewrite their content. Coach them.
+- Do NOT describe images or charts — no "Image Analysis" sections. Only suggest how chart data should be referenced in the text.
+- Do NOT add generic closing paragraphs like "Good luck!" or summaries of what you said.
+- Use markdown formatting throughout (bold, bullets, headers).
+
+${CURRENT_TERM_DATA_NOTE}`;
+
+  const { client, model } = await getClientAndModel();
+
+  if (hasImages) {
+    const aiMode = await getSetting('ai_mode') || 'cloud';
+    const visionModel = aiMode === 'cloud' ? CLOUD_VISION_MODEL : model;
+
+    const content: OpenAI.Chat.ChatCompletionContentPart[] = [
+      { type: 'text', text: promptText },
+      ...imageUrls.map((url): OpenAI.Chat.ChatCompletionContentPart => ({
+        type: 'image_url',
+        image_url: { url },
+      })),
+    ];
+
+    return client.chat.completions.create({
+      model: visionModel,
+      messages: [{ role: 'user', content }],
+      stream: true,
+    });
+  }
+
+  return client.chat.completions.create({
+    model,
+    messages: [{ role: 'user', content: promptText }],
+    stream: true,
+  });
 }
 
 /**
@@ -464,18 +728,21 @@ export async function getChatResponse(
   });
   const { promptText: ragText, citations } = formatRAGContextWithCitations(ragContext);
 
-  const systemPrompt = `You are a knowledgeable program review assistant for College of the Siskiyous. You have access to program data, institutional policies, and historical context to help faculty members with their program reviews.
-
-Program Context:
+  const programContextBlock = aggregatedData
+    ? `Program: ${programData.programName}\n${buildInstitutionalDataSummary(aggregatedData)}`
+    : `Program Context:
 - Program: ${programData.programName}
 - Enrollment Trend: ${programData.enrollment.map(e => `${e.year}: ${e.count}`).join(', ')}
 - Completion Rate: ${(programData.completionRate * 100).toFixed(1)}%
 - Job Placement Rate: ${(programData.jobPlacementRate * 100).toFixed(1)}%
 - Key Strengths: ${programData.summary.strengths.join(', ')}
-- Key Weaknesses: ${programData.summary.weaknesses.join(', ')}
+- Key Weaknesses: ${programData.summary.weaknesses.join(', ')}`;
+
+  const systemPrompt = `You are a knowledgeable program review assistant for College of the Siskiyous. You have access to real institutional data, policies, and historical context to help faculty members with their program reviews.
+
+${programContextBlock}
 
 ${knowledgeBaseData ? `\nAdditional Program Context:\n${knowledgeBaseData}` : ''}
-${aggregatedData ? buildInstitutionalDataSummary(aggregatedData) : ''}
 ${collegeWideData ? buildCollegeWideSummary(collegeWideData) : ''}
 ${ragText}
 
@@ -483,10 +750,14 @@ Response rules:
 - Be CONCISE: 2-4 short paragraphs max unless the user asks for detail.
 - Use markdown: **bold** for key terms and numbers.
 - Use bullet points for lists (1 line each, max 5 items).
-- Use emojis sparingly (📊 data, ✅ positive, ⚠️ concern, 💡 suggestion).
+- Use emojis to add visual flair: 📊 for data/stats, ✅ for positives, ⚠️ for concerns, 💡 for suggestions, 📈 for growth/trends, 🎯 for goals, 👥 for demographics/students. Use 1-3 per response to keep it lively.
 - Do NOT include "Recommendations", "Next Steps", or "Important Context" sections unless asked.
 - If you don't have exact data, say so briefly — don't speculate at length.
-- ONLY cite sources that are directly relevant to the program "${programData.programName}". Do NOT cite sources from other programs.`;
+- ONLY cite sources that are directly relevant to the program "${programData.programName}". Do NOT cite sources from other programs.
+- When comparing program data to college-wide data, use ONLY the numbers provided above. Do not invent or estimate numbers.
+- If data seems anomalous (e.g., 0% rates, 100% single gender), flag it as a possible data issue rather than treating it as fact.
+
+${CURRENT_TERM_DATA_NOTE}`;
 
   // Map chat history: our 'model' role → OpenAI 'assistant' role
   const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
@@ -508,6 +779,83 @@ Response rules:
     text: response.choices[0]?.message?.content ?? '',
     citations,
   };
+}
+
+/**
+ * Stream chat response
+ */
+export async function streamChatResponse(
+  userMessage: string,
+  programData: ProgramData,
+  chatHistory: ChatMessage[],
+  knowledgeBaseData?: string,
+  programCategory?: string,
+  aggregatedData?: AggregatedProgramData | null,
+  collegeWideData?: AggregatedProgramData | null,
+  reviewContent?: string
+): Promise<{ stream: AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>; citations: Citation[] }> {
+  const ragContext = await retrieveContext({
+    programName: programData.programName,
+    programCategory,
+    query: userMessage,
+  });
+  const { promptText: ragText, citations } = formatRAGContextWithCitations(ragContext);
+
+  // When real institutional data is available, use it instead of the basic programData summary
+  // to avoid conflicting/synthetic numbers confusing the AI
+  const programContextBlock = aggregatedData
+    ? `Program: ${programData.programName}\n${buildInstitutionalDataSummary(aggregatedData)}`
+    : `Program Context:
+- Program: ${programData.programName}
+- Enrollment Trend: ${programData.enrollment.map(e => `${e.year}: ${e.count}`).join(', ')}
+- Completion Rate: ${(programData.completionRate * 100).toFixed(1)}%
+- Job Placement Rate: ${(programData.jobPlacementRate * 100).toFixed(1)}%
+- Key Strengths: ${programData.summary.strengths.join(', ')}
+- Key Weaknesses: ${programData.summary.weaknesses.join(', ')}`;
+
+  const reviewContextBlock = reviewContent
+    ? `\nCurrent Program Review Draft (what the user has written so far):\n---\n${reviewContent}\n---\nYou can see exactly what has been written and what sections are empty. When the user asks about their review, reference the actual content above. Point out which sections are complete, which are empty, and what specific content could be improved or added.`
+    : '';
+
+  const systemPrompt = `You are a knowledgeable program review assistant for College of the Siskiyous. You have access to real institutional data, policies, and historical context to help faculty members with their program reviews.
+
+${programContextBlock}
+${reviewContextBlock}
+
+${knowledgeBaseData ? `\nAdditional Program Context:\n${knowledgeBaseData}` : ''}
+${collegeWideData ? buildCollegeWideSummary(collegeWideData) : ''}
+${ragText}
+
+Response rules:
+- Be CONCISE: 2-4 short paragraphs max unless the user asks for detail.
+- Use markdown: **bold** for key terms and numbers.
+- Use bullet points for lists (1 line each, max 5 items).
+- Use emojis to add visual flair: 📊 for data/stats, ✅ for positives, ⚠️ for concerns, 💡 for suggestions, 📈 for growth/trends, 🎯 for goals, 👥 for demographics/students. Use 1-3 per response to keep it lively.
+- Do NOT include "Recommendations", "Next Steps", or "Important Context" sections unless asked.
+- If you don't have exact data, say so briefly — don't speculate at length.
+- ONLY cite sources that are directly relevant to the program "${programData.programName}". Do NOT cite sources from other programs.
+- When comparing program data to college-wide data, use ONLY the numbers provided above. Do not invent or estimate numbers.
+- If data seems anomalous (e.g., 0% rates, 100% single gender), flag it as a possible data issue rather than treating it as fact.
+
+${CURRENT_TERM_DATA_NOTE}`;
+
+  const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
+    { role: 'system', content: systemPrompt },
+    ...chatHistory.map((msg): OpenAI.Chat.ChatCompletionMessageParam => ({
+      role: msg.role === 'model' ? 'assistant' : 'user',
+      content: msg.content,
+    })),
+    { role: 'user', content: userMessage },
+  ];
+
+  const { client, model } = await getClientAndModel();
+  const stream = await client.chat.completions.create({
+    model,
+    messages,
+    stream: true,
+  });
+
+  return { stream, citations };
 }
 
 /**

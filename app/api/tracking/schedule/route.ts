@@ -25,7 +25,7 @@ export async function GET(request: Request) {
   // Fetch tracking status and engagement counts for each program
   const programsWithStatus = await Promise.all(
     programs.map(async (program) => {
-      const [trackingRes, engagementRes] = await Promise.all([
+      const [trackingRes, engagementRes, submittedRes, presentedRes] = await Promise.all([
         supabase
           .from('pr_program_tracking')
           .select('*')
@@ -37,17 +37,34 @@ export async function GET(request: Request) {
           .select('count', { count: 'exact', head: true })
           .eq('program_name', program.name)
           .eq('academic_year', year),
+        supabase
+          .from('pr_engagement_log')
+          .select('count', { count: 'exact', head: true })
+          .eq('program_name', program.name)
+          .eq('academic_year', year)
+          .eq('engagement_type', 'submitted'),
+        supabase
+          .from('pr_engagement_log')
+          .select('count', { count: 'exact', head: true })
+          .eq('program_name', program.name)
+          .eq('academic_year', year)
+          .eq('engagement_type', 'presented'),
       ]);
 
       const tracking = trackingRes.data;
       const engagementCount = engagementRes.count || 0;
+      const hasSubmitted = (submittedRes.count || 0) > 0;
+      const hasPresented = (presentedRes.count || 0) > 0;
 
       // Compute status based on logic
+      // Priority: override > presented > submitted > engaged > follow-up
       let status = 'red';
       if (tracking?.status_override) {
         status = tracking.status_override;
-      } else if (tracking?.final_submitted || tracking?.draft_submitted) {
-        status = 'green';
+      } else if (hasPresented || tracking?.presented) {
+        status = 'presented';
+      } else if (hasSubmitted || tracking?.final_submitted || tracking?.draft_submitted) {
+        status = 'submitted';
       } else if (engagementCount > 0) {
         status = 'yellow';
       }
@@ -67,8 +84,9 @@ export async function GET(request: Request) {
         type: program.type,
         reviewType: program.years[year],
         status,
-        draftSubmitted: tracking?.draft_submitted || false,
-        finalSubmitted: tracking?.final_submitted || false,
+        draftSubmitted: tracking?.draft_submitted || hasSubmitted,
+        finalSubmitted: tracking?.final_submitted || hasSubmitted,
+        presented: tracking?.presented || hasPresented,
         engagementCount,
         lastEngagementDate: lastEngagement?.engagement_date || null,
         notes: tracking?.notes || '',

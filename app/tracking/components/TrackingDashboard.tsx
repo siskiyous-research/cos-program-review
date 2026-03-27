@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { getCurrentAcademicYear, getAllYears, INSTRUCTIONAL_SCHEDULE, NON_INSTRUCTIONAL_SCHEDULE } from '@/lib/tracking-schedule';
+import { getCurrentAcademicYear, getAllYears, INSTRUCTIONAL_SCHEDULE, NON_INSTRUCTIONAL_SCHEDULE, type InstructionalDivision, type NonInstructionalDivision } from '@/lib/tracking-schedule';
 import EngagementPanel from './EngagementPanel';
 
 type FilterType = 'all' | 'instructional' | 'non_instructional' | 'needs_followup' | 'engaged' | 'complete';
@@ -13,8 +13,12 @@ interface ProgramStatus {
   engagementCount: number;
 }
 
+const INSTRUCTIONAL_DIVISIONS: InstructionalDivision[] = ['CTE', 'LAS', 'Athletics & Health', 'Nursing'];
+const NON_INSTRUCTIONAL_DIVISIONS: NonInstructionalDivision[] = ["President's Office", 'Administrative Services', 'Student Services', 'Academic Affairs'];
+
 export default function TrackingDashboard() {
   const [filterType, setFilterType] = useState<FilterType>('all');
+  const [subFilter, setSubFilter] = useState<string>('all');
   const [statuses, setStatuses] = useState<Record<string, ProgramStatus>>({});
   const [engagementPanel, setEngagementPanel] = useState<{ program: string; type: string } | null>(null);
   const currentYear = getCurrentAcademicYear();
@@ -57,8 +61,16 @@ export default function TrackingDashboard() {
   };
 
   const filtered = allPrograms.filter((p) => {
-    if (filterType === 'instructional') return p.type === 'instructional';
-    if (filterType === 'non_instructional') return p.type === 'non_instructional';
+    if (filterType === 'instructional') {
+      if (p.type !== 'instructional') return false;
+      if (subFilter !== 'all') return p.division === subFilter;
+      return true;
+    }
+    if (filterType === 'non_instructional') {
+      if (p.type !== 'non_instructional') return false;
+      if (subFilter !== 'all') return p.division === subFilter;
+      return true;
+    }
     if (filterType === 'needs_followup') return getStatus(p.name) === 'red';
     if (filterType === 'engaged') return getStatus(p.name) === 'yellow';
     if (filterType === 'complete') return getStatus(p.name) === 'submitted' || getStatus(p.name) === 'presented';
@@ -97,20 +109,72 @@ export default function TrackingDashboard() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-2">
-        {filters.map((f) => (
-          <button
-            key={f.key}
-            onClick={() => setFilterType(f.key)}
-            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              filterType === f.key
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
+      <div className="space-y-2">
+        <div className="flex flex-wrap gap-2">
+          {filters.map((f) => (
+            <button
+              key={f.key}
+              onClick={() => { setFilterType(f.key); setSubFilter('all'); }}
+              className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                filterType === f.key
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Sub-filters for Instructional */}
+        {filterType === 'instructional' && (
+          <div className="flex flex-wrap gap-2 pl-2">
+            <button
+              onClick={() => setSubFilter('all')}
+              className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                subFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
+              }`}
+            >
+              All
+            </button>
+            {INSTRUCTIONAL_DIVISIONS.map((div) => (
+              <button
+                key={div}
+                onClick={() => setSubFilter(div)}
+                className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                  subFilter === div ? 'bg-indigo-600 text-white' : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
+                }`}
+              >
+                {div}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Sub-filters for Non-Instructional */}
+        {filterType === 'non_instructional' && (
+          <div className="flex flex-wrap gap-2 pl-2">
+            <button
+              onClick={() => setSubFilter('all')}
+              className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                subFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
+              }`}
+            >
+              All
+            </button>
+            {NON_INSTRUCTIONAL_DIVISIONS.map((div) => (
+              <button
+                key={div}
+                onClick={() => setSubFilter(div)}
+                className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                  subFilter === div ? 'bg-indigo-600 text-white' : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
+                }`}
+              >
+                {div}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Schedule Table */}

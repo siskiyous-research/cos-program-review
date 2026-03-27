@@ -15,12 +15,17 @@ export default async function TrackingPage() {
   return (
     <main className="min-h-screen bg-white">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <nav className="mb-6 flex items-center gap-4 text-sm">
-          <a href="/" className="text-blue-600 hover:text-blue-800 font-medium">
-            Review Assistant
+        <nav className="mb-6 flex items-center justify-between text-sm">
+          <div className="flex items-center gap-4">
+            <a href="/" className="text-blue-600 hover:text-blue-800 font-medium">
+              Review Assistant
+            </a>
+            <span className="text-gray-300">/</span>
+            <span className="text-gray-500">Tracking Dashboard</span>
+          </div>
+          <a href="/slo-tracking" className="text-blue-600 hover:text-blue-800 font-medium text-sm">
+            SLO Assessment Tracking →
           </a>
-          <span className="text-gray-300">/</span>
-          <span className="text-gray-500">Tracking Dashboard</span>
         </nav>
         <TrackingDashboard />
       </div>

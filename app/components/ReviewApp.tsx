@@ -242,6 +242,7 @@ export default function ReviewApp({ user }: ReviewAppProps) {
     if (!programData) return;
 
     const userNotes = reviewSections[sectionId]?.trim() || '';
+    const existingContent = userNotes;
 
     setIsGeneratingSection(sectionId);
     setError(null);
@@ -249,7 +250,7 @@ export default function ReviewApp({ user }: ReviewAppProps) {
       const section = currentTemplate.find((s) => s.id === sectionId);
       if (section) {
         const programCategory = getProgramCategory(programName);
-        const response = await fetch('/api/section-assistance', {
+        const response = await fetch('/api/section-assistance/stream', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -262,14 +263,41 @@ export default function ReviewApp({ user }: ReviewAppProps) {
           }),
         });
 
-        const result = await response.json();
-        if (!result.ok) {
+        if (!response.ok) {
+          const result = await response.json();
           throw new Error(result.error || 'Failed to generate assistance');
         }
 
-        setReviewSections((prev) => ({ ...prev, [sectionId]: result.assistance }));
-        if (result.citations) {
-          setSectionCitations((prev) => ({ ...prev, [sectionId]: result.citations }));
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error('No response stream');
+
+        const decoder = new TextDecoder();
+        let streamedText = '';
+        const prefix = existingContent ? existingContent + '<hr>' : '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split('\n');
+
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (data.type === 'citations' && data.citations) {
+                setSectionCitations((prev) => ({ ...prev, [sectionId]: data.citations }));
+              } else if (data.type === 'text') {
+                streamedText += data.text;
+                setReviewSections((prev) => ({ ...prev, [sectionId]: prefix + streamedText }));
+              } else if (data.type === 'error') {
+                throw new Error(data.error);
+              }
+            } catch (parseErr) {
+              // skip malformed lines
+            }
+          }
         }
       }
     } catch (e) {
@@ -294,7 +322,7 @@ export default function ReviewApp({ user }: ReviewAppProps) {
       const section = currentTemplate.find((s) => s.id === sectionId);
       if (section) {
         const programCategory = getProgramCategory(programName);
-        const response = await fetch('/api/section-guidance', {
+        const response = await fetch('/api/section-guidance/stream', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -306,12 +334,39 @@ export default function ReviewApp({ user }: ReviewAppProps) {
           }),
         });
 
-        const result = await response.json();
-        if (!result.ok) {
+        if (!response.ok) {
+          const result = await response.json();
           throw new Error(result.error || 'Failed to generate guidance');
         }
 
-        setSectionGuidance((prev) => ({ ...prev, [sectionId]: result.guidance }));
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error('No response stream');
+
+        const decoder = new TextDecoder();
+        let streamedGuidance = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split('\n');
+
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (data.type === 'text') {
+                streamedGuidance += data.text;
+                setSectionGuidance((prev) => ({ ...prev, [sectionId]: streamedGuidance }));
+              } else if (data.type === 'error') {
+                throw new Error(data.error);
+              }
+            } catch (parseErr) {
+              // skip malformed lines
+            }
+          }
+        }
       }
     } catch (e) {
       console.error('Failed to get ACCJC guidance:', e);
@@ -331,8 +386,22 @@ export default function ReviewApp({ user }: ReviewAppProps) {
     const updatedHistory: ChatMessage[] = [...chatHistory, { role: 'user', content: prompt }];
     setChatHistory(updatedHistory);
 
+    // Add a placeholder assistant message that we'll stream into
+    setChatHistory((prev) => [...prev, { role: 'model', content: '' }]);
+
     try {
-      const response = await fetch('/api/chat', {
+      // Build a summary of current review content so the chatbot knows what's been written
+      const reviewContentSummary = currentTemplate
+        .map((section) => {
+          const content = reviewSections[section.id]?.trim();
+          if (!content) return `## ${section.title}\n[Empty — not yet written]`;
+          // Strip HTML tags for a cleaner summary
+          const plain = content.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+          return `## ${section.title}\n${plain}`;
+        })
+        .join('\n\n');
+
+      const response = await fetch('/api/chat/stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -341,21 +410,58 @@ export default function ReviewApp({ user }: ReviewAppProps) {
           programData,
           programCategory: getProgramCategory(programName),
           aggregatedData,
+          reviewContent: reviewContentSummary,
         }),
       });
 
-      const result = await response.json();
-      if (!result.ok) {
+      if (!response.ok) {
+        const result = await response.json();
         throw new Error(result.error || 'Failed to get chat response');
       }
 
-      setChatHistory((prev) => [...prev, { role: 'model', content: result.response, citations: result.citations }]);
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('No response stream');
+
+      const decoder = new TextDecoder();
+      let streamedText = '';
+      let streamedCitations: Citation[] | undefined;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          try {
+            const data = JSON.parse(line.slice(6));
+            if (data.type === 'citations' && data.citations) {
+              streamedCitations = data.citations;
+            } else if (data.type === 'text') {
+              streamedText += data.text;
+              // Update the last message (the placeholder) with streamed content
+              setChatHistory((prev) => {
+                const updated = [...prev];
+                updated[updated.length - 1] = { role: 'model', content: streamedText, citations: streamedCitations };
+                return updated;
+              });
+            } else if (data.type === 'error') {
+              throw new Error(data.error);
+            }
+          } catch (parseErr) {
+            // skip malformed lines
+          }
+        }
+      }
     } catch (e) {
       console.error('Failed to get chat response:', e);
-      setChatHistory((prev) => [
-        ...prev,
-        { role: 'model', content: 'Sorry, I encountered an error. Please try again.' },
-      ]);
+      setChatHistory((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1] = { role: 'model', content: 'Sorry, I encountered an error. Please try again.' };
+        return updated;
+      });
     } finally {
       setIsChatting(false);
     }

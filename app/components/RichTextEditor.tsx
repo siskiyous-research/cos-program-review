@@ -20,6 +20,7 @@ export function RichTextEditor({ content, onChange, placeholder, variant = 'comp
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         heading: isFull ? { levels: [2, 3] } : false,
@@ -258,6 +259,27 @@ export function RichTextEditor({ content, onChange, placeholder, variant = 'comp
             />
           </>
         )}
+
+        {/* Undo / Redo */}
+        <Separator />
+        <ToolbarButton
+          onClick={() => editor.chain().focus().undo().run()}
+          isActive={false}
+          title="Undo"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h10a5 5 0 015 5v2M3 10l4-4M3 10l4 4" />
+          </svg>
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().redo().run()}
+          isActive={false}
+          title="Redo"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 10H11a5 5 0 00-5 5v2M21 10l-4-4M21 10l-4 4" />
+          </svg>
+        </ToolbarButton>
       </div>
 
       {/* Editor */}

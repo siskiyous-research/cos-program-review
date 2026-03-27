@@ -10,6 +10,12 @@ function ResizableImageView({ node, updateAttributes, selected }: NodeViewProps)
   const [currentWidth, setCurrentWidth] = useState<number>(width || 0);
   const imgRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const widthRef = useRef<number>(currentWidth);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    widthRef.current = currentWidth;
+  }, [currentWidth]);
 
   // Get natural width on load if no width set
   const handleLoad = useCallback(() => {
@@ -36,11 +42,12 @@ function ResizableImageView({ node, updateAttributes, selected }: NodeViewProps)
       const maxW = container ? container.clientWidth - 32 : 800;
       const newWidth = Math.max(100, Math.min(startWidth + delta, maxW));
       setCurrentWidth(newWidth);
+      widthRef.current = newWidth;
     };
 
     const handleUp = () => {
       setIsResizing(false);
-      updateAttributes({ width: currentWidth });
+      updateAttributes({ width: widthRef.current });
       window.removeEventListener('mousemove', handleMove);
       window.removeEventListener('mouseup', handleUp);
     };
@@ -108,6 +115,23 @@ export const ResizableImage = Node.create({
     return [
       {
         tag: 'img[src]',
+        getAttrs(node) {
+          const el = node as HTMLElement;
+          const dataWidth = el.getAttribute('data-width');
+          const styleWidth = el.style?.width;
+          let width: number | null = null;
+          if (dataWidth) {
+            width = parseInt(dataWidth, 10);
+          } else if (styleWidth && styleWidth.endsWith('px')) {
+            width = parseInt(styleWidth, 10);
+          }
+          return {
+            src: el.getAttribute('src'),
+            alt: el.getAttribute('alt'),
+            title: el.getAttribute('title') || el.closest('figure')?.querySelector('figcaption')?.textContent || null,
+            width: width && !isNaN(width) ? width : null,
+          };
+        },
       },
     ];
   },
@@ -116,7 +140,7 @@ export const ResizableImage = Node.create({
     const { title, width, ...rest } = HTMLAttributes;
     const imgAttrs = mergeAttributes(rest, {
       class: 'max-w-full rounded-md my-2',
-      ...(width ? { style: `width: ${width}px` } : {}),
+      ...(width ? { 'data-width': width, style: `width: ${width}px` } : {}),
     });
     if (title) {
       return ['figure', { class: 'my-3' }, ['img', imgAttrs], ['figcaption', { class: 'text-xs text-slate-500 text-center mt-1 italic' }, title]];
