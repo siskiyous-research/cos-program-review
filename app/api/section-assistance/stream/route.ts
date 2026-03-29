@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
   if (authError) return authError;
 
   try {
-    const { sectionId, sectionTitle, sectionDescription, programData, userNotes, knowledgeBaseData, programCategory } = await req.json();
+    const { sectionId, sectionTitle, sectionDescription, programData, userNotes, knowledgeBaseData, programCategory, aggregatedData } = await req.json();
 
     if (!sectionId || !sectionTitle || !programData) {
       return new Response(
@@ -30,7 +30,8 @@ export async function POST(req: NextRequest) {
       programData as ProgramData,
       userNotes || '',
       knowledgeBaseData,
-      programCategory
+      programCategory,
+      aggregatedData || null
     );
 
     const encoder = new TextEncoder();

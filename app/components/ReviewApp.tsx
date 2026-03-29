@@ -260,6 +260,7 @@ export default function ReviewApp({ user }: ReviewAppProps) {
             programData,
             userNotes,
             programCategory,
+            aggregatedData,
           }),
         });
 

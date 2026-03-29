@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
   if (authError) return authError;
 
   try {
-    const { sectionId, sectionTitle, sectionDescription, programData, userNotes, knowledgeBaseData, programCategory } = await req.json();
+    const { sectionId, sectionTitle, sectionDescription, programData, userNotes, knowledgeBaseData, programCategory, aggregatedData } = await req.json();
 
     // Validate required fields (userNotes can be empty)
     if (!sectionId || !sectionTitle || !programData) {
@@ -32,7 +32,8 @@ export async function POST(req: NextRequest) {
       programData as ProgramData,
       userNotes || '',
       knowledgeBaseData,
-      programCategory
+      programCategory,
+      aggregatedData || null
     );
 
     return NextResponse.json({ ok: true, assistance: result.text, citations: result.citations });

@@ -17,6 +17,76 @@ const CLOUD_VISION_MODEL = 'google/gemini-2.0-flash-001';
 // Important context about current-term data that all AI tools should be aware of
 const CURRENT_TERM_DATA_NOTE = `IMPORTANT DATA CONTEXT: If the current academic term (e.g., Spring 2026) is still in progress, success rates and completion rates for that term will appear artificially low because final grades have not yet been entered. Do NOT flag current-term low success rates as a program concern — instead note that the term is still in progress and grades are pending. Only analyze success/completion trends using completed terms. Similarly, enrollment for the current term may still be changing as students add/drop.`;
 
+/**
+ * Summarize AggregatedProgramData into a concise text block for AI context
+ */
+function summarizeInstitutionalData(data: AggregatedProgramData | null | undefined): string {
+  if (!data) return '';
+  const parts: string[] = [];
+
+  // Enrollment trend (last 6 terms)
+  if (data.enrollment?.length) {
+    const recent = data.enrollment.slice(-6);
+    parts.push(`Enrollment (recent terms): ${recent.map(e => `${e.term}: ${e.count}`).join(', ')}`);
+  }
+
+  // FTES
+  if (data.ftes?.length) {
+    const recent = data.ftes.slice(-3);
+    parts.push(`FTES: ${recent.map(f => `${f.academicYear}: ${f.ftes}`).join(', ')}`);
+  }
+
+  // Success rates (fall)
+  if (data.successFall?.length) {
+    const recent = data.successFall.slice(-3);
+    parts.push(`Fall Success Rates: ${recent.map(s => `${s.term}: ${(s.successRate * 100).toFixed(1)}% success, ${(s.completionRate * 100).toFixed(1)}% completion (n=${s.count})`).join('; ')}`);
+  }
+
+  // Success rates (spring)
+  if (data.successSpring?.length) {
+    const recent = data.successSpring.slice(-3);
+    parts.push(`Spring Success Rates: ${recent.map(s => `${s.term}: ${(s.successRate * 100).toFixed(1)}% success, ${(s.completionRate * 100).toFixed(1)}% completion (n=${s.count})`).join('; ')}`);
+  }
+
+  // Success by ethnicity (most recent year)
+  if (data.successByEthnicity?.length) {
+    const years = [...new Set(data.successByEthnicity.map(e => e.academicYear))].sort();
+    const latestYear = years[years.length - 1];
+    const latest = data.successByEthnicity.filter(e => e.academicYear === latestYear);
+    if (latest.length) {
+      parts.push(`Success by Ethnicity (${latestYear}): ${latest.map(e => `${e.ethnicity}: ${(e.successRate * 100).toFixed(1)}% (n=${e.count})`).join('; ')}`);
+    }
+  }
+
+  // Demographics
+  if (data.demographics?.length) {
+    parts.push(`Demographics: ${data.demographics.map(d => `${d.ethnicity}: ${d.pct}%`).join(', ')}`);
+  }
+
+  // Gender (most recent year)
+  if (data.gender?.length) {
+    const years = [...new Set(data.gender.map(g => g.academicYear))].sort();
+    const latestYear = years[years.length - 1];
+    const latest = data.gender.filter(g => g.academicYear === latestYear);
+    if (latest.length) {
+      parts.push(`Gender (${latestYear}): ${latest.map(g => `${g.gender}: ${g.count}`).join(', ')}`);
+    }
+  }
+
+  // Modality (most recent year)
+  if (data.modality?.length) {
+    const years = [...new Set(data.modality.map(m => m.academicYear))].sort();
+    const latestYear = years[years.length - 1];
+    const latest = data.modality.filter(m => m.academicYear === latestYear);
+    if (latest.length) {
+      parts.push(`Modality (${latestYear}): ${latest.map(m => `${m.modeGroup}: ${m.count} students, ${(m.successRate * 100).toFixed(1)}% success`).join('; ')}`);
+    }
+  }
+
+  if (parts.length === 0) return '';
+  return `\nInstitutional Data (ZogoTech):\n${parts.join('\n')}`;
+}
+
 async function getClientAndModel(): Promise<{ client: OpenAI; model: string }> {
   const aiMode = await getSetting('ai_mode') || 'cloud';
   console.log('[getClientAndModel] AI mode:', aiMode);
@@ -117,7 +187,8 @@ export async function getSectionAssistance(
   programData: ProgramData,
   userNotes: string,
   knowledgeBaseData?: string,
-  programCategory?: string
+  programCategory?: string,
+  aggregatedData?: AggregatedProgramData | null
 ): Promise<SectionAssistanceResult> {
   const accjcContext = buildAccjcContext(sectionId);
   const hasNotes = userNotes.trim().length > 0;
@@ -162,24 +233,44 @@ IMPORTANT:
       modeInstruction = `User's notes: "${userNotes}"`;
     }
 
-    // When section is empty, generate a structured template with fill-in fields based on the section description,
-    // followed by a brief narrative prompt. This applies to ALL sections, not just specific ones.
+    // When section is empty, generate a structured template + data-informed narrative starters
     if (!hasNotes) {
+      const institutionalSummary = summarizeInstitutionalData(aggregatedData);
+      const hasReviewData = ragContext.chunks.some(c => c.source === 'review');
+      const hasInstitutionalData = !!institutionalSummary;
+      const hasAnyContext = hasReviewData || hasInstitutionalData;
+
       return `You are helping a faculty member at College of the Siskiyous start writing the "${sectionTitle}" section of their ${programData.programName} program review.
 
 The section instructions say: "${sectionDescription}"
 
-Generate a SHORT structured HTML template that:
-1. Starts with bold labeled fields (using <p><strong>Label:</strong> [fill in]</p>) for each specific detail requested in the instructions above
-2. Uses <ul><li> for any lists of items requested
-3. Ends with a brief prompt paragraph in italics asking the user to add their narrative explanation
+Generate a structured HTML response with TWO parts:
+
+PART 1 — TEMPLATE FIELDS:
+For each specific detail or question the section instructions ask for, create a bold labeled field:
+- Use <p><strong>Label:</strong> [fill in]</p> for simple fields
+- Use <ul><li> for any lists of items requested
+- Pre-fill the Program Name as "${programData.programName}" where appropriate
+- Use [fill in], [describe], [list], or similar placeholders for fields the user needs to complete
+
+PART 2 — NARRATIVE STARTERS:
+${hasAnyContext
+  ? `After the template fields, add 1-2 short narrative paragraphs that incorporate the real data provided below. Start sentences with specific facts from the data (e.g., "Enrollment in ${programData.programName} has [increased/decreased] from X to Y over the past three years..."). Where data supports a point, cite it with [1], [2] bracket notation. Leave sentences partially written where the faculty member should add their own interpretation or context — use "..." or "[explain]" to indicate where they should continue.`
+  : `After the template fields, add 1-2 short paragraphs with sentence starters that prompt the faculty member to fill in their own information. Start each sentence but leave it open for them to complete (e.g., "The ${programData.programName} program currently serves approximately... students per term, with..."). Do NOT fabricate any data or statistics.`}
+
+${institutionalSummary}
+
+${ragText}
+
+${accjcContext}
+
+${CURRENT_TERM_DATA_NOTE}
 
 Rules:
-- Pre-fill the Program Name as "${programData.programName}" if a program name field is appropriate
-- Use [fill in], [describe], [#], or similar placeholder text for fields the user needs to complete
-- Keep it SHORT — only include fields that the instructions specifically ask for
 - Output clean HTML only. No markdown. No code blocks. No introductory text.
-- Do NOT write the narrative for them — just provide the template structure and placeholders.`;
+- Keep the template SHORT — only fields the instructions specifically ask for
+- ${hasAnyContext ? 'Cite real data with [1], [2] bracket notation matching the numbered references above.' : 'Do NOT invent statistics or data points.'}
+- Narrative sentences should be incomplete where the user needs to add their own perspective — give them a running start, not a finished product.`;
     }
 
     const hasReviewData = ragContext.chunks.some(c => c.source === 'review');
@@ -215,18 +306,15 @@ Frame this as a fresh starting point rather than a gap.`;
         specificInstruction = `Provide a professional, well-structured response that aligns with college program review standards.`;
     }
 
+    const institutionalSummary = summarizeInstitutionalData(aggregatedData);
+
     return `${baseIntro}
 
 ${specificInstruction}
 
 ${modeInstruction}
 
-Program Data Summary:
-- Enrollment trend: ${programData?.enrollment?.map(e => `${e.year}: ${e.count}`).join(', ')}
-- Completion Rate: ${(programData?.completionRate || 0) * 100}%
-- Job Placement Rate: ${(programData?.jobPlacementRate || 0) * 100}%
-- Program Strengths: ${programData?.summary?.strengths?.join(', ')}
-- Program Weaknesses: ${programData?.summary?.weaknesses?.join(', ')}
+${institutionalSummary}
 
 ${knowledgeBaseData ? `\nAdditional Context from Knowledge Base:\n${knowledgeBaseData}` : ''}
 
@@ -263,7 +351,8 @@ export async function streamSectionAssistance(
   programData: ProgramData,
   userNotes: string,
   knowledgeBaseData?: string,
-  programCategory?: string
+  programCategory?: string,
+  aggregatedData?: AggregatedProgramData | null
 ): Promise<{ stream: AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>; citations: Citation[] }> {
   const accjcContext = buildAccjcContext(sectionId);
   const hasNotes = userNotes.trim().length > 0;
@@ -304,23 +393,44 @@ IMPORTANT:
     modeInstruction = `User's notes: "${userNotes}"`;
   }
 
-  // When section is empty, generate a structured template dynamically from the section description
+  // When section is empty, generate a structured template + data-informed narrative starters
   if (!hasNotes) {
+    const institutionalSummary = summarizeInstitutionalData(aggregatedData);
+    const hasReviewData = ragContext.chunks.some(c => c.source === 'review');
+    const hasInstitutionalData = !!institutionalSummary;
+    const hasAnyContext = hasReviewData || hasInstitutionalData;
+
     const prompt = `You are helping a faculty member at College of the Siskiyous start writing the "${sectionTitle}" section of their ${programData.programName} program review.
 
 The section instructions say: "${sectionDescription}"
 
-Generate a SHORT structured HTML template that:
-1. Starts with bold labeled fields (using <p><strong>Label:</strong> [fill in]</p>) for each specific detail requested in the instructions above
-2. Uses <ul><li> for any lists of items requested
-3. Ends with a brief prompt paragraph in italics asking the user to add their narrative explanation
+Generate a structured HTML response with TWO parts:
+
+PART 1 — TEMPLATE FIELDS:
+For each specific detail or question the section instructions ask for, create a bold labeled field:
+- Use <p><strong>Label:</strong> [fill in]</p> for simple fields
+- Use <ul><li> for any lists of items requested
+- Pre-fill the Program Name as "${programData.programName}" where appropriate
+- Use [fill in], [describe], [list], or similar placeholders for fields the user needs to complete
+
+PART 2 — NARRATIVE STARTERS:
+${hasAnyContext
+  ? `After the template fields, add 1-2 short narrative paragraphs that incorporate the real data provided below. Start sentences with specific facts from the data (e.g., "Enrollment in ${programData.programName} has [increased/decreased] from X to Y over the past three years..."). Where data supports a point, cite it with [1], [2] bracket notation. Leave sentences partially written where the faculty member should add their own interpretation or context — use "..." or "[explain]" to indicate where they should continue.`
+  : `After the template fields, add 1-2 short paragraphs with sentence starters that prompt the faculty member to fill in their own information. Start each sentence but leave it open for them to complete (e.g., "The ${programData.programName} program currently serves approximately... students per term, with..."). Do NOT fabricate any data or statistics.`}
+
+${institutionalSummary}
+
+${ragText}
+
+${accjcContext}
+
+${CURRENT_TERM_DATA_NOTE}
 
 Rules:
-- Pre-fill the Program Name as "${programData.programName}" if a program name field is appropriate
-- Use [fill in], [describe], [#], or similar placeholder text for fields the user needs to complete
-- Keep it SHORT — only include fields that the instructions specifically ask for
 - Output clean HTML only. No markdown. No code blocks. No introductory text.
-- Do NOT write the narrative for them — just provide the template structure and placeholders.`;
+- Keep the template SHORT — only fields the instructions specifically ask for
+- ${hasAnyContext ? 'Cite real data with [1], [2] bracket notation matching the numbered references above.' : 'Do NOT invent statistics or data points.'}
+- Narrative sentences should be incomplete where the user needs to add their own perspective — give them a running start, not a finished product.`;
 
     const { client, model } = await getClientAndModel();
     const stream = await client.chat.completions.create({
@@ -364,18 +474,15 @@ Frame this as a fresh starting point rather than a gap.`;
       specificInstruction = `Provide a professional, well-structured response that aligns with college program review standards.`;
   }
 
+  const institutionalSummary = summarizeInstitutionalData(aggregatedData);
+
   const prompt = `${baseIntro}
 
 ${specificInstruction}
 
 ${modeInstruction}
 
-Program Data Summary:
-- Enrollment trend: ${programData?.enrollment?.map(e => `${e.year}: ${e.count}`).join(', ')}
-- Completion Rate: ${(programData?.completionRate || 0) * 100}%
-- Job Placement Rate: ${(programData?.jobPlacementRate || 0) * 100}%
-- Program Strengths: ${programData?.summary?.strengths?.join(', ')}
-- Program Weaknesses: ${programData?.summary?.weaknesses?.join(', ')}
+${institutionalSummary}
 
 ${knowledgeBaseData ? `\nAdditional Context from Knowledge Base:\n${knowledgeBaseData}` : ''}
 
