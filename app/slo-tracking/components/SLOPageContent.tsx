@@ -1,8 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import SLOTrackingDashboard from './SLOTrackingDashboard';
-import SLODataDashboard from './SLODataDashboard';
+
+const SLODataDashboard = dynamic(() => import('./SLODataDashboard'), {
+  ssr: false,
+  loading: () => <div className="py-8 text-center text-gray-500">Loading SLO data...</div>,
+});
 
 type View = 'tracking' | 'data';
 
