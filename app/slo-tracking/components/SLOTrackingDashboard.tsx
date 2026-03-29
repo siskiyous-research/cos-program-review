@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import type { SLOCourseStatus, SLOStatus, SLOProgramSummary } from '@/lib/slo-types';
-import { buildProgramSummaries } from '@/lib/slo-schedule';
+import { buildProgramSummaries } from '@/lib/slo-utils';
 import SLOEngagementPanel from './SLOEngagementPanel';
 import SLOProgramRollup from './SLOProgramRollup';
 

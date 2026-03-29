@@ -162,20 +162,24 @@ IMPORTANT:
       modeInstruction = `User's notes: "${userNotes}"`;
     }
 
-    // program_info: only use template when section is empty
-    if (sectionId === 'program_info' && !hasNotes) {
-      return `Output ONLY the following HTML exactly as shown. Do not add any other text, paragraphs, analysis, or commentary before or after it.
+    // When section is empty, generate a structured template with fill-in fields based on the section description,
+    // followed by a brief narrative prompt. This applies to ALL sections, not just specific ones.
+    if (!hasNotes) {
+      return `You are helping a faculty member at College of the Siskiyous start writing the "${sectionTitle}" section of their ${programData.programName} program review.
 
-<p><strong>Program Name:</strong> ${programData.programName}</p>
-<p><strong>Academic Year:</strong> [fill in]</p>
-<p><strong>Person Completing Update:</strong> [fill in]</p>
-<p><strong>Staffing:</strong></p>
-<ul>
-<li>Full-time Faculty: [#]</li>
-<li>Part-time/Adjunct Faculty: [#]</li>
-<li>Classified Staff: [#]</li>
-</ul>
-<p><strong>Staffing Changes:</strong> [Note any changes from prior year, or "No changes"]</p>`;
+The section instructions say: "${sectionDescription}"
+
+Generate a SHORT structured HTML template that:
+1. Starts with bold labeled fields (using <p><strong>Label:</strong> [fill in]</p>) for each specific detail requested in the instructions above
+2. Uses <ul><li> for any lists of items requested
+3. Ends with a brief prompt paragraph in italics asking the user to add their narrative explanation
+
+Rules:
+- Pre-fill the Program Name as "${programData.programName}" if a program name field is appropriate
+- Use [fill in], [describe], [#], or similar placeholder text for fields the user needs to complete
+- Keep it SHORT — only include fields that the instructions specifically ask for
+- Output clean HTML only. No markdown. No code blocks. No introductory text.
+- Do NOT write the narrative for them — just provide the template structure and placeholders.`;
     }
 
     const hasReviewData = ragContext.chunks.some(c => c.source === 'review');
@@ -300,20 +304,23 @@ IMPORTANT:
     modeInstruction = `User's notes: "${userNotes}"`;
   }
 
-  // program_info: only use template when section is empty
-  if (sectionId === 'program_info' && !hasNotes) {
-    const prompt = `Output ONLY the following HTML exactly as shown. Do not add any other text, paragraphs, analysis, or commentary before or after it.
+  // When section is empty, generate a structured template dynamically from the section description
+  if (!hasNotes) {
+    const prompt = `You are helping a faculty member at College of the Siskiyous start writing the "${sectionTitle}" section of their ${programData.programName} program review.
 
-<p><strong>Program Name:</strong> ${programData.programName}</p>
-<p><strong>Academic Year:</strong> [fill in]</p>
-<p><strong>Person Completing Update:</strong> [fill in]</p>
-<p><strong>Staffing:</strong></p>
-<ul>
-<li>Full-time Faculty: [#]</li>
-<li>Part-time/Adjunct Faculty: [#]</li>
-<li>Classified Staff: [#]</li>
-</ul>
-<p><strong>Staffing Changes:</strong> [Note any changes from prior year, or "No changes"]</p>`;
+The section instructions say: "${sectionDescription}"
+
+Generate a SHORT structured HTML template that:
+1. Starts with bold labeled fields (using <p><strong>Label:</strong> [fill in]</p>) for each specific detail requested in the instructions above
+2. Uses <ul><li> for any lists of items requested
+3. Ends with a brief prompt paragraph in italics asking the user to add their narrative explanation
+
+Rules:
+- Pre-fill the Program Name as "${programData.programName}" if a program name field is appropriate
+- Use [fill in], [describe], [#], or similar placeholder text for fields the user needs to complete
+- Keep it SHORT — only include fields that the instructions specifically ask for
+- Output clean HTML only. No markdown. No code blocks. No introductory text.
+- Do NOT write the narrative for them — just provide the template structure and placeholders.`;
 
     const { client, model } = await getClientAndModel();
     const stream = await client.chat.completions.create({
