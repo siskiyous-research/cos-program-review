@@ -1,10 +1,28 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Component, type ReactNode } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer,
   LineChart, Line, CartesianGrid, Cell, LabelList,
 } from 'recharts';
+
+// Inline error boundary to isolate chart rendering errors
+class ChartErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  state = { error: null as Error | null };
+  static getDerivedStateFromError(error: Error) { return { error }; }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm font-medium text-red-700">Chart rendering error:</p>
+          <pre className="text-xs text-red-600 mt-1 whitespace-pre-wrap">{this.state.error.message}</pre>
+          <pre className="text-xs text-gray-500 mt-1 whitespace-pre-wrap max-h-32 overflow-auto">{this.state.error.stack}</pre>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 interface TermBreakdown {
   total: number;
@@ -272,12 +290,14 @@ export default function SLODataDashboard({ courseFilter: courseFilterProp }: { c
   return (
     <div className="space-y-6">
       {/* Header stats */}
+      <ChartErrorBoundary>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="Total Assessments" value={overall.total_assessments.toLocaleString()} />
-        <StatCard label="Proficiency Rate" value={`${overall.met_pct}%`} color="text-green-600" />
-        <StatCard label="Unique Students" value={overall.unique_students.toLocaleString()} />
-        <StatCard label="Courses" value={overall.unique_courses.toLocaleString()} />
+        <StatCard label="Total Assessments" value={String(overall.total_assessments ?? 0)} />
+        <StatCard label="Proficiency Rate" value={`${overall.met_pct ?? 0}%`} color="text-green-600" />
+        <StatCard label="Unique Students" value={String(overall.unique_students ?? 0)} />
+        <StatCard label="Courses" value={String(overall.unique_courses ?? 0)} />
       </div>
+      </ChartErrorBoundary>
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
@@ -363,6 +383,7 @@ export default function SLODataDashboard({ courseFilter: courseFilterProp }: { c
       </div>
 
       {/* Chart */}
+      <ChartErrorBoundary>
       <div className="rounded-lg border border-gray-200 p-4 bg-white">
         <h3 className="text-sm font-semibold text-gray-700 mb-4">
           {TABS.find(t => t.key === tab)?.label} by {viewMode === 'achieved' ? 'Proficiency Achieved' : 'Proficiency Level'}
@@ -438,6 +459,8 @@ export default function SLODataDashboard({ courseFilter: courseFilterProp }: { c
           </ResponsiveContainer>
         )}
       </div>
+
+      </ChartErrorBoundary>
 
       {/* Data table */}
       <div className="rounded-lg border border-gray-200 overflow-x-auto">
