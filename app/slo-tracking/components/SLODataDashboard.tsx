@@ -179,21 +179,43 @@ export default function SLODataDashboard({ courseFilter: courseFilterProp }: { c
     return data.metadata.courses.filter(c => c.startsWith(subjectFilter + '-'));
   }, [data, subjectFilter]);
 
+  // Select aggregation level (memoized to keep hook count stable)
+  const agg: Aggregations | null = useMemo(() => {
+    if (!data) return null;
+    const activeCourse = courseFilterProp || (courseCodeFilter !== 'all' ? courseCodeFilter : null);
+    if (activeCourse && data.by_course[activeCourse]) {
+      return data.by_course[activeCourse];
+    } else if (subjectFilter !== 'all' && data.by_subject[subjectFilter]) {
+      return data.by_subject[subjectFilter];
+    }
+    return data.institution;
+  }, [data, courseFilterProp, courseCodeFilter, subjectFilter]);
+
+  // Compute filtered overall stats — MUST be before early returns to respect Rules of Hooks
+  const overall = useMemo(() => {
+    if (!agg) return { total_assessments: 0, met: 0, not_met: 0, met_pct: 0, unique_students: 0, unique_courses: 0, terms_covered: 0 };
+    if (!activeTermcodes) return agg.overall;
+    let total = 0, met = 0;
+    for (const td of agg.by_term) {
+      if (activeTermcodes.has(td.termcode)) {
+        total += td.total;
+        met += td.met;
+      }
+    }
+    return {
+      ...agg.overall,
+      total_assessments: total,
+      met,
+      not_met: total - met,
+      met_pct: total > 0 ? Math.round(met / total * 1000) / 10 : 0,
+    };
+  }, [agg, activeTermcodes]);
+
   if (loading) return <div className="py-8 text-center text-gray-500">Loading SLO data...</div>;
-  if (!data) return <div className="py-8 text-center text-gray-500">No SLO data available. Run the aggregation script first.</div>;
+  if (!data || !agg) return <div className="py-8 text-center text-gray-500">No SLO data available. Run the aggregation script first.</div>;
 
   // Determine the active course filter (prop overrides dropdown)
   const activeCourse = courseFilterProp || (courseCodeFilter !== 'all' ? courseCodeFilter : null);
-
-  // Select aggregation level
-  let agg: Aggregations;
-  if (activeCourse && data.by_course[activeCourse]) {
-    agg = data.by_course[activeCourse];
-  } else if (subjectFilter !== 'all' && data.by_subject[subjectFilter]) {
-    agg = data.by_subject[subjectFilter];
-  } else {
-    agg = data.institution;
-  }
 
   // Apply term filter to dimension data
   function filterByTerm(items: AggData[]): AggData[] {
@@ -243,26 +265,6 @@ export default function SLODataDashboard({ courseFilter: courseFilterProp }: { c
   };
 
   const chartData = getChartData();
-
-  // Compute filtered overall stats
-  const overall = useMemo(() => {
-    if (!activeTermcodes) return agg.overall;
-    // Re-compute from trend data
-    let total = 0, met = 0;
-    for (const td of agg.by_term) {
-      if (activeTermcodes.has(td.termcode)) {
-        total += td.total;
-        met += td.met;
-      }
-    }
-    return {
-      ...agg.overall,
-      total_assessments: total,
-      met,
-      not_met: total - met,
-      met_pct: total > 0 ? Math.round(met / total * 1000) / 10 : 0,
-    };
-  }, [agg, activeTermcodes]);
 
   // Get unique proficiency levels
   const allLevels = new Set<string>();
